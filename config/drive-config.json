@@ -1,0 +1,18 @@
+{
+    "drive": {
+        "folderId": "ID_DA_PASTA_VELOACADEMY",
+        "apiKey": "SUA_API_KEY_AQUI",
+        "cacheTimeout": 3600
+    },
+    "testVideo": {
+        "id": "1LdjDs0eiD-6nQOnpPdb-Ig8zDAZNVZWs",
+        "title": "Boas-vindas e Introdução",
+        "type": "video",
+        "duration": "5 min"
+    },
+    "features": {
+        "enableDriveAPI": true,
+        "fallbackToLocal": true,
+        "autoSync": false
+    }
+}

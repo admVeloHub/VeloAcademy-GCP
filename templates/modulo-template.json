@@ -1,0 +1,28 @@
+{
+    "id": "modulo1",
+    "title": "Módulo 1: Fundamentos",
+    "description": "Conceitos básicos e introdução ao sistema",
+    "order": 1,
+    "lessons": [
+        {
+            "id": "l1-1",
+            "title": "Boas-vindas e Introdução",
+            "type": "video",
+            "duration": "5 min",
+            "fileId": "1LdjDs0eiD-6nQOnpPdb-Ig8zDAZNVZWs",
+            "filePath": "https://drive.google.com/uc?export=view&id=1LdjDs0eiD-6nQOnpPdb-Ig8zDAZNVZWs",
+            "description": "Vídeo de boas-vindas e introdução ao curso",
+            "order": 1
+        },
+        {
+            "id": "l1-2",
+            "title": "Guia de Processos Iniciais",
+            "type": "pdf",
+            "duration": "Leitura",
+            "fileId": "SEU_FILE_ID_AQUI",
+            "filePath": "https://drive.google.com/uc?export=view&id=SEU_FILE_ID_AQUI",
+            "description": "Documento com guia de processos",
+            "order": 2
+        }
+    ]
+}

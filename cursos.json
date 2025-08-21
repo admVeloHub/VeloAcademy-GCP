@@ -1,0 +1,85 @@
+{
+    "onboarding": {
+        "title": "Onboarding de Atendimento VeloTax",
+        "description": "Aprenda os processos essenciais para um atendimento de excelência.",
+        "modules": [
+            {
+                "title": "Módulo 1: Treinamentos Essenciais",
+                "lessons": [
+                    { "id": "l1-1", "title": "Treinamento de atendimento ao cliente", "type": "video", "duration": "5 min", "filePath": "https://drive.google.com/file/d/1LdjDs0eiD-6nQOnpPdb-Ig8zDAZNVZWs/view?usp=sharing", "driveId": "1LdjDs0eiD-6nQOnpPdb-Ig8zDAZNVZWs" },
+                    { "id": "l1-2", "title": "Treinamento de qualidade", "type": "video", "duration": "10 min", "filePath": "https://drive.google.com/file/d/1hLlrViKOIYd9yf9VqUldn4OvdIhjkQiN/view?usp=drive_link", "driveId": "1hLlrViKOIYd9yf9VqUldn4OvdIhjkQiN" },
+                    { "id": "l1-3", "title": "Treinamento via redes sociais", "type": "video", "duration": "8 min", "filePath": "https://drive.google.com/file/d/1DKe3UJU4ydHK2wH3w2PFUOG0OHRx3cPc/view?usp=drive_link", "driveId": "1DKe3UJU4ydHK2wH3w2PFUOG0OHRx3cPc" }
+                ]
+            },
+            {
+                "title": "Módulo 2: Conhecendo os Produtos Velotax",
+                "sections": [
+                    {
+                        "subtitle": "Crédito do Trabalhador",
+                        "lessons": [
+                            { "id": "l2-1", "title": "Crédito do Trabalhador", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1G6V9Ih6z4NDyLyamv6aYJksR-reQV2Tv/view?usp=drive_link", "driveId": "1G6V9Ih6z4NDyLyamv6aYJksR-reQV2Tv" },
+                            { "id": "l2-2", "title": "Possíveis ocorrências - Crédito do Trabalhador", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link", "driveId": "1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ" },
+                            { "id": "l2-3", "title": "Treinamento - Crédito do Trabalhador", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/17aG4cX8xwXqgX_wOVyUi7b-v5zGyeGC3/view?usp=drive_link", "driveId": "17aG4cX8xwXqgX_wOVyUi7b-v5zGyeGC3" }
+                        ]
+                    },
+                    {
+                        "subtitle": "Pagamento PIX",
+                        "lessons": [
+                            { "id": "l2-4", "title": "Em breve - Conteúdo sobre Pagamento PIX", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                        ]
+                    },
+                    {
+                        "subtitle": "Antecipação da Restituição",
+                        "lessons": [
+                            { "id": "l2-5", "title": "Em breve - Conteúdo sobre Antecipação da Restituição", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "cs004": {
+        "title": "Segurança da Informação para Colaboradores",
+        "description": "Aprenda a proteger os dados da empresa e dos clientes contra ameaças digitais.",
+        "modules": [
+            {
+                "title": "Módulo 1: Conceitos Fundamentais",
+                "lessons": [
+                    { "id": "l7-1", "title": "O que é Segurança da Informação?", "type": "video", "duration": "10 min", "filePath": "https://drive.google.com/file/d/1Svw_vrH7zKOKfZgxzJo8VUbdX-4P8yMq/view?usp=drive_link" },
+                    { "id": "l7-2", "title": "Tipos de Ameaças (Phishing, Malware)", "type": "audio", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1muXEPK8hd-HxrftBL2nBoAagHxJuXd_D/view?usp=sharing" },
+                    { "id": "l7-3", "title": "Política de Senhas Seguras", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1JaTpyGK4FA_J-xoAv7YJ3m5ux-aIGIaL/view?usp=drive_link" }
+                ]
+            },
+            {
+                "title": "Módulo 2: Boas Práticas no Dia a Dia",
+                "lessons": [
+                    { "id": "l8-1", "title": "Navegação Segura e E-mails Confiáveis", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l8-2", "title": "Protegendo seu Ambiente de Trabalho", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l8-3", "title": "O que fazer em caso de incidente?", "type": "audio", "duration": "10 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" }
+                ]
+            }
+        ]
+    },
+    "cs003": {
+        "title": "Excelência no Atendimento ao Cliente",
+        "description": "Transforme cada interação em uma oportunidade de encantar e fidelizar clientes.",
+        "modules": [
+            {
+                "title": "Módulo 1: A Mentalidade do Atendimento de Elite",
+                "lessons": [
+                    { "id": "l4-1", "title": "Comunicação Empática", "type": "audio", "duration": "18 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l4-2", "title": "Linguagem Positiva e Eficaz", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l4-3", "title": "Guia Rápido de Tom de Voz", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" }
+                ]
+            },
+            {
+                "title": "Módulo 2: Lidando com Situações Desafiadoras",
+                "lessons": [
+                    { "id": "l5-1", "title": "Técnicas de Resolução de Conflitos", "type": "video", "duration": "22 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l5-2", "title": "Como Lidar com Clientes Irritados", "type": "audio", "duration": "20 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l5-3", "title": "Dizendo \"Não\" com Profissionalismo", "type": "video", "duration": "10 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" }
+                ]
+            }
+        ]
+    }
+}

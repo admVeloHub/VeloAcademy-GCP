@@ -1,0 +1,21 @@
+{
+    "id": "cs001",
+    "title": "Onboarding de Atendimento VeloTax",
+    "description": "Aprenda os processos essenciais para um atendimento de excelência.",
+    "category": "atendimento",
+    "level": "iniciante",
+    "duration": "2 horas",
+    "tags": ["onboarding", "atendimento", "velotax"],
+    "published": true,
+    "order": 1,
+    "createdAt": "2025-01-21",
+    "updatedAt": "2025-01-21",
+    "thumbnail": "thumbnail.jpg",
+    "instructor": "Equipe VeloAcademy",
+    "prerequisites": [],
+    "objectives": [
+        "Entender os processos básicos de atendimento",
+        "Aplicar técnicas de comunicação eficaz",
+        "Utilizar ferramentas do sistema"
+    ]
+}

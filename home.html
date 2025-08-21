@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home - VeloAcademy</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="icon" type="image/png" href="./academy.png">
+</head>
+<body>
+
+    <header>
+        <div class="container header-container">
+            <div class="logo" id="logo-container">
+                <img id="logo-image" class="logo-image" src="./academy.png" alt="VeloAcademy Logo">
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="./home.html" class="nav-link active">Home</a>
+                <a href="./cursos.html" class="nav-link">Cursos</a>
+                <a href="./conquistas.html" class="nav-link">Conquistas</a>
+                <a href="./auto-feedback.html" class="nav-link">Auto Feedback</a>
+                <a href="https://velohub.vercel.app" class="nav-link" target="_blank">VeloHub</a>
+            </nav>
+
+            <div class="user-section">
+                <div class="user-info" id="user-info">
+                    <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
+                    <span id="user-name" class="user-name"></span>
+                    <button id="logout-btn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="theme-switch-wrapper" id="theme-toggle">
+                <i class='bx bx-sun theme-icon'></i>
+                <i class='bx bx-moon theme-icon'></i>
+                <span class="switch"></span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container main-container">
+            <!-- Welcome Section -->
+            <section class="welcome-section">
+                <h1>Bem-vindo de volta!</h1>
+                <p>Continue seu desenvolvimento profissional com os cursos da VeloAcademy</p>
+            </section>
+
+            <!-- Quick Stats -->
+            <section class="stats-section">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">12</div>
+                            <div class="stat-label">Cursos Concluídos</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-play-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">3</div>
+                            <div class="stat-label">Em Andamento</div>
+                        </div>
+                    </div>
+                    
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-number">45h</div>
+                            <div class="stat-label">Horas de Estudo</div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recommended Courses -->
+            <section class="recommended-section">
+                <h2>Cursos Recomendados</h2>
+                <div class="courses-grid">
+                    <div class="course-card">
+                        <div class="course-header">
+                            <div class="course-icon">
+                                <i class="fas fa-headset"></i>
+                            </div>
+                            <div class="course-info">
+                                <h3>Excelência no Atendimento</h3>
+                                <div class="course-meta">
+                                    <span class="duration"><i class="fas fa-clock"></i> 2h 30min</span>
+                                    <span class="rating"><i class="fas fa-star"></i> 4.8</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Desenvolva habilidades avançadas de comunicação e resolução de problemas.</p>
+                        <a href="./cursos.html" class="btn btn-primary">Ver Curso</a>
+                    </div>
+
+                    <div class="course-card">
+                        <div class="course-header">
+                            <div class="course-icon">
+                                <i class="fas fa-box"></i>
+                            </div>
+                            <div class="course-info">
+                                <h3>Conhecimento de Produtos</h3>
+                                <div class="course-meta">
+                                    <span class="duration"><i class="fas fa-clock"></i> 3h 15min</span>
+                                    <span class="rating"><i class="fas fa-star"></i> 4.9</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Conheça em detalhes todos os produtos e serviços da VeloTax.</p>
+                        <a href="./cursos.html" class="btn btn-primary">Ver Curso</a>
+                    </div>
+
+                    <div class="course-card">
+                        <div class="course-header">
+                            <div class="course-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="course-info">
+                                <h3>Técnicas de Vendas</h3>
+                                <div class="course-meta">
+                                    <span class="duration"><i class="fas fa-clock"></i> 1h 45min</span>
+                                    <span class="rating"><i class="fas fa-star"></i> 4.7</span>
+                                </div>
+                            </div>
+                        </div>
+                        <p>Aprenda estratégias eficazes de vendas e identificação de oportunidades.</p>
+                        <a href="./cursos.html" class="btn btn-primary">Ver Curso</a>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="./js/home-dashboard.js"></script>
+</body>
+</html>
