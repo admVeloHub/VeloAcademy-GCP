@@ -877,6 +877,16 @@ const veloAcademyApp = {
 
                         linkAction = `href="${finalUrl}" download onclick="veloAcademyApp.downloadFile('${finalUrl}', '${lesson.title}')"`;
 
+                    } else if (lesson.type === 'audio') {
+
+                        // Para áudios/podcasts, usar botão "Ouvir"
+
+                        linkClass = 'btn';
+
+                        linkText = 'Ouvir';
+
+                        linkAction = `href="${finalUrl}" target="_blank"`;
+
                     } else {
 
                         // Para vídeos e outros conteúdos
@@ -1006,6 +1016,16 @@ const veloAcademyApp = {
                         linkText = 'Baixar PDF';
 
                         linkAction = `href="${finalUrl}" download onclick="veloAcademyApp.downloadFile('${finalUrl}', '${lesson.title}')"`;
+
+                    } else if (lesson.type === 'audio') {
+
+                        // Para áudios/podcasts, usar botão "Ouvir"
+
+                        linkClass = 'btn';
+
+                        linkText = 'Ouvir';
+
+                        linkAction = `href="${finalUrl}" target="_blank"`;
 
                     } else {
 
