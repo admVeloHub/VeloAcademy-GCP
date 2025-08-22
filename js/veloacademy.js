@@ -1,8 +1,6 @@
 const veloAcademyApp = {
 
     courseDatabase: {},
-    quizDatabase: {},
-    quizConfig: {},
 
     logoConfig: {
 
@@ -14,9 +12,197 @@ const veloAcademyApp = {
 
     appConfig: {},
 
+    // Configuração do Google Apps Script para Quiz
+    appsScriptConfig: {
+        scriptUrl: 'https://script.google.com/macros/s/1RnTU4r_i_uA4jbMolg_O_3F9jLbhfEnz7uSC2eJxuwCnkB8bV0uw1W_h/exec'
+    },
 
+    // Dados do quiz atual
+    currentQuiz: null,
 
-    
+    // Função para carregar quiz do Google Apps Script
+    async loadQuizFromAppsScript(courseId) {
+        try {
+            console.log('Carregando quiz do Apps Script para:', courseId);
+            
+            const url = `${this.appsScriptConfig.scriptUrl}?action=getQuiz&courseId=${courseId}`;
+            const response = await fetch(url);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            
+            if (data.status === 'success') {
+                this.currentQuiz = {
+                    courseId: courseId,
+                    questions: data.questions,
+                    passingScore: data.passingScore,
+                    currentQuestion: 0,
+                    userAnswers: [],
+                    startTime: Date.now()
+                };
+                
+                console.log('Quiz carregado com sucesso:', this.currentQuiz);
+                this.showQuizInterface();
+                return true;
+            } else {
+                throw new Error('Erro ao carregar quiz do Apps Script');
+            }
+        } catch (error) {
+            console.error('Erro ao carregar quiz:', error);
+            alert('Erro ao carregar o quiz. Tente novamente.');
+            return false;
+        }
+    },
+
+    // Função para iniciar o quiz
+    startQuiz(courseId) {
+        console.log('Iniciando quiz para:', courseId);
+        this.loadQuizFromAppsScript(courseId);
+    },
+
+    // Função para mostrar a interface do quiz
+    showQuizInterface() {
+        if (!this.currentQuiz) {
+            console.error('Nenhum quiz carregado');
+            return;
+        }
+
+        // Mudar para a view do quiz
+        this.switchView('quiz-view');
+
+        // Renderizar a primeira pergunta
+        this.renderCurrentQuestion();
+    },
+
+    // Função para renderizar a pergunta atual
+    renderCurrentQuestion() {
+        const quizView = document.getElementById('quiz-view');
+        if (!quizView || !this.currentQuiz) return;
+
+        const question = this.currentQuiz.questions[this.currentQuiz.currentQuestion];
+        const questionNumber = this.currentQuiz.currentQuestion + 1;
+        const totalQuestions = this.currentQuiz.questions.length;
+
+        quizView.innerHTML = `
+            <div class="quiz-header">
+                <h2>Quiz - ${this.getCourseTitle(this.currentQuiz.courseId)}</h2>
+                <div class="quiz-info">
+                    <span>Pergunta ${questionNumber} de ${totalQuestions}</span>
+                </div>
+            </div>
+            
+            <div class="quiz-question">
+                <h3>${question.question}</h3>
+                <div class="quiz-options">
+                    ${question.options.map((option, index) => `
+                        <div class="quiz-option" onclick="veloAcademyApp.selectAnswer(${index})">
+                            <span class="option-text">${option}</span>
+                        </div>
+                    `).join('')}
+                </div>
+            </div>
+            
+            <div class="quiz-navigation">
+                ${this.currentQuiz.currentQuestion > 0 ? 
+                    `<button class="btn-secondary" onclick="veloAcademyApp.previousQuestion()">Anterior</button>` : 
+                    '<div></div>'
+                }
+                ${this.currentQuiz.currentQuestion < totalQuestions - 1 ? 
+                    `<button class="btn-primary" onclick="veloAcademyApp.nextQuestion()">Próxima</button>` : 
+                    `<button class="btn-primary" onclick="veloAcademyApp.finishQuiz()">Finalizar Quiz</button>`
+                }
+            </div>
+        `;
+    },
+
+    // Função para selecionar uma resposta
+    selectAnswer(answerIndex) {
+        if (!this.currentQuiz) return;
+
+        // Salvar a resposta do usuário
+        this.currentQuiz.userAnswers[this.currentQuiz.currentQuestion] = answerIndex;
+
+        // Marcar visualmente a opção selecionada
+        const options = document.querySelectorAll('.quiz-option');
+        options.forEach((option, index) => {
+            option.classList.remove('selected');
+            if (index === answerIndex) {
+                option.classList.add('selected');
+            }
+        });
+    },
+
+    // Função para ir para a próxima pergunta
+    nextQuestion() {
+        if (!this.currentQuiz || this.currentQuiz.currentQuestion >= this.currentQuiz.questions.length - 1) {
+            return;
+        }
+
+        this.currentQuiz.currentQuestion++;
+        this.renderCurrentQuestion();
+    },
+
+    // Função para ir para a pergunta anterior
+    previousQuestion() {
+        if (!this.currentQuiz || this.currentQuiz.currentQuestion <= 0) {
+            return;
+        }
+
+        this.currentQuiz.currentQuestion--;
+        this.renderCurrentQuestion();
+    },
+
+    // Função para finalizar o quiz
+    async finishQuiz() {
+        if (!this.currentQuiz) return;
+
+        // Verificar se todas as perguntas foram respondidas
+        const unansweredQuestions = this.currentQuiz.userAnswers.filter(answer => answer === undefined || answer === null).length;
+        if (unansweredQuestions > 0) {
+            if (!confirm(`Você tem ${unansweredQuestions} pergunta(s) não respondida(s). Deseja finalizar mesmo assim?`)) {
+                return;
+            }
+        }
+
+        // Enviar respostas para o Apps Script
+        await this.submitQuizToAppsScript();
+    },
+
+    // Função para enviar quiz para o Apps Script
+    async submitQuizToAppsScript() {
+        try {
+            const userName = localStorage.getItem('userName') || 'Usuário';
+            const courseId = this.currentQuiz.courseId;
+            const answers = JSON.stringify(this.currentQuiz.userAnswers);
+
+            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userName)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
+            
+            // Abrir em nova aba para o Apps Script processar e gerar o certificado
+            window.open(url, '_blank');
+            
+            // Voltar para o curso
+            this.returnToCourse();
+            
+        } catch (error) {
+            console.error('Erro ao enviar quiz:', error);
+            alert('Erro ao enviar o quiz. Tente novamente.');
+        }
+    },
+
+    // Função para voltar ao curso
+    returnToCourse() {
+        this.currentQuiz = null;
+        this.switchView('course-view');
+    },
+
+    // Função auxiliar para obter o título do curso
+    getCourseTitle(courseId) {
+        const course = this.courseDatabase[courseId];
+        return course ? course.title : 'Curso';
+    },
 
     async init() {
 
@@ -25,14 +211,8 @@ const veloAcademyApp = {
         await this.loadConfig();
         console.log('Config loaded');
 
-        await this.loadQuizConfig();
-        console.log('Quiz config loaded');
-
         await this.loadCourses();
         console.log('Courses loaded:', this.courseDatabase);
-
-        await this.loadQuizzes();
-        console.log('Quizzes loaded:', this.quizDatabase);
 
         this.renderCourses();
         console.log('Courses rendered');
@@ -46,8 +226,6 @@ const veloAcademyApp = {
         this.initLogout();
 
     },
-
-
 
     async loadConfig() {
 
@@ -71,99 +249,6 @@ const veloAcademyApp = {
 
     },
 
-    async loadQuizConfig() {
-        try {
-            const response = await fetch('./quiz-config.json');
-            if (response.ok) {
-                this.quizConfig = await response.json();
-                console.log('Quiz config loaded successfully:', this.quizConfig);
-            }
-        } catch (error) {
-            console.warn('Erro ao carregar configuração de quizzes, usando padrões:', error);
-            this.quizConfig = {
-                googleDriveFolderId: "1hb6gBRMllqyyTlbUzJ9y2PULsP9FvJyf",
-                quizFiles: {},
-                settings: {
-                    cacheTimeout: 3600000,
-                    fallbackToLocal: true,
-                    showExplanations: false,
-                    allowRetry: true,
-                    maxRetries: 3
-                }
-            };
-        }
-    },
-
-    async loadQuizzes() {
-        console.log('Iniciando carregamento de quizzes...');
-        console.log('Quiz config:', this.quizConfig);
-        
-        if (!this.quizConfig.quizFiles) {
-            console.warn('Nenhuma configuração de quiz encontrada');
-            return;
-        }
-
-        for (const [courseId, quizInfo] of Object.entries(this.quizConfig.quizFiles)) {
-            console.log(`Verificando quiz ${courseId}:`, quizInfo);
-            if (quizInfo.enabled && quizInfo.driveId && !quizInfo.driveId.includes('SUBSTITUIR')) {
-                try {
-                    await this.loadQuizFromGoogleDrive(courseId, quizInfo.driveId);
-                } catch (error) {
-                    console.error(`Erro ao carregar quiz ${courseId}:`, error);
-                }
-            } else {
-                // Fallback: tentar carregar localmente se não há ID configurado
-                console.log(`Tentando carregar quiz ${courseId} localmente...`);
-                try {
-                    await this.loadQuizFromLocal(courseId);
-                } catch (error) {
-                    console.error(`Erro ao carregar quiz ${courseId} local:`, error);
-                }
-            }
-        }
-    },
-
-    async loadQuizFromGoogleDrive(courseId, driveId) {
-        try {
-            // URL para download direto do Google Drive
-            const downloadUrl = `https://drive.google.com/uc?export=download&id=${driveId}`;
-            
-            const response = await fetch(downloadUrl);
-            if (response.ok) {
-                const quizData = await response.json();
-                this.quizDatabase[courseId] = quizData;
-                console.log(`Quiz ${courseId} carregado com sucesso:`, quizData);
-            } else {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-        } catch (error) {
-            console.error(`Erro ao carregar quiz ${courseId} do Google Drive:`, error);
-            // Fallback para versão local se configurado
-            if (this.quizConfig.settings.fallbackToLocal) {
-                await this.loadQuizFromLocal(courseId);
-            }
-        }
-    },
-
-    async loadQuizFromLocal(courseId) {
-        try {
-            const response = await fetch(`./${courseId}-quiz.json`);
-            if (response.ok) {
-                const quizData = await response.json();
-                this.quizDatabase[courseId] = quizData;
-                console.log(`Quiz ${courseId} carregado localmente:`, quizData);
-            }
-        } catch (error) {
-            console.error(`Erro ao carregar quiz ${courseId} local:`, error);
-        }
-    },
-
-
-
-
-
-
-
     initLogo() {
 
         if (this.logoConfig.localPath) {
@@ -177,8 +262,6 @@ const veloAcademyApp = {
         }
 
     },
-
-
 
     loadLocalLogo() {
 
@@ -241,8 +324,6 @@ const veloAcademyApp = {
         testImage.src = this.logoConfig.localPath;
 
     },
-
-
 
     loadLogoFromGoogleDrive() {
 
@@ -312,8 +393,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     async loadCourses() {
 
         try {
@@ -340,8 +419,6 @@ const veloAcademyApp = {
         }
 
     },
-
-
 
     loadFallbackCourses() {
 
@@ -519,8 +596,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     renderCourses() {
 
         const coursesGrid = document.getElementById('courses-grid');
@@ -535,8 +610,6 @@ const veloAcademyApp = {
         coursesGrid.innerHTML = '';
 
         let index = 0;
-
-
 
         for (const courseId in this.courseDatabase) {
 
@@ -606,8 +679,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     countTotalLessons(course) {
 
         let total = 0;
@@ -634,8 +705,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     getCourseType(courseId) {
 
         const types = {
@@ -651,8 +720,6 @@ const veloAcademyApp = {
         return types[courseId] || 'Curso';
 
     },
-
-
 
     estimateCourseDuration(course) {
 
@@ -720,8 +787,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     getLessonIcon(type) {
 
         switch (type) {
@@ -740,8 +805,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     openCourse(courseId) {
 
         const course = this.courseDatabase[courseId];
@@ -757,22 +820,14 @@ const veloAcademyApp = {
         console.log('=== ABRINDO CURSO ===');
         console.log('Course ID:', courseId);
         console.log('Course:', course);
-        console.log('Quiz Database:', this.quizDatabase);
-        console.log('Quiz disponível para este curso:', this.quizDatabase[courseId]);
-
-
 
         console.log('Carregando curso:', course.title);
 
         console.log('Módulos encontrados:', course.modules.length);
 
-
-
         const courseView = document.getElementById('course-view');
 
         let modulesHtml = '';
-
-
 
         course.modules.forEach((module, moduleIndex) => {
 
@@ -797,159 +852,155 @@ const veloAcademyApp = {
 
                 // Nova estrutura com seções
 
-                                 module.sections.forEach((section, sectionIndex) => {
+                module.sections.forEach((section, sectionIndex) => {
 
-                     console.log(`Seção ${sectionIndex + 1}:`, section.subtitle);
+                    console.log(`Seção ${sectionIndex + 1}:`, section.subtitle);
 
-                     console.log('Aulas encontradas:', section.lessons.length);
-
-                     
-
-                     const accordionId = `accordion-${moduleIndex}-${sectionIndex}`;
-
-                     
-
-                     
-
-                     moduleHtml += `
-
-                         <h4 class="module-subtitle" onclick="veloAcademyApp.toggleAccordion('${accordionId}')">
-
-                             ${section.subtitle}
-
-                             <i class="fas fa-chevron-down accordion-icon"></i>
-
-                         </h4>
-
-                     `;
-
-                     
-
-                     moduleHtml += `<div class="accordion-content" id="${accordionId}">`;
-
-                     moduleHtml += '<ul class="modules-list">';
-
-                     
-
-                     section.lessons.forEach((lesson, lessonIndex) => {
-
-                         const isLinkValid = this.validateLink(lesson.filePath);
-
-                         const isGoogleDrive = this.isGoogleDriveLink(lesson.filePath);
-
-                         const finalUrl = isGoogleDrive ? this.getGoogleDriveViewUrl(lesson.filePath) : lesson.filePath;
-
-                         
-
-                         console.log(`Aula ${lessonIndex + 1}:`, lesson.title);
-
-                         console.log('Link original:', lesson.filePath);
-
-                         console.log('Link final:', finalUrl);
-
-                         console.log('É Google Drive:', isGoogleDrive);
-
-                         console.log('Link válido:', isLinkValid);
-
-                         
-
-                                             // Lógica específica para diferentes tipos de conteúdo
-
-                    let linkClass, linkText, linkAction;
+                    console.log('Aulas encontradas:', section.lessons.length);
 
                     
 
-                    if (!isLinkValid) {
+                    const accordionId = `accordion-${moduleIndex}-${sectionIndex}`;
 
-                        linkClass = 'btn disabled';
+                    
 
-                        linkText = 'Link Indisponível';
+                    moduleHtml += `
 
-                        linkAction = 'onclick="return false;"';
+                        <h4 class="module-subtitle" onclick="veloAcademyApp.toggleAccordion('${accordionId}')">
 
-                    } else if (lesson.type === 'pdf') {
+                            ${section.subtitle}
 
-                        // Para PDFs, usar download automático
+                            <i class="fas fa-chevron-down accordion-icon"></i>
 
-                        linkClass = 'btn';
+                        </h4>
 
-                        linkText = 'Baixar PDF';
+                    `;
 
-                        linkAction = `href="${finalUrl}" download onclick="veloAcademyApp.downloadFile('${finalUrl}', '${lesson.title}')"`;
+                    
 
-                    } else if (lesson.type === 'audio') {
+                    moduleHtml += `<div class="accordion-content" id="${accordionId}">`;
 
-                        // Para áudios/podcasts, usar botão "Ouvir"
+                    moduleHtml += '<ul class="modules-list">';
 
-                        linkClass = 'btn';
+                    
 
-                        linkText = 'Ouvir';
+                    section.lessons.forEach((lesson, lessonIndex) => {
 
-                        linkAction = `href="${finalUrl}" target="_blank"`;
+                        const isLinkValid = this.validateLink(lesson.filePath);
 
-                    } else {
+                        const isGoogleDrive = this.isGoogleDriveLink(lesson.filePath);
 
-                        // Para vídeos e outros conteúdos
+                        const finalUrl = isGoogleDrive ? this.getGoogleDriveViewUrl(lesson.filePath) : lesson.filePath;
 
-                        linkClass = 'btn';
+                        
 
-                        linkText = 'Assistir';
+                        console.log(`Aula ${lessonIndex + 1}:`, lesson.title);
 
-                        linkAction = `href="${finalUrl}" target="_blank"`;
+                        console.log('Link original:', lesson.filePath);
 
+                        console.log('Link final:', finalUrl);
+
+                        console.log('É Google Drive:', isGoogleDrive);
+
+                        console.log('Link válido:', isLinkValid);
+
+                        
+
+                        // Lógica específica para diferentes tipos de conteúdo
+
+                        let linkClass, linkText, linkAction;
+
+                        
+
+                        if (!isLinkValid) {
+
+                            linkClass = 'btn disabled';
+
+                            linkText = 'Link Indisponível';
+
+                            linkAction = 'onclick="return false;"';
+
+                        } else if (lesson.type === 'pdf') {
+
+                            // Para PDFs, usar download automático
+
+                            linkClass = 'btn';
+
+                            linkText = 'Baixar PDF';
+
+                            linkAction = `href="${finalUrl}" download onclick="veloAcademyApp.downloadFile('${finalUrl}', '${lesson.title}')"`;
+
+                        } else if (lesson.type === 'audio') {
+
+                            // Para áudios/podcasts, usar botão "Ouvir"
+
+                            linkClass = 'btn';
+
+                            linkText = 'Ouvir';
+
+                            linkAction = `href="${finalUrl}" target="_blank"`;
+
+                        } else {
+
+                            // Para vídeos e outros conteúdos
+
+                            linkClass = 'btn';
+
+                            linkText = 'Assistir';
+
+                            linkAction = `href="${finalUrl}" target="_blank"`;
+
+                        }
+
+                        
+
+                        // Adicionar ícone especial para Google Drive
+
+                        const driveIcon = isGoogleDrive ? '<i class="fab fa-google-drive" style="margin-right: 5px;"></i>' : '';
+
+                        
+
+                        moduleHtml += `
+
+                            <li>
+
+                                <div class="lesson-info">
+
+                                    ${this.getLessonIcon(lesson.type)}
+
+                                    <div>
+
+                                        <p>${lesson.title}</p>
+
+                                        <span>${lesson.duration} ${isGoogleDrive ? '• Google Drive' : ''}</span>
+
+                                    </div>
+
+                                </div>
+
+                                <a ${linkAction} class="${linkClass}">${driveIcon}${linkText}</a>
+
+                            </li>
+
+                        `;
+
+                    });
+                    
+                    // Adicionar botão de quiz para seções específicas
+                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX') {
+                        const quizCourseId = section.subtitle === 'Crédito do Trabalhador' ? 'credito' : 'pix';
+                        moduleHtml += `
+                            <div class="quiz-section">
+                                <button class="btn-quiz" onclick="veloAcademyApp.startQuiz('${quizCourseId}')">
+                                    <i class="fas fa-question-circle"></i> Fazer Quiz
+                                </button>
+                            </div>
+                        `;
                     }
-
                     
+                    moduleHtml += '</ul></div>';
 
-                    // Adicionar ícone especial para Google Drive
-
-                    const driveIcon = isGoogleDrive ? '<i class="fab fa-google-drive" style="margin-right: 5px;"></i>' : '';
-
-                         
-
-                         moduleHtml += `
-
-                             <li>
-
-                                 <div class="lesson-info">
-
-                                     ${this.getLessonIcon(lesson.type)}
-
-                                     <div>
-
-                                         <p>${lesson.title}</p>
-
-                                         <span>${lesson.duration} ${isGoogleDrive ? '• Google Drive' : ''}</span>
-
-                                     </div>
-
-                                 </div>
-
-                                 <a ${linkAction} class="${linkClass}">${driveIcon}${linkText}</a>
-
-                             </li>
-
-                         `;
-
-                     });
-                     
-                     // Adicionar botão "Fazer Quiz" no final de cada subtítulo
-                     const hasQuiz = this.quizDatabase[courseId];
-                     console.log(`Verificando quiz para curso ${courseId}:`, hasQuiz);
-                     if (hasQuiz) {
-                         moduleHtml += `
-                             <div class="quiz-section">
-                                 <button class="btn btn-quiz" onclick="veloAcademyApp.startQuiz('${courseId}')">
-                                     <i class="fas fa-question-circle"></i>
-                                     Fazer Quiz
-                                 </button>
-                             </div>
-                         `;
-                     }
-                     
-                     moduleHtml += '</ul></div>';
-
-                 });
+                });
 
             } else {
 
@@ -1040,13 +1091,11 @@ const veloAcademyApp = {
                     }
 
                     
-
                     // Adicionar ícone especial para Google Drive
 
                     const driveIcon = isGoogleDrive ? '<i class="fab fa-google-drive" style="margin-right: 5px;"></i>' : '';
 
                     
-
                     moduleHtml += `
 
                         <li>
@@ -1073,20 +1122,6 @@ const veloAcademyApp = {
 
                 });
                 
-                // Adicionar botão "Fazer Quiz" no final de cada módulo (estrutura antiga)
-                const hasQuiz = this.quizDatabase[courseId];
-                console.log(`Verificando quiz para curso ${courseId} (estrutura antiga):`, hasQuiz);
-                if (hasQuiz) {
-                    moduleHtml += `
-                        <div class="quiz-section">
-                            <button class="btn btn-quiz" onclick="veloAcademyApp.startQuiz('${courseId}')">
-                                <i class="fas fa-question-circle"></i>
-                                Fazer Quiz
-                            </button>
-                        </div>
-                    `;
-                }
-                
                 moduleHtml += '</ul>';
 
             }
@@ -1098,8 +1133,6 @@ const veloAcademyApp = {
             modulesHtml += moduleHtml;
 
         });
-
-
 
         courseView.innerHTML = `
 
@@ -1129,13 +1162,9 @@ const veloAcademyApp = {
 
         document.getElementById('back-to-courses').addEventListener('click', () => this.switchView('dashboard-view'));
 
-
-
         this.switchView('course-view');
 
     },
-
-
 
     validateLink(link) {
 
@@ -1146,7 +1175,6 @@ const veloAcademyApp = {
         }
 
         
-
         // Verificar se é um link quebrado (placeholder)
 
         if (link.includes('YOUR_FILE_ID_HERE')) {
@@ -1156,7 +1184,6 @@ const veloAcademyApp = {
         }
 
         
-
         // Verificar se é um link válido do Google Drive
 
         if (link.includes('drive.google.com')) {
@@ -1174,7 +1201,6 @@ const veloAcademyApp = {
         }
 
         
-
         // Verificar se é um link HTTP/HTTPS válido
 
         if (link.startsWith('http://') || link.startsWith('https://')) {
@@ -1184,20 +1210,15 @@ const veloAcademyApp = {
         }
 
         
-
         return false;
 
     },
-
-
 
     isGoogleDriveLink(link) {
 
         return link && link.includes('drive.google.com');
 
     },
-
-
 
     getGoogleDriveViewUrl(filePath) {
 
@@ -1208,7 +1229,6 @@ const veloAcademyApp = {
         }
 
         
-
         // Extrair o ID do arquivo
 
         const driveIdMatch = filePath.match(/[a-zA-Z0-9_-]{25,}/);
@@ -1224,12 +1244,9 @@ const veloAcademyApp = {
         }
 
         
-
         return filePath;
 
     },
-
-
 
     switchView(viewId) {
 
@@ -1245,8 +1262,6 @@ const veloAcademyApp = {
 
     },
 
-
-
     initTheme() {
 
         const themeToggle = document.getElementById('theme-toggle');
@@ -1259,13 +1274,9 @@ const veloAcademyApp = {
         console.log('Sun icon:', sunIcon, 'Moon icon:', moonIcon);
         const docElement = document.documentElement;
 
-
-
         const savedTheme = localStorage.getItem('theme') || 'light';
 
         docElement.setAttribute('data-theme', savedTheme);
-
-
 
         const updateIcons = (theme) => {
 
@@ -1285,11 +1296,7 @@ const veloAcademyApp = {
 
         };
 
-
-
         updateIcons(savedTheme);
-
-
 
         themeToggle.addEventListener('click', () => {
 
@@ -1298,404 +1305,171 @@ const veloAcademyApp = {
             const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
 
             
-
             docElement.setAttribute('data-theme', newTheme);
 
             localStorage.setItem('theme', newTheme);
 
-                            updateIcons(newTheme);
+            updateIcons(newTheme);
 
-            });
+        });
 
-        },
+    },
 
+    toggleAccordion(accordionId) {
 
+        const accordion = document.getElementById(accordionId);
 
-        toggleAccordion(accordionId) {
+        const header = document.querySelector(`[onclick*="${accordionId}"]`);
 
-            const accordion = document.getElementById(accordionId);
+        
+        if (!accordion || !header) return;
 
-            const header = document.querySelector(`[onclick*="${accordionId}"]`);
+        
+        const isActive = accordion.classList.contains('active');
+
+        
+        if (isActive) {
+
+            // Fecha o acordeão
+
+            accordion.classList.remove('active');
+
+            header.classList.remove('active');
+
+        } else {
+
+            // Abre o acordeão
+
+            accordion.classList.add('active');
+
+            header.classList.add('active');
+
+        }
+
+    },
+
+    downloadFile(url, filename) {
+
+        // Função para fazer download de arquivos
+
+        try {
+
+            // Criar um elemento <a> temporário
+
+            const link = document.createElement('a');
+
+            link.href = url;
+
+            link.download = filename || 'documento.pdf';
+
+            link.target = '_blank';
 
             
+            // Adicionar ao DOM, clicar e remover
 
-            if (!accordion || !header) return;
+            document.body.appendChild(link);
+
+            link.click();
+
+            document.body.removeChild(link);
 
             
+            console.log('Download iniciado:', filename);
 
-            const isActive = accordion.classList.contains('active');
+        } catch (error) {
 
-            
+            console.error('Erro ao fazer download:', error);
 
-            if (isActive) {
+            // Fallback: abrir em nova aba
 
-                // Fecha o acordeão
+            window.open(url, '_blank');
 
-                accordion.classList.remove('active');
+        }
 
-                header.classList.remove('active');
+    },
+
+    initUserInfo() {
+
+        const userName = localStorage.getItem('userName');
+
+        const userPicture = localStorage.getItem('userPicture');
+
+        
+        // Atualizar nome do usuário
+
+        const userNameElement = document.getElementById('user-name');
+
+        if (userNameElement) {
+
+            userNameElement.textContent = userName || 'Usuário';
+
+        }
+
+        
+        // Atualizar avatar do usuário
+
+        const userAvatar = document.getElementById('user-avatar');
+
+        if (userAvatar) {
+
+            if (userPicture) {
+
+                userAvatar.src = userPicture;
+
+                userAvatar.style.display = 'block';
 
             } else {
 
-                // Abre o acordeão
+                userAvatar.style.display = 'none';
 
-                accordion.classList.add('active');
+                const userInfo = document.getElementById('user-info');
 
-                header.classList.add('active');
+                if (userInfo) {
 
-            }
-
-        },
-
-
-
-        downloadFile(url, filename) {
-
-            // Função para fazer download de arquivos
-
-            try {
-
-                // Criar um elemento <a> temporário
-
-                const link = document.createElement('a');
-
-                link.href = url;
-
-                link.download = filename || 'documento.pdf';
-
-                link.target = '_blank';
-
-                
-
-                // Adicionar ao DOM, clicar e remover
-
-                document.body.appendChild(link);
-
-                link.click();
-
-                document.body.removeChild(link);
-
-                
-
-                console.log('Download iniciado:', filename);
-
-            } catch (error) {
-
-                console.error('Erro ao fazer download:', error);
-
-                // Fallback: abrir em nova aba
-
-                window.open(url, '_blank');
-
-            }
-
-        },
-
-
-
-        initUserInfo() {
-
-            const userName = localStorage.getItem('userName');
-
-            const userPicture = localStorage.getItem('userPicture');
-
-            
-
-            // Atualizar nome do usuário
-
-            const userNameElement = document.getElementById('user-name');
-
-            if (userNameElement) {
-
-                userNameElement.textContent = userName || 'Usuário';
-
-            }
-
-            
-
-            // Atualizar avatar do usuário
-
-            const userAvatar = document.getElementById('user-avatar');
-
-            if (userAvatar) {
-
-                if (userPicture) {
-
-                    userAvatar.src = userPicture;
-
-                    userAvatar.style.display = 'block';
-
-                } else {
-
-                    userAvatar.style.display = 'none';
-
-                    const userInfo = document.getElementById('user-info');
-
-                    if (userInfo) {
-
-                        userInfo.classList.add('no-avatar');
-
-                    }
+                    userInfo.classList.add('no-avatar');
 
                 }
 
             }
 
-        },
-
-
-
-        initLogout() {
-
-            const logoutBtn = document.getElementById('logout-btn');
-
-            if (logoutBtn) {
-
-                logoutBtn.addEventListener('click', () => {
-
-                    // Limpar dados do usuário
-
-                    localStorage.removeItem('userEmail');
-
-                    localStorage.removeItem('userName');
-
-                    localStorage.removeItem('userPicture');
-
-                    
-
-                    // Redirecionar para landing page
-
-                    window.location.href = './index.html';
-
-                });
-
-            }
-
-        },
-
-        // Sistema de Quiz
-        startQuiz(courseId) {
-            const quiz = this.quizDatabase[courseId];
-            if (!quiz) {
-                alert('Quiz não disponível para este curso.');
-                return;
-            }
-
-            this.currentQuiz = {
-                courseId: courseId,
-                quiz: quiz,
-                currentQuestion: 0,
-                answers: [],
-                startTime: Date.now(),
-                timeLimit: quiz.timeLimit * 60 * 1000 // Converter para milissegundos
-            };
-
-            this.showQuizInterface();
-        },
-
-        showQuizInterface() {
-            const quiz = this.currentQuiz.quiz;
-            const question = quiz.questions[this.currentQuiz.currentQuestion];
-
-            const quizView = document.getElementById('quiz-view');
-            if (!quizView) {
-                console.error('Elemento quiz-view não encontrado');
-                return;
-            }
-
-            const timeRemaining = this.calculateTimeRemaining();
-            const progress = ((this.currentQuiz.currentQuestion + 1) / quiz.questions.length) * 100;
-
-            quizView.innerHTML = `
-                <div class="quiz-header">
-                    <button class="btn btn-secondary" onclick="veloAcademyApp.exitQuiz()">
-                        <i class="fas fa-arrow-left"></i> Sair do Quiz
-                    </button>
-                    <div class="quiz-info">
-                        <h2>${quiz.title}</h2>
-                        <p>${quiz.description}</p>
-                    </div>
-                    <div class="quiz-timer">
-                        <i class="fas fa-clock"></i>
-                        <span id="time-remaining">${this.formatTime(timeRemaining)}</span>
-                    </div>
-                </div>
-                
-                <div class="quiz-progress">
-                    <div class="progress-bar">
-                        <div class="progress-fill" style="width: ${progress}%"></div>
-                    </div>
-                    <span class="progress-text">Questão ${this.currentQuiz.currentQuestion + 1} de ${quiz.questions.length}</span>
-                </div>
-
-                <div class="quiz-question">
-                    <h3>${question.question}</h3>
-                    <div class="quiz-options">
-                        ${question.options.map((option, index) => `
-                            <label class="quiz-option">
-                                <input type="radio" name="question-${this.currentQuiz.currentQuestion}" value="${index}">
-                                <span class="option-text">${option}</span>
-                            </label>
-                        `).join('')}
-                    </div>
-                </div>
-
-                <div class="quiz-navigation">
-                    ${this.currentQuiz.currentQuestion > 0 ? 
-                        `<button class="btn btn-secondary" onclick="veloAcademyApp.previousQuestion()">
-                            <i class="fas fa-arrow-left"></i> Anterior
-                        </button>` : ''
-                    }
-                    ${this.currentQuiz.currentQuestion < quiz.questions.length - 1 ? 
-                        `<button class="btn btn-primary" onclick="veloAcademyApp.nextQuestion()">
-                            Próxima <i class="fas fa-arrow-right"></i>
-                        </button>` : 
-                        `<button class="btn btn-success" onclick="veloAcademyApp.finishQuiz()">
-                            Finalizar Quiz <i class="fas fa-check"></i>
-                        </button>`
-                    }
-                </div>
-            `;
-
-            this.switchView('quiz-view');
-            this.startTimer();
-        },
-
-        calculateTimeRemaining() {
-            const elapsed = Date.now() - this.currentQuiz.startTime;
-            const remaining = this.currentQuiz.timeLimit - elapsed;
-            return Math.max(0, remaining);
-        },
-
-        formatTime(milliseconds) {
-            const minutes = Math.floor(milliseconds / 60000);
-            const seconds = Math.floor((milliseconds % 60000) / 1000);
-            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
-        },
-
-        startTimer() {
-            this.timerInterval = setInterval(() => {
-                const timeRemaining = this.calculateTimeRemaining();
-                const timeElement = document.getElementById('time-remaining');
-                
-                if (timeElement) {
-                    timeElement.textContent = this.formatTime(timeRemaining);
-                }
-
-                if (timeRemaining <= 0) {
-                    this.finishQuiz();
-                }
-            }, 1000);
-        },
-
-        stopTimer() {
-            if (this.timerInterval) {
-                clearInterval(this.timerInterval);
-                this.timerInterval = null;
-            }
-        },
-
-        nextQuestion() {
-            this.saveCurrentAnswer();
-            if (this.currentQuiz.currentQuestion < this.currentQuiz.quiz.questions.length - 1) {
-                this.currentQuiz.currentQuestion++;
-                this.showQuizInterface();
-            }
-        },
-
-        previousQuestion() {
-            this.saveCurrentAnswer();
-            if (this.currentQuiz.currentQuestion > 0) {
-                this.currentQuiz.currentQuestion--;
-                this.showQuizInterface();
-            }
-        },
-
-        saveCurrentAnswer() {
-            const selectedOption = document.querySelector(`input[name="question-${this.currentQuiz.currentQuestion}"]:checked`);
-            if (selectedOption) {
-                this.currentQuiz.answers[this.currentQuiz.currentQuestion] = parseInt(selectedOption.value);
-            }
-        },
-
-        finishQuiz() {
-            this.stopTimer();
-            this.saveCurrentAnswer();
-
-            const quiz = this.currentQuiz.quiz;
-            let correctAnswers = 0;
-
-            for (let i = 0; i < quiz.questions.length; i++) {
-                if (this.currentQuiz.answers[i] === quiz.questions[i].correctAnswer) {
-                    correctAnswers++;
-                }
-            }
-
-            const score = Math.round((correctAnswers / quiz.questions.length) * 10);
-            const passed = score >= quiz.passingScore;
-
-            this.showQuizResults(score, passed, correctAnswers, quiz.questions.length);
-        },
-
-        showQuizResults(score, passed, correctAnswers, totalQuestions) {
-            const quizView = document.getElementById('quiz-view');
-            const quiz = this.currentQuiz.quiz;
-
-            quizView.innerHTML = `
-                <div class="quiz-results">
-                    <div class="result-header">
-                        <h2>${passed ? '🎉 Parabéns!' : '📚 Continue Estudando'}</h2>
-                        <p class="result-subtitle">${passed ? 'Você foi aprovado no quiz!' : 'Você precisa estudar mais o conteúdo.'}</p>
-                    </div>
-
-                    <div class="result-score">
-                        <div class="score-circle ${passed ? 'passed' : 'failed'}">
-                            <span class="score-number">${score}</span>
-                            <span class="score-max">/10</span>
-                        </div>
-                        <div class="score-details">
-                            <p><strong>Acertos:</strong> ${correctAnswers} de ${totalQuestions}</p>
-                            <p><strong>Nota mínima:</strong> ${quiz.passingScore}/10</p>
-                            <p><strong>Status:</strong> <span class="status ${passed ? 'passed' : 'failed'}">${passed ? 'Aprovado' : 'Reprovado'}</span></p>
-                        </div>
-                    </div>
-
-                    <div class="result-actions">
-                        ${passed ? 
-                            `<button class="btn btn-success" onclick="veloAcademyApp.returnToCourse()">
-                                <i class="fas fa-check"></i> Continuar
-                            </button>` :
-                            `<button class="btn btn-primary" onclick="veloAcademyApp.returnToCourse()">
-                                <i class="fas fa-book"></i> Voltar ao Curso
-                            </button>`
-                        }
-                    </div>
-                </div>
-            `;
-        },
-
-        exitQuiz() {
-            if (confirm('Tem certeza que deseja sair do quiz? Seu progresso será perdido.')) {
-                this.stopTimer();
-                this.currentQuiz = null;
-                this.switchView('course-view');
-            }
-        },
-
-        returnToCourse() {
-            this.currentQuiz = null;
-            this.switchView('course-view');
         }
 
-    };
+    },
 
-    
+    initLogout() {
 
-    document.addEventListener('DOMContentLoaded', () => {
+        const logoutBtn = document.getElementById('logout-btn');
 
-        veloAcademyApp.init();
+        if (logoutBtn) {
 
-    });
+            logoutBtn.addEventListener('click', () => {
+
+                // Limpar dados do usuário
+
+                localStorage.removeItem('userEmail');
+
+                localStorage.removeItem('userName');
+
+                localStorage.removeItem('userPicture');
+
+                
+                // Redirecionar para landing page
+
+                window.location.href = './index.html';
+
+            });
+
+        }
+
+    }
+
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+
+    veloAcademyApp.init();
+
+});
 
 
 
