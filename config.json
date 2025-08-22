@@ -2,8 +2,8 @@
     "logo": {
         "localPath": "./academy.png",
         "fallbackIcon": "bx-book-bookmark",
-        "width": "40px",
-        "height": "40px"
+        "width": "200px",
+        "height": "55px"
     },
     "theme": {
         "default": "dark",

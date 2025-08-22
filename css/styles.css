@@ -54,7 +54,7 @@ body, html {
     width: 100%;
     max-width: none;
     margin: 0;
-    padding: 0 40px;
+    padding: 0 5px;
 }
 
 h1, h2, h3 {
@@ -93,17 +93,17 @@ header {
     align-items: center;
     position: relative;
 }
-.logo-section { 
+.logo { 
     position: absolute;
-    left: -85px;
-    top: 50%;
-    transform: translateY(-50%) scale(1.40);
+    left: 20px;
+    top: 60%;
+    transform: translateY(-50%) scale(2.10);
     z-index: 10;
 }
 .logo i { font-size: 2.8rem; color: var(--cor-accent); }
 .logo-image {
     width: 200px;
-    height: 67px;
+    height: 55px;
     object-fit: contain;
     border-radius: 4px;
     transition: transform 0.3s ease;
@@ -146,23 +146,36 @@ header {
 /* Theme Toggle */
 .theme-switch-wrapper {
     cursor: pointer;
-    font-size: 1.8rem;
-    color: var(--cor-texto-secundario);
     position: absolute;
-    right: 0;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
+    z-index: 10;
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
     display: flex;
     align-items: center;
-    gap: 8px;
-    z-index: 10;
+    justify-content: center;
+    transition: all 0.3s ease;
 }
+
+.theme-switch-wrapper:hover {
+    background: var(--cor-borda);
+    transform: translateY(-50%) scale(1.05);
+}
+
 .theme-icon { 
-    display: none; 
-    transition: opacity 0.3s ease;
+    font-size: 1.2rem;
+    color: var(--cor-texto-secundario);
+    transition: all 0.3s ease;
 }
+
 .theme-icon.active {
-    display: block;
+    opacity: 1;
+    color: var(--cor-accent);
 }
 
 /* Main e Sistema de Views */
@@ -263,6 +276,38 @@ body:has(.hero-section) .hero-section {
 
 #course-view .module-card h3 {
     margin-bottom: 20px;
+}
+
+#course-view .module-card .module-title {
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    background: var(--cor-fundo-secundario);
+    border-radius: 8px;
+    margin-bottom: 15px;
+    transition: all 0.3s ease;
+    border: 1px solid var(--cor-borda);
+}
+
+#course-view .module-card .module-title:hover {
+    background: var(--cor-fundo-terciario);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+#course-view .module-card .module-title.active {
+    background: var(--cor-accent);
+    color: white;
+}
+
+#course-view .module-card .module-title .accordion-icon {
+    transition: transform 0.3s ease;
+}
+
+#course-view .module-card .module-title.active .accordion-icon {
+    transform: rotate(180deg);
 }
 
 #course-view .module-card .accordion-content {
@@ -781,7 +826,7 @@ footer p {
     
     .container {
         width: 100%;
-        padding: 0 20px;
+        padding: 0 5px;
     }
 
     header h1 {
@@ -872,7 +917,7 @@ footer p {
         text-align: center;
     }
 
-    .logo-section {
+    .logo {
         flex-direction: column;
         gap: 10px;
     }
@@ -920,7 +965,7 @@ footer p {
     .container {
         max-width: none;
         width: 100%;
-        padding: 0 40px;
+        padding: 0 5px;
     }
 
     /* 3. Ajusta a grade para ter cards um pouco maiores */
@@ -1531,43 +1576,7 @@ footer p {
 /* == CORREÇÃO DO BOTÃO DE TEMA == */
 /* ============================================= */
 
-.theme-switch-wrapper {
-    position: relative;
-    display: flex;
-    align-items: center;
-    cursor: pointer;
-    padding: var(--espaco-sm);
-    border-radius: var(--borda-raio);
-    background: var(--cor-fundo);
-    border: 1px solid var(--cor-borda);
-    transition: all 0.3s ease;
-}
-
-.theme-switch-wrapper:hover {
-    background: var(--cor-borda);
-}
-
-.theme-icon {
-    font-size: 18px;
-    color: var(--cor-texto-secundario);
-    transition: all 0.3s ease;
-    opacity: 0.5;
-}
-
-.theme-icon.active {
-    opacity: 1;
-    color: var(--cor-accent);
-}
-
-.theme-switch-wrapper[data-theme="light"] .bx-sun {
-    opacity: 1;
-    color: var(--cor-accent);
-}
-
-.theme-switch-wrapper[data-theme="dark"] .bx-moon {
-    opacity: 1;
-    color: var(--cor-accent);
-}
+/* Botão de tema já está definido no início do arquivo */
 
 /* ============================================= */
 /* == RESPONSIVIDADE == */
@@ -1580,7 +1589,7 @@ footer p {
         padding: var(--espaco-md);
     }
     
-    .logo-section {
+    .logo {
         flex-direction: column;
         text-align: center;
     }
