@@ -1,0 +1,76 @@
+{
+    "courseId": "pix",
+    "title": "PIX: Normas e Segurança",
+    "description": "Quiz sobre os processos, regras de negócio e protocolos de segurança essenciais para transações PIX.",
+    "passingScore": 9,
+    "totalQuestions": 6,
+    "timeLimit": 30,
+    "questions": [
+        {
+            "id": 1,
+            "question": "Por que a Velotax vincula a chave Pix ao Velobank?",
+            "options": [
+                "Para dificultar a portabilidade da chave.",
+                "Para garantir que a restituição seja direcionada corretamente ao parceiro financeiro.",
+                "Para impedir que o cliente use a chave em outro banco."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 2,
+            "question": "O que acontece se o cliente solicitar a exclusão da chave Pix sem quitar a antecipação?",
+            "options": [
+                "A exclusão ocorre em até 2 dias úteis, mas caracteriza quebra contratual e o valor passa a ser cobrado integralmente.",
+                "A chave é liberada sem custos ou consequências.",
+                "A exclusão é feita automaticamente e sem necessidade de pagamento."
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 3,
+            "question": "Clientes com antecipação de 2024 que não quitaram e querem retirar a chave devem:",
+            "options": [
+                "Sempre esperar até 2025, quando a Receita processará automaticamente.",
+                "Corrigir os dados bancários no e-CAC, cadastrar a chave CPF como Pix e, após receber, repassar o valor para a Velotax.",
+                "Solicitar que a Receita transfira o valor direto para a Velotax."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 4,
+            "question": "Qual é o prazo médio que a Receita Federal leva para processar a atualização dos dados no Portal e-CAC?",
+            "options": [
+                "De 10 a 15 dias.",
+                "Até 24 horas.",
+                "Cerca de 30 dias."
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 5,
+            "question": "Se o cliente já recebeu a restituição de 2024 em outra conta e não quitou a antecipação, qual deve ser o procedimento?",
+            "options": [
+                "Orientar o cliente a aguardar o próximo lote da Receita.",
+                "Solicitar a liberação da chave Pix e encaminhar o caso para o N2, que enviará o e-mail de cobrança.",
+                "Cancelar automaticamente a antecipação."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 6,
+            "question": "O que deve constar obrigatoriamente no cadastro bancário no Portal e-CAC para o cliente receber a restituição corretamente?",
+            "options": [
+                "Qualquer chave Pix (celular, e-mail ou aleatória).",
+                "Uma conta corrente vinculada ao nome do cliente.",
+                "A chave Pix obrigatoriamente do tipo CPF."
+            ],
+            "correctAnswer": 2
+        }
+    ],
+    "metadata": {
+        "createdAt": "2025-01-21",
+        "updatedAt": "2025-01-21",
+        "version": "1.0",
+        "author": "VeloAcademy"
+    }
+}

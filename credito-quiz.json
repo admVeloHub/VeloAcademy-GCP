@@ -1,0 +1,104 @@
+{
+    "courseId": "credito",
+    "title": "Crédito do Trabalhador: Análise e Concessão",
+    "description": "Quiz sobre o fluxo completo de análise e concessão da linha de Crédito do Trabalhador.",
+    "passingScore": 9,
+    "totalQuestions": 8,
+    "timeLimit": 45,
+    "questions": [
+        {
+            "id": 1,
+            "question": "O que é o Crédito do Trabalhador?",
+            "options": [
+                "Um empréstimo pessoal com juros baixos.",
+                "Uma linha de crédito especial para trabalhadores com restituição de IR.",
+                "Um financiamento para compra de imóveis.",
+                "Um cartão de crédito corporativo."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 2,
+            "question": "Qual é o prazo máximo para pagamento do Crédito do Trabalhador?",
+            "options": [
+                "Até 12 meses.",
+                "Até 24 meses.",
+                "Até 36 meses.",
+                "Até 48 meses."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 3,
+            "question": "Qual documento é obrigatório para solicitar o Crédito do Trabalhador?",
+            "options": [
+                "Comprovante de residência.",
+                "Declaração de IR do ano anterior.",
+                "Carteira de trabalho.",
+                "Extrato bancário dos últimos 3 meses."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 4,
+            "question": "Qual é o valor máximo que pode ser antecipado no Crédito do Trabalhador?",
+            "options": [
+                "Até 50% da restituição.",
+                "Até 70% da restituição.",
+                "Até 80% da restituição.",
+                "Até 100% da restituição."
+            ],
+            "correctAnswer": 2
+        },
+        {
+            "id": 5,
+            "question": "Em quanto tempo o cliente recebe o dinheiro após a aprovação?",
+            "options": [
+                "No mesmo dia.",
+                "Em até 2 dias úteis.",
+                "Em até 5 dias úteis.",
+                "Em até 10 dias úteis."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 6,
+            "question": "Qual é a taxa de juros do Crédito do Trabalhador?",
+            "options": [
+                "1,99% ao mês.",
+                "2,99% ao mês.",
+                "3,99% ao mês.",
+                "4,99% ao mês."
+            ],
+            "correctAnswer": 0
+        },
+        {
+            "id": 7,
+            "question": "O que acontece se o cliente não pagar as parcelas em dia?",
+            "options": [
+                "O crédito é cancelado automaticamente.",
+                "São aplicados juros de mora e multa.",
+                "A restituição é bloqueada pela Receita.",
+                "O cliente é incluído no SPC/Serasa."
+            ],
+            "correctAnswer": 1
+        },
+        {
+            "id": 8,
+            "question": "Qual é o prazo para a Receita Federal pagar a restituição?",
+            "options": [
+                "Até 30 dias após a declaração.",
+                "Até 60 dias após a declaração.",
+                "Até 90 dias após a declaração.",
+                "Não há prazo definido."
+            ],
+            "correctAnswer": 1
+        }
+    ],
+    "metadata": {
+        "createdAt": "2025-01-21",
+        "updatedAt": "2025-01-21",
+        "version": "1.0",
+        "author": "VeloAcademy"
+    }
+}

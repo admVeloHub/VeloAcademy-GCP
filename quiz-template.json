@@ -1,0 +1,28 @@
+{
+    "courseId": "template",
+    "title": "Nome do Curso",
+    "description": "Descrição do quiz sobre o curso.",
+    "passingScore": 9,
+    "totalQuestions": 0,
+    "timeLimit": 30,
+    "questions": [
+        {
+            "id": 1,
+            "question": "Pergunta exemplo?",
+            "options": [
+                "Opção A",
+                "Opção B",
+                "Opção C",
+                "Opção D"
+            ],
+            "correctAnswer": 0
+        }
+    ],
+    "metadata": {
+        "createdAt": "2025-01-21",
+        "updatedAt": "2025-01-21",
+        "version": "1.0",
+        "author": "VeloAcademy",
+        "instructions": "Template para criação de novos quizzes. Copie este arquivo, altere o courseId, título, descrição e adicione as questões específicas do curso."
+    }
+}

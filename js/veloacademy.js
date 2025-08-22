@@ -1,6 +1,8 @@
 const veloAcademyApp = {
 
     courseDatabase: {},
+    quizDatabase: {},
+    quizConfig: {},
 
     logoConfig: {
 
@@ -23,8 +25,14 @@ const veloAcademyApp = {
         await this.loadConfig();
         console.log('Config loaded');
 
+        await this.loadQuizConfig();
+        console.log('Quiz config loaded');
+
         await this.loadCourses();
         console.log('Courses loaded:', this.courseDatabase);
+
+        await this.loadQuizzes();
+        console.log('Quizzes loaded:', this.quizDatabase);
 
         this.renderCourses();
         console.log('Courses rendered');
@@ -61,6 +69,93 @@ const veloAcademyApp = {
 
         }
 
+    },
+
+    async loadQuizConfig() {
+        try {
+            const response = await fetch('./quiz-config.json');
+            if (response.ok) {
+                this.quizConfig = await response.json();
+                console.log('Quiz config loaded successfully:', this.quizConfig);
+            }
+        } catch (error) {
+            console.warn('Erro ao carregar configuração de quizzes, usando padrões:', error);
+            this.quizConfig = {
+                googleDriveFolderId: "1hb6gBRMllqyyTlbUzJ9y2PULsP9FvJyf",
+                quizFiles: {},
+                settings: {
+                    cacheTimeout: 3600000,
+                    fallbackToLocal: true,
+                    showExplanations: false,
+                    allowRetry: true,
+                    maxRetries: 3
+                }
+            };
+        }
+    },
+
+    async loadQuizzes() {
+        console.log('Iniciando carregamento de quizzes...');
+        console.log('Quiz config:', this.quizConfig);
+        
+        if (!this.quizConfig.quizFiles) {
+            console.warn('Nenhuma configuração de quiz encontrada');
+            return;
+        }
+
+        for (const [courseId, quizInfo] of Object.entries(this.quizConfig.quizFiles)) {
+            console.log(`Verificando quiz ${courseId}:`, quizInfo);
+            if (quizInfo.enabled && quizInfo.driveId && !quizInfo.driveId.includes('SUBSTITUIR')) {
+                try {
+                    await this.loadQuizFromGoogleDrive(courseId, quizInfo.driveId);
+                } catch (error) {
+                    console.error(`Erro ao carregar quiz ${courseId}:`, error);
+                }
+            } else {
+                // Fallback: tentar carregar localmente se não há ID configurado
+                console.log(`Tentando carregar quiz ${courseId} localmente...`);
+                try {
+                    await this.loadQuizFromLocal(courseId);
+                } catch (error) {
+                    console.error(`Erro ao carregar quiz ${courseId} local:`, error);
+                }
+            }
+        }
+    },
+
+    async loadQuizFromGoogleDrive(courseId, driveId) {
+        try {
+            // URL para download direto do Google Drive
+            const downloadUrl = `https://drive.google.com/uc?export=download&id=${driveId}`;
+            
+            const response = await fetch(downloadUrl);
+            if (response.ok) {
+                const quizData = await response.json();
+                this.quizDatabase[courseId] = quizData;
+                console.log(`Quiz ${courseId} carregado com sucesso:`, quizData);
+            } else {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        } catch (error) {
+            console.error(`Erro ao carregar quiz ${courseId} do Google Drive:`, error);
+            // Fallback para versão local se configurado
+            if (this.quizConfig.settings.fallbackToLocal) {
+                await this.loadQuizFromLocal(courseId);
+            }
+        }
+    },
+
+    async loadQuizFromLocal(courseId) {
+        try {
+            const response = await fetch(`./${courseId}-quiz.json`);
+            if (response.ok) {
+                const quizData = await response.json();
+                this.quizDatabase[courseId] = quizData;
+                console.log(`Quiz ${courseId} carregado localmente:`, quizData);
+            }
+        } catch (error) {
+            console.error(`Erro ao carregar quiz ${courseId} local:`, error);
+        }
     },
 
 
@@ -659,6 +754,12 @@ const veloAcademyApp = {
 
         }
 
+        console.log('=== ABRINDO CURSO ===');
+        console.log('Course ID:', courseId);
+        console.log('Course:', course);
+        console.log('Quiz Database:', this.quizDatabase);
+        console.log('Quiz disponível para este curso:', this.quizDatabase[courseId]);
+
 
 
         console.log('Carregando curso:', course.title);
@@ -821,9 +922,21 @@ const veloAcademyApp = {
                          `;
 
                      });
-
                      
-
+                     // Adicionar botão "Fazer Quiz" no final de cada subtítulo
+                     const hasQuiz = this.quizDatabase[courseId];
+                     console.log(`Verificando quiz para curso ${courseId}:`, hasQuiz);
+                     if (hasQuiz) {
+                         moduleHtml += `
+                             <div class="quiz-section">
+                                 <button class="btn btn-quiz" onclick="veloAcademyApp.startQuiz('${courseId}')">
+                                     <i class="fas fa-question-circle"></i>
+                                     Fazer Quiz
+                                 </button>
+                             </div>
+                         `;
+                     }
+                     
                      moduleHtml += '</ul></div>';
 
                  });
@@ -939,9 +1052,21 @@ const veloAcademyApp = {
                     `;
 
                 });
-
                 
-
+                // Adicionar botão "Fazer Quiz" no final de cada módulo (estrutura antiga)
+                const hasQuiz = this.quizDatabase[courseId];
+                console.log(`Verificando quiz para curso ${courseId} (estrutura antiga):`, hasQuiz);
+                if (hasQuiz) {
+                    moduleHtml += `
+                        <div class="quiz-section">
+                            <button class="btn btn-quiz" onclick="veloAcademyApp.startQuiz('${courseId}')">
+                                <i class="fas fa-question-circle"></i>
+                                Fazer Quiz
+                            </button>
+                        </div>
+                    `;
+                }
+                
                 moduleHtml += '</ul>';
 
             }
@@ -1326,6 +1451,220 @@ const veloAcademyApp = {
 
             }
 
+        },
+
+        // Sistema de Quiz
+        startQuiz(courseId) {
+            const quiz = this.quizDatabase[courseId];
+            if (!quiz) {
+                alert('Quiz não disponível para este curso.');
+                return;
+            }
+
+            this.currentQuiz = {
+                courseId: courseId,
+                quiz: quiz,
+                currentQuestion: 0,
+                answers: [],
+                startTime: Date.now(),
+                timeLimit: quiz.timeLimit * 60 * 1000 // Converter para milissegundos
+            };
+
+            this.showQuizInterface();
+        },
+
+        showQuizInterface() {
+            const quiz = this.currentQuiz.quiz;
+            const question = quiz.questions[this.currentQuiz.currentQuestion];
+
+            const quizView = document.getElementById('quiz-view');
+            if (!quizView) {
+                console.error('Elemento quiz-view não encontrado');
+                return;
+            }
+
+            const timeRemaining = this.calculateTimeRemaining();
+            const progress = ((this.currentQuiz.currentQuestion + 1) / quiz.questions.length) * 100;
+
+            quizView.innerHTML = `
+                <div class="quiz-header">
+                    <button class="btn btn-secondary" onclick="veloAcademyApp.exitQuiz()">
+                        <i class="fas fa-arrow-left"></i> Sair do Quiz
+                    </button>
+                    <div class="quiz-info">
+                        <h2>${quiz.title}</h2>
+                        <p>${quiz.description}</p>
+                    </div>
+                    <div class="quiz-timer">
+                        <i class="fas fa-clock"></i>
+                        <span id="time-remaining">${this.formatTime(timeRemaining)}</span>
+                    </div>
+                </div>
+                
+                <div class="quiz-progress">
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progress}%"></div>
+                    </div>
+                    <span class="progress-text">Questão ${this.currentQuiz.currentQuestion + 1} de ${quiz.questions.length}</span>
+                </div>
+
+                <div class="quiz-question">
+                    <h3>${question.question}</h3>
+                    <div class="quiz-options">
+                        ${question.options.map((option, index) => `
+                            <label class="quiz-option">
+                                <input type="radio" name="question-${this.currentQuiz.currentQuestion}" value="${index}">
+                                <span class="option-text">${option}</span>
+                            </label>
+                        `).join('')}
+                    </div>
+                </div>
+
+                <div class="quiz-navigation">
+                    ${this.currentQuiz.currentQuestion > 0 ? 
+                        `<button class="btn btn-secondary" onclick="veloAcademyApp.previousQuestion()">
+                            <i class="fas fa-arrow-left"></i> Anterior
+                        </button>` : ''
+                    }
+                    ${this.currentQuiz.currentQuestion < quiz.questions.length - 1 ? 
+                        `<button class="btn btn-primary" onclick="veloAcademyApp.nextQuestion()">
+                            Próxima <i class="fas fa-arrow-right"></i>
+                        </button>` : 
+                        `<button class="btn btn-success" onclick="veloAcademyApp.finishQuiz()">
+                            Finalizar Quiz <i class="fas fa-check"></i>
+                        </button>`
+                    }
+                </div>
+            `;
+
+            this.switchView('quiz-view');
+            this.startTimer();
+        },
+
+        calculateTimeRemaining() {
+            const elapsed = Date.now() - this.currentQuiz.startTime;
+            const remaining = this.currentQuiz.timeLimit - elapsed;
+            return Math.max(0, remaining);
+        },
+
+        formatTime(milliseconds) {
+            const minutes = Math.floor(milliseconds / 60000);
+            const seconds = Math.floor((milliseconds % 60000) / 1000);
+            return `${minutes}:${seconds.toString().padStart(2, '0')}`;
+        },
+
+        startTimer() {
+            this.timerInterval = setInterval(() => {
+                const timeRemaining = this.calculateTimeRemaining();
+                const timeElement = document.getElementById('time-remaining');
+                
+                if (timeElement) {
+                    timeElement.textContent = this.formatTime(timeRemaining);
+                }
+
+                if (timeRemaining <= 0) {
+                    this.finishQuiz();
+                }
+            }, 1000);
+        },
+
+        stopTimer() {
+            if (this.timerInterval) {
+                clearInterval(this.timerInterval);
+                this.timerInterval = null;
+            }
+        },
+
+        nextQuestion() {
+            this.saveCurrentAnswer();
+            if (this.currentQuiz.currentQuestion < this.currentQuiz.quiz.questions.length - 1) {
+                this.currentQuiz.currentQuestion++;
+                this.showQuizInterface();
+            }
+        },
+
+        previousQuestion() {
+            this.saveCurrentAnswer();
+            if (this.currentQuiz.currentQuestion > 0) {
+                this.currentQuiz.currentQuestion--;
+                this.showQuizInterface();
+            }
+        },
+
+        saveCurrentAnswer() {
+            const selectedOption = document.querySelector(`input[name="question-${this.currentQuiz.currentQuestion}"]:checked`);
+            if (selectedOption) {
+                this.currentQuiz.answers[this.currentQuiz.currentQuestion] = parseInt(selectedOption.value);
+            }
+        },
+
+        finishQuiz() {
+            this.stopTimer();
+            this.saveCurrentAnswer();
+
+            const quiz = this.currentQuiz.quiz;
+            let correctAnswers = 0;
+
+            for (let i = 0; i < quiz.questions.length; i++) {
+                if (this.currentQuiz.answers[i] === quiz.questions[i].correctAnswer) {
+                    correctAnswers++;
+                }
+            }
+
+            const score = Math.round((correctAnswers / quiz.questions.length) * 10);
+            const passed = score >= quiz.passingScore;
+
+            this.showQuizResults(score, passed, correctAnswers, quiz.questions.length);
+        },
+
+        showQuizResults(score, passed, correctAnswers, totalQuestions) {
+            const quizView = document.getElementById('quiz-view');
+            const quiz = this.currentQuiz.quiz;
+
+            quizView.innerHTML = `
+                <div class="quiz-results">
+                    <div class="result-header">
+                        <h2>${passed ? '🎉 Parabéns!' : '📚 Continue Estudando'}</h2>
+                        <p class="result-subtitle">${passed ? 'Você foi aprovado no quiz!' : 'Você precisa estudar mais o conteúdo.'}</p>
+                    </div>
+
+                    <div class="result-score">
+                        <div class="score-circle ${passed ? 'passed' : 'failed'}">
+                            <span class="score-number">${score}</span>
+                            <span class="score-max">/10</span>
+                        </div>
+                        <div class="score-details">
+                            <p><strong>Acertos:</strong> ${correctAnswers} de ${totalQuestions}</p>
+                            <p><strong>Nota mínima:</strong> ${quiz.passingScore}/10</p>
+                            <p><strong>Status:</strong> <span class="status ${passed ? 'passed' : 'failed'}">${passed ? 'Aprovado' : 'Reprovado'}</span></p>
+                        </div>
+                    </div>
+
+                    <div class="result-actions">
+                        ${passed ? 
+                            `<button class="btn btn-success" onclick="veloAcademyApp.returnToCourse()">
+                                <i class="fas fa-check"></i> Continuar
+                            </button>` :
+                            `<button class="btn btn-primary" onclick="veloAcademyApp.returnToCourse()">
+                                <i class="fas fa-book"></i> Voltar ao Curso
+                            </button>`
+                        }
+                    </div>
+                </div>
+            `;
+        },
+
+        exitQuiz() {
+            if (confirm('Tem certeza que deseja sair do quiz? Seu progresso será perdido.')) {
+                this.stopTimer();
+                this.currentQuiz = null;
+                this.switchView('course-view');
+            }
+        },
+
+        returnToCourse() {
+            this.currentQuiz = null;
+            this.switchView('course-view');
         }
 
     };

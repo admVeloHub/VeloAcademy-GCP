@@ -1,0 +1,28 @@
+{
+    "googleDriveFolderId": "1hb6gBRMllqyyTlbUzJ9y2PULsP9FvJyf",
+    "quizFiles": {
+        "onboarding": {
+            "fileName": "onboarding-quiz.json",
+            "driveId": "SUBSTITUIR_PELO_ID_DO_ARQUIVO_PIX_QUIZ",
+            "enabled": true
+        },
+        "cs004": {
+            "fileName": "cs004-quiz.json", 
+            "driveId": "SUBSTITUIR_PELO_ID_DO_ARQUIVO_CREDITO_QUIZ",
+            "enabled": true
+        }
+    },
+    "settings": {
+        "cacheTimeout": 3600000,
+        "fallbackToLocal": true,
+        "showExplanations": false,
+        "allowRetry": true,
+        "maxRetries": 3
+    },
+    "metadata": {
+        "createdAt": "2025-01-21",
+        "updatedAt": "2025-01-21",
+        "version": "1.0",
+        "instructions": "Após fazer upload dos arquivos JSON na pasta do Google Drive, substitua os driveId pelos IDs reais dos arquivos."
+    }
+}
