@@ -1,0 +1,77 @@
+{
+  "courseId": "credito",
+  "title": "Quiz - Crédito do Trabalhador: Análise e Concessão",
+  "passingScore": 6,
+  "questions": [
+    {
+      "question": "O Crédito Consignado Trabalhador é voltado para:",
+      "options": [
+        "Funcionários públicos apenas",
+        "Funcionários CLT de empresas privadas e domésticos, além de diretores com FGTS",
+        "Apenas aposentados e pensionistas",
+        "Qualquer pessoa com conta bancária"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Qual é o tempo mínimo de vínculo empregatício exigido pela Velotax para contratar o consignado?",
+      "options": [
+        "6 meses",
+        "12 meses",
+        "18 meses",
+        "Não existe tempo mínimo"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Segundo a política da Velotax, a margem consignável máxima autorizada é:",
+      "options": [
+        "25% do salário líquido",
+        "30% do salário líquido",
+        "35% do salário líquido",
+        "40% do salário líquido"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Qual é o prazo de carência para início do pagamento das parcelas?",
+      "options": [
+        "15 a 30 dias",
+        "30 a 45 dias",
+        "60 a 92 dias",
+        "Não existe carência"
+      ],
+      "answer": 2
+    },
+    {
+      "question": "Após a assinatura eletrônica do contrato, qual o próximo passo para que o desconto em folha seja efetivado?",
+      "options": [
+        "Liberação imediata do crédito",
+        "Análise manual pela Velotax",
+        "Averbação do contrato junto ao Governo/MTE",
+        "Aprovação pela Caixa Econômica Federal"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "O que acontece se o cliente solicitar o cancelamento dentro do prazo legal de 7 dias?",
+      "options": [
+        "O contrato é cancelado sem necessidade de devolução",
+        "O cliente deve devolver o valor integral do crédito à Velotax",
+        "O contrato é desconsiderado automaticamente",
+        "A empresa do cliente assume a dívida"
+      ],
+      "answer": 2
+    },
+    {
+      "question": "Em caso de empresas com menos de 24 meses de registro, o colaborador pode contratar?",
+      "options": [
+        "Sim, sem restrições",
+        "Sim, desde que seja CLT",
+        "Não, a empresa deve ter no mínimo 24 meses",
+        "Apenas se a margem for inferior a 25%"
+      ],
+      "answer": 3
+    }
+  ]
+}

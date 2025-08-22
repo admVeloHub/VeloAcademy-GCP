@@ -23,18 +23,43 @@ const veloAcademyApp = {
     // Função para carregar quiz do Google Apps Script
     async loadQuizFromAppsScript(courseId) {
         try {
-            console.log('Carregando quiz do Apps Script para:', courseId);
+            console.log('=== INICIANDO CARREGAMENTO DO QUIZ ===');
+            console.log('Course ID:', courseId);
+            console.log('Apps Script URL:', this.appsScriptConfig.scriptUrl);
             
             const url = `${this.appsScriptConfig.scriptUrl}?action=getQuiz&courseId=${courseId}`;
+            console.log('URL completa:', url);
+            
+            console.log('Fazendo requisição para o Apps Script...');
             const response = await fetch(url);
             
+            console.log('Status da resposta:', response.status);
+            console.log('Headers da resposta:', response.headers);
+            
             if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status}`);
+                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
             }
             
-            const data = await response.json();
+            console.log('Convertendo resposta para JSON...');
+            const responseText = await response.text();
+            console.log('Resposta bruta:', responseText);
+            
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (parseError) {
+                console.error('Erro ao fazer parse do JSON:', parseError);
+                console.log('Resposta que falhou no parse:', responseText);
+                throw new Error('Resposta inválida do servidor');
+            }
+            
+            console.log('Dados recebidos:', data);
             
             if (data.status === 'success') {
+                console.log('Status de sucesso confirmado');
+                console.log('Perguntas recebidas:', data.questions);
+                console.log('Nota de aprovação:', data.passingScore);
+                
                 this.currentQuiz = {
                     courseId: courseId,
                     questions: data.questions,
@@ -48,11 +73,53 @@ const veloAcademyApp = {
                 this.showQuizInterface();
                 return true;
             } else {
-                throw new Error('Erro ao carregar quiz do Apps Script');
+                console.error('Status de erro recebido:', data.status);
+                throw new Error(`Erro do Apps Script: ${data.status}`);
             }
         } catch (error) {
-            console.error('Erro ao carregar quiz:', error);
-            alert('Erro ao carregar o quiz. Tente novamente.');
+            console.error('=== ERRO AO CARREGAR QUIZ DO APPS SCRIPT ===');
+            console.error('Tipo de erro:', error.constructor.name);
+            console.error('Mensagem:', error.message);
+            console.error('Stack trace:', error.stack);
+            
+            console.log('Tentando carregar quiz local como fallback...');
+            return await this.loadQuizFromLocal(courseId);
+        }
+    },
+
+    // Função para carregar quiz local como fallback
+    async loadQuizFromLocal(courseId) {
+        try {
+            console.log('=== CARREGANDO QUIZ LOCAL ===');
+            console.log('Course ID:', courseId);
+            
+            const response = await fetch(`./quiz/${courseId}-quiz.json`);
+            
+            if (!response.ok) {
+                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
+            }
+            
+            const quizData = await response.json();
+            console.log('Quiz local carregado:', quizData);
+            
+            this.currentQuiz = {
+                courseId: courseId,
+                questions: quizData.questions,
+                passingScore: quizData.passingScore,
+                currentQuestion: 0,
+                userAnswers: [],
+                startTime: Date.now()
+            };
+            
+            console.log('Quiz local carregado com sucesso:', this.currentQuiz);
+            this.showQuizInterface();
+            return true;
+            
+        } catch (error) {
+            console.error('=== ERRO AO CARREGAR QUIZ LOCAL ===');
+            console.error('Erro:', error);
+            
+            alert('Erro ao carregar o quiz. Verifique se os arquivos estão disponíveis.');
             return false;
         }
     },
@@ -180,8 +247,22 @@ const veloAcademyApp = {
 
             const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userName)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
             
-            // Abrir em nova aba para o Apps Script processar e gerar o certificado
-            window.open(url, '_blank');
+            console.log('Enviando quiz para Apps Script:', url);
+            
+            // Tentar enviar para o Apps Script
+            try {
+                const response = await fetch(url);
+                if (response.ok) {
+                    // Se funcionou, abrir em nova aba para o certificado
+                    window.open(url, '_blank');
+                } else {
+                    throw new Error('Apps Script não respondeu');
+                }
+            } catch (appsScriptError) {
+                console.log('Apps Script falhou, usando fallback local:', appsScriptError);
+                // Fallback: processar localmente
+                this.processQuizLocally();
+            }
             
             // Voltar para o curso
             this.returnToCourse();
@@ -190,6 +271,64 @@ const veloAcademyApp = {
             console.error('Erro ao enviar quiz:', error);
             alert('Erro ao enviar o quiz. Tente novamente.');
         }
+    },
+
+    // Função para processar quiz localmente (fallback)
+    processQuizLocally() {
+        if (!this.currentQuiz) return;
+
+        // Calcular pontuação
+        let score = 0;
+        this.currentQuiz.questions.forEach((question, index) => {
+            if (this.currentQuiz.userAnswers[index] === question.answer) {
+                score++;
+            }
+        });
+
+        const totalQuestions = this.currentQuiz.questions.length;
+        const finalGrade = (score / totalQuestions) * 10;
+        const passingScore = this.currentQuiz.passingScore;
+
+        // Mostrar resultado
+        this.showLocalQuizResult(finalGrade, passingScore, totalQuestions);
+    },
+
+    // Função para mostrar resultado local
+    showLocalQuizResult(finalGrade, passingScore, totalQuestions) {
+        const quizView = document.getElementById('quiz-view');
+        if (!quizView) return;
+
+        const isPassed = finalGrade >= passingScore;
+        const resultClass = isPassed ? 'passed' : 'failed';
+        const resultText = isPassed ? 'APROVADO' : 'REPROVADO';
+        const resultMessage = isPassed 
+            ? 'Parabéns! Você foi aprovado no quiz.' 
+            : `Você precisa de pelo menos ${passingScore} pontos para ser aprovado.`;
+
+        quizView.innerHTML = `
+            <div class="quiz-results ${resultClass}">
+                <div class="result-header">
+                    <h2>Resultado do Quiz</h2>
+                    <div class="result-score">
+                        <div class="score-circle">
+                            <span class="score-number">${finalGrade.toFixed(1)}</span>
+                            <span class="score-max">/ 10</span>
+                        </div>
+                    </div>
+                    <div class="result-subtitle">
+                        <span class="status ${resultClass}">${resultText}</span>
+                    </div>
+                    <p>${resultMessage}</p>
+                    <div class="score-details">
+                        <p>Acertos: ${Math.round((finalGrade / 10) * totalQuestions)} de ${totalQuestions} perguntas</p>
+                        <p>Nota mínima para aprovação: ${passingScore}</p>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    <button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>
+                </div>
+            </div>
+        `;
     },
 
     // Função para voltar ao curso
