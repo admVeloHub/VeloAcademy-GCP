@@ -269,31 +269,33 @@ body:has(.hero-section) .hero-section {
     width: 100%;
 }
 
-#course-view .course-header {
-    margin-bottom: 40px;
-    text-align: center;
-    padding: 40px 30px;
-    background: linear-gradient(135deg, var(--cor-card) 0%, rgba(255, 255, 255, 0.05) 100%);
-    border-radius: 16px;
-    border: 1px solid var(--cor-borda);
-    position: relative;
+#course-view .course-header-compact {
+    margin-bottom: 30px;
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    padding: 20px 0;
+    border-bottom: 1px solid var(--cor-borda);
 }
 
-#course-view .course-header h1 {
-    margin: 20px 0 15px 0;
-    font-size: 2.5rem;
+#course-view .course-title-section {
+    flex: 1;
+}
+
+#course-view .course-title-section h1 {
+    margin: 0 0 8px 0;
+    font-size: 2rem;
     color: var(--cor-texto-principal);
     border: none;
     padding: 0;
+    line-height: 1.2;
 }
 
-#course-view .course-header p {
-    font-size: 1.1rem;
+#course-view .course-title-section p {
+    font-size: 1rem;
     color: var(--cor-texto-secundario);
-    margin-bottom: 30px;
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
+    margin: 0;
+    line-height: 1.5;
 }
 
 
@@ -940,11 +942,18 @@ footer p {
     #course-view .btn-secondary {
         align-self: flex-start;
         margin-bottom: 0;
+        flex-shrink: 0;
     }
 
     /* Header do curso */
-    #course-view .course-header {
+    #course-view .course-header-compact {
         width: 100%;
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    #course-view .course-title-section h1 {
+        font-size: 1.8rem;
     }
 
     /* Container dos módulos */

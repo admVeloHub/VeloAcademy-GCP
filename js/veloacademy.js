@@ -467,12 +467,14 @@ const veloAcademyApp = {
         });
 
         courseView.innerHTML = `
-            <div class="course-header">
+            <div class="course-header-compact">
                 <button class="btn btn-secondary" id="back-to-courses">
                     <i class="fas fa-arrow-left"></i> Voltar para Cursos
                 </button>
-                <h1>${course.title}</h1>
-                <p>${course.description}</p>
+                <div class="course-title-section">
+                    <h1>${course.title}</h1>
+                    <p>${course.description}</p>
+                </div>
             </div>
             ${modulesHtml}
         `;
