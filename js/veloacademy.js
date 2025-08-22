@@ -217,15 +217,92 @@ const veloAcademyApp = {
             const course = this.courseDatabase[courseId];
             const card = document.createElement('div');
             card.className = 'course-card';
+            card.setAttribute('data-course', courseId);
             card.style.animationDelay = `${index * 100}ms`;
+            
+            // Calcular estatísticas do curso
+            const totalModules = course.modules.length;
+            const totalLessons = this.countTotalLessons(course);
+            const courseType = this.getCourseType(courseId);
+            
             card.innerHTML = `
                 <h3>${course.title}</h3>
                 <p>${course.description}</p>
+                <div class="course-meta">
+                    <div class="course-stats">
+                        <div class="course-stat">
+                            <i class="fas fa-layer-group"></i>
+                            <span>${totalModules} módulos</span>
+                        </div>
+                        <div class="course-stat">
+                            <i class="fas fa-play-circle"></i>
+                            <span>${totalLessons} aulas</span>
+                        </div>
+                    </div>
+                    <div class="course-badge">${courseType}</div>
+                </div>
             `;
             card.addEventListener('click', () => this.openCourse(courseId));
             coursesGrid.appendChild(card);
             index++;
         }
+    },
+
+    countTotalLessons(course) {
+        let total = 0;
+        course.modules.forEach(module => {
+            if (module.sections) {
+                module.sections.forEach(section => {
+                    total += section.lessons.length;
+                });
+            } else if (module.lessons) {
+                total += module.lessons.length;
+            }
+        });
+        return total;
+    },
+
+    getCourseType(courseId) {
+        const types = {
+            'onboarding': 'Essencial',
+            'cs004': 'Segurança',
+            'cs003': 'Atendimento'
+        };
+        return types[courseId] || 'Curso';
+    },
+
+    estimateCourseDuration(course) {
+        let totalMinutes = 0;
+        course.modules.forEach(module => {
+            if (module.sections) {
+                module.sections.forEach(section => {
+                    section.lessons.forEach(lesson => {
+                        const duration = lesson.duration;
+                        if (duration.includes('min')) {
+                            totalMinutes += parseInt(duration);
+                        } else if (duration.includes('hora')) {
+                            totalMinutes += parseInt(duration) * 60;
+                        } else {
+                            totalMinutes += 15; // Estimativa padrão para leitura
+                        }
+                    });
+                });
+            } else if (module.lessons) {
+                module.lessons.forEach(lesson => {
+                    const duration = lesson.duration;
+                    if (duration.includes('min')) {
+                        totalMinutes += parseInt(duration);
+                    } else if (duration.includes('hora')) {
+                        totalMinutes += parseInt(duration) * 60;
+                    } else {
+                        totalMinutes += 15; // Estimativa padrão para leitura
+                    }
+                });
+            }
+        });
+        
+        const hours = Math.ceil(totalMinutes / 60);
+        return hours;
     },
 
     getLessonIcon(type) {
@@ -390,9 +467,27 @@ const veloAcademyApp = {
         });
 
         courseView.innerHTML = `
-            <button class="btn btn-secondary" id="back-to-courses">
-                <i class="fas fa-arrow-left"></i> Voltar para Cursos
-            </button>
+            <div class="course-header">
+                <button class="btn btn-secondary" id="back-to-courses">
+                    <i class="fas fa-arrow-left"></i> Voltar para Cursos
+                </button>
+                <h1>${course.title}</h1>
+                <p>${course.description}</p>
+                <div class="course-overview">
+                    <div class="overview-stat">
+                        <i class="fas fa-layer-group"></i>
+                        <span>${course.modules.length} módulos</span>
+                    </div>
+                    <div class="overview-stat">
+                        <i class="fas fa-play-circle"></i>
+                        <span>${this.countTotalLessons(course)} aulas</span>
+                    </div>
+                    <div class="overview-stat">
+                        <i class="fas fa-clock"></i>
+                        <span>${this.estimateCourseDuration(course)} horas estimadas</span>
+                    </div>
+                </div>
+            </div>
             ${modulesHtml}
         `;
         

@@ -243,17 +243,103 @@ body:has(.hero-section) .hero-section {
     color: var(--cor-accent);
 }
 
-/* Detalhes do Curso (Course View) */
+/* Detalhes do Curso (Course View) - Layout Melhorado */
+#course-view {
+    max-width: 900px;
+    margin: 0 auto;
+}
+
 #course-view .course-header {
+    margin-bottom: 40px;
+    text-align: center;
+    padding: 40px 30px;
+    background: linear-gradient(135deg, var(--cor-card) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border-radius: 16px;
+    border: 1px solid var(--cor-borda);
+    position: relative;
+}
+
+#course-view .course-header h1 {
+    margin: 20px 0 15px 0;
+    font-size: 2.5rem;
+    color: var(--cor-texto-principal);
+    border: none;
+    padding: 0;
+}
+
+#course-view .course-header p {
+    font-size: 1.1rem;
+    color: var(--cor-texto-secundario);
     margin-bottom: 30px;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.course-overview {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.overview-stat {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 15px 20px;
+    background: var(--cor-container);
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    font-weight: 500;
+    color: var(--cor-texto-principal);
+    transition: all 0.3s ease;
+}
+
+.overview-stat:hover {
+    background: var(--cor-fundo);
+    border-color: var(--cor-accent);
+    transform: translateY(-2px);
+}
+
+.overview-stat i {
+    color: var(--cor-accent);
+    font-size: 1.2rem;
 }
 
 .module-card {
-    background-color: var(--cor-card);
-    border-radius: var(--borda-raio);
+    background: linear-gradient(135deg, var(--cor-card) 0%, rgba(255, 255, 255, 0.02) 100%);
+    border-radius: 16px;
     border: 1px solid var(--cor-borda);
-    padding: 25px;
-    margin-bottom: 20px;
+    padding: 30px;
+    margin-bottom: 25px;
+    box-shadow: 0 8px 32px var(--cor-sombra);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
+}
+
+.module-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 4px;
+    height: 100%;
+    background: linear-gradient(180deg, var(--cor-accent), #4dabf7);
+    transform: scaleY(0);
+    transition: transform 0.3s ease;
+}
+
+.module-card:hover::before {
+    transform: scaleY(1);
+}
+
+.module-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 40px var(--cor-sombra);
+    border-color: var(--cor-accent);
 }
 .module-card h3 {
     margin-top: 0;
@@ -318,9 +404,59 @@ body:has(.hero-section) .hero-section {
     list-style: none;
     padding: 0;
     margin: 0;
+}
+
+.modules-list li {
+    background: var(--cor-container);
+    border: 1px solid var(--cor-borda);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
     display: flex;
-    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+    gap: 20px;
+}
+
+.modules-list li:hover {
+    background: var(--cor-fundo);
+    border-color: var(--cor-accent);
+    transform: translateX(8px);
+    box-shadow: 0 4px 20px var(--cor-sombra);
+}
+
+.lesson-info {
+    display: flex;
+    align-items: center;
     gap: 15px;
+    flex: 1;
+}
+
+.lesson-info i {
+    font-size: 1.2rem;
+    color: var(--cor-accent);
+    width: 24px;
+    text-align: center;
+}
+
+.lesson-info div {
+    flex: 1;
+}
+
+.lesson-info p {
+    margin: 0 0 5px 0;
+    font-weight: 500;
+    color: var(--cor-texto-principal);
+    font-size: 0.95rem;
+}
+
+.lesson-info span {
+    color: var(--cor-texto-secundario);
+    font-size: 0.85rem;
+    display: flex;
+    align-items: center;
+    gap: 8px;
 }
 .modules-list li {
     background-color: var(--cor-container);
@@ -1463,6 +1599,133 @@ footer p {
     .course-card {
         padding: var(--espaco-md);
     }
+}
+
+/* Cards de Cursos - Layout Melhorado */
+#courses-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 30px;
+    margin-top: 30px;
+}
+
+.course-card {
+    background: linear-gradient(135deg, var(--cor-card) 0%, rgba(255, 255, 255, 0.05) 100%);
+    border: 1px solid var(--cor-borda);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 8px 32px var(--cor-sombra);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    cursor: pointer;
+    opacity: 0;
+    animation: slideUp 0.6s ease-out forwards;
+    position: relative;
+    overflow: hidden;
+}
+
+.course-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, var(--cor-accent), #4dabf7, var(--cor-accent));
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.course-card:hover::before {
+    transform: scaleX(1);
+}
+
+.course-card:hover {
+    transform: translateY(-12px) scale(1.02);
+    box-shadow: 0 20px 40px var(--cor-sombra);
+    border-color: var(--cor-accent);
+}
+
+.course-card h3 {
+    margin: 0 0 15px 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--cor-texto-principal);
+    line-height: 1.3;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.course-card h3::before {
+    content: '📚';
+    font-size: 1.2rem;
+}
+
+.course-card p {
+    color: var(--cor-texto-secundario);
+    line-height: 1.6;
+    margin-bottom: 20px;
+    font-size: 0.95rem;
+}
+
+.course-meta {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid var(--cor-borda);
+}
+
+.course-stats {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: var(--cor-texto-secundario);
+}
+
+.course-stat {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.course-badge {
+    background: linear-gradient(135deg, var(--cor-accent), #4dabf7);
+    color: white;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* Especial para o curso de Onboarding */
+.course-card[data-course="onboarding"] h3::before {
+    content: '🚀';
+}
+
+.course-card[data-course="onboarding"] .course-badge {
+    background: linear-gradient(135deg, #28a745, #20c997);
+}
+
+/* Especial para cursos de segurança */
+.course-card[data-course="cs004"] h3::before {
+    content: '🔒';
+}
+
+.course-card[data-course="cs004"] .course-badge {
+    background: linear-gradient(135deg, #dc3545, #fd7e14);
+}
+
+/* Especial para cursos de atendimento */
+.course-card[data-course="cs003"] h3::before {
+    content: '💬';
+}
+
+.course-card[data-course="cs003"] .course-badge {
+    background: linear-gradient(135deg, #6f42c1, #e83e8c);
 }
 
 
