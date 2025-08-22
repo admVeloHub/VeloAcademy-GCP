@@ -949,31 +949,29 @@ footer p {
         font-size: 2.5rem; /* Aumenta o título principal */
     }
 
-    /* 4. Otimização da página de detalhes do curso (a grande melhoria) */
+    /* 4. Otimização da página de detalhes do curso (layout vertical) */
     #course-view {
-        display: grid;
-        grid-template-columns: 350px 1fr; /* Coluna fixa à esquerda, restante flexível */
-        grid-template-rows: auto 1fr;
-        gap: 40px;
-        align-items: start;
+        max-width: 900px;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        gap: 30px;
     }
 
-    /* Posiciona o botão "Voltar" e o Header na primeira coluna */
+    /* Botão voltar no topo */
     #course-view .btn-secondary {
-        grid-column: 1 / 2;
-        grid-row: 1 / 2;
+        align-self: flex-start;
         margin-bottom: 0;
     }
 
+    /* Header do curso */
     #course-view .course-header {
-        grid-column: 1 / 2;
-        grid-row: 2 / 3;
+        width: 100%;
     }
 
-    /* Posiciona a lista de módulos na segunda coluna */
+    /* Container dos módulos */
     #course-view #modules-container {
-        grid-column: 2 / 3;
-        grid-row: 1 / 3; /* Ocupa as duas linhas da grid */
+        width: 100%;
     }
 }
 
