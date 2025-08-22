@@ -339,11 +339,11 @@ body:has(.hero-section) .hero-section {
     text-align: center;
     margin: 0;
     width: auto;
-    position: absolute;
+    position: fixed;
     left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    z-index: 5;
+    top: 80px;
+    transform: translateX(-50%);
+    z-index: 100;
 }
 
 #course-view .course-title-section h1 {
@@ -1019,8 +1019,8 @@ footer p {
     #course-view .course-title-section {
         margin: 0;
         left: 50%;
-        top: 50%;
-        transform: translate(-50%, -50%);
+        top: 60px;
+        transform: translateX(-50%);
     }
     
     #course-view .course-title-section h1 {
