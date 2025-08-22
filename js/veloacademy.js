@@ -473,20 +473,6 @@ const veloAcademyApp = {
                 </button>
                 <h1>${course.title}</h1>
                 <p>${course.description}</p>
-                <div class="course-overview">
-                    <div class="overview-stat">
-                        <i class="fas fa-layer-group"></i>
-                        <span>${course.modules.length} módulos</span>
-                    </div>
-                    <div class="overview-stat">
-                        <i class="fas fa-play-circle"></i>
-                        <span>${this.countTotalLessons(course)} aulas</span>
-                    </div>
-                    <div class="overview-stat">
-                        <i class="fas fa-clock"></i>
-                        <span>${this.estimateCourseDuration(course)} horas estimadas</span>
-                    </div>
-                </div>
             </div>
             ${modulesHtml}
         `;

@@ -51,9 +51,10 @@ body, html {
 }
 
 .container {
-    width: 90%;
-    max-width: 1100px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 40px;
 }
 
 h1, h2, h3 {
@@ -84,6 +85,7 @@ header {
     z-index: 100;
     max-height: 80px;
     overflow: hidden;
+    width: 100%;
 }
 .header-container {
     display: flex;
@@ -243,10 +245,12 @@ body:has(.hero-section) .hero-section {
     color: var(--cor-accent);
 }
 
-/* Detalhes do Curso (Course View) - Layout Melhorado */
+/* Detalhes do Curso (Course View) - Layout Full Frame */
 #course-view {
-    max-width: 900px;
-    margin: 0 auto;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    padding: 0 40px;
 }
 
 /* Layout vertical para módulos */
@@ -292,37 +296,7 @@ body:has(.hero-section) .hero-section {
     margin-right: auto;
 }
 
-.course-overview {
-    display: flex;
-    justify-content: center;
-    gap: 40px;
-    margin-top: 30px;
-    flex-wrap: wrap;
-}
 
-.overview-stat {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 15px 20px;
-    background: var(--cor-container);
-    border: 1px solid var(--cor-borda);
-    border-radius: 12px;
-    font-weight: 500;
-    color: var(--cor-texto-principal);
-    transition: all 0.3s ease;
-}
-
-.overview-stat:hover {
-    background: var(--cor-fundo);
-    border-color: var(--cor-accent);
-    transform: translateY(-2px);
-}
-
-.overview-stat i {
-    color: var(--cor-accent);
-    font-size: 1.2rem;
-}
 
 .module-card {
     background: linear-gradient(135deg, var(--cor-card) 0%, rgba(255, 255, 255, 0.02) 100%);
@@ -798,8 +772,8 @@ footer p {
     }
     
     .container {
-        width: 95%;
-        padding: 15px 0;
+        width: 100%;
+        padding: 0 20px;
     }
 
     header h1 {
@@ -936,7 +910,9 @@ footer p {
 
     /* 2. Expande a largura máxima do contêiner principal */
     .container {
-        max-width: 1400px;
+        max-width: none;
+        width: 100%;
+        padding: 0 40px;
     }
 
     /* 3. Ajusta a grade para ter cards um pouco maiores */
@@ -949,10 +925,12 @@ footer p {
         font-size: 2.5rem; /* Aumenta o título principal */
     }
 
-    /* 4. Otimização da página de detalhes do curso (layout vertical) */
+    /* 4. Otimização da página de detalhes do curso (layout full frame) */
     #course-view {
-        max-width: 900px;
-        margin: 0 auto;
+        width: 100%;
+        max-width: none;
+        margin: 0;
+        padding: 0 40px;
         display: flex;
         flex-direction: column;
         gap: 30px;
@@ -1626,9 +1604,10 @@ footer p {
 /* Cards de Cursos - Layout Melhorado */
 #courses-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
     gap: 30px;
     margin-top: 30px;
+    width: 100%;
 }
 
 .course-card {
