@@ -321,24 +321,25 @@ const veloAcademyApp = {
         const resultHTML = `
             <div class="quiz-results ${resultClass}">
                 <div class="result-header">
-                    <h2>Resultado do Quiz</h2>
+                    <h2>Resultado</h2>
+                    <div class="result-image">
+                        <img src="./Public/${isPassed ? 'aprovado' : 'reprovado'}.png" alt="${resultText}" class="result-status-image">
+                        <div class="result-subtitle">
+                            <span class="status ${resultClass}">${resultText}</span>
+                        </div>
+                    </div>
                     <div class="result-score">
                         <div class="score-circle">
                             <span class="score-number">${finalGrade.toFixed(1)}</span>
                             <span class="score-max">/ 10</span>
                         </div>
                     </div>
-                    <div class="result-subtitle">
-                        <span class="status ${resultClass}">${resultText}</span>
-                    </div>
-                    <p>${resultMessage}</p>
-                    <div class="score-details">
-                        <p>Acertos: ${Math.round((finalGrade / 10) * totalQuestions)} de ${totalQuestions} perguntas</p>
-                        <p>Nota mínima para aprovação: ${passingScore}</p>
-                    </div>
                 </div>
                 <div class="result-actions">
-                    <button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>
+                    ${isPassed ? 
+                        `<button class="btn-primary" onclick="veloAcademyApp.generateCertificate()">Receba o Certificado</button>` :
+                        `<button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>`
+                    }
                 </div>
             </div>
         `;
@@ -356,6 +357,32 @@ const veloAcademyApp = {
         console.log('=== VOLTANDO AO CURSO ===');
         this.currentQuiz = null;
         this.switchView('course-view');
+    },
+
+    // Função para gerar certificado
+    async generateCertificate() {
+        console.log('=== GERANDO CERTIFICADO ===');
+        try {
+            const userName = localStorage.getItem('userName') || 'Usuário';
+            const courseId = this.currentQuiz.courseId;
+            const answers = JSON.stringify(this.currentQuiz.userAnswers);
+
+            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userName)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
+            
+            console.log('Gerando certificado via Apps Script:', url);
+            
+            // Abrir em nova aba para o certificado
+            window.open(url, '_blank');
+            
+            // Voltar para o curso após gerar o certificado
+            setTimeout(() => {
+                this.returnToCourse();
+            }, 1000);
+            
+        } catch (error) {
+            console.error('Erro ao gerar certificado:', error);
+            alert('Erro ao gerar o certificado. Tente novamente.');
+        }
     },
 
     // Função auxiliar para obter o título do curso
