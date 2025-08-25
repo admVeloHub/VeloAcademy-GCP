@@ -14,7 +14,7 @@ const veloAcademyApp = {
 
     // Configuração do Google Apps Script para Quiz
     appsScriptConfig: {
-        scriptUrl: 'https://script.google.com/macros/s/1RnTU4r_i_uA4jbMolg_O_3F9jLbhfEnz7uSC2eJxuwCnkB8bV0uw1W_h/exec'
+        scriptUrl: 'https://script.google.com/macros/s/AKfycbw3LfkmU0HN2_nnWuaJoSyhIAZ_TZBg30Qb52UGf_vXA2PdnW7ccCS2SeYn_Fh5JEYv/exec'
     },
 
     // Dados do quiz atual
@@ -59,6 +59,15 @@ const veloAcademyApp = {
                 console.log('Status de sucesso confirmado');
                 console.log('Perguntas recebidas:', data.questions);
                 console.log('Nota de aprovação:', data.passingScore);
+                
+                // Verificar se as perguntas têm as respostas corretas
+                const hasAnswers = data.questions.every(q => q.answer !== undefined);
+                console.log('Perguntas têm respostas corretas:', hasAnswers);
+                
+                if (!hasAnswers) {
+                    console.log('Apps Script não retornou respostas corretas, usando quiz local');
+                    throw new Error('Apps Script não retornou respostas corretas');
+                }
                 
                 this.currentQuiz = {
                     courseId: courseId,
@@ -153,6 +162,9 @@ const veloAcademyApp = {
         const questionNumber = this.currentQuiz.currentQuestion + 1;
         const totalQuestions = this.currentQuiz.questions.length;
 
+        console.log(`Renderizando questão ${questionNumber}:`, question);
+        console.log(`Resposta correta da questão ${questionNumber}:`, question.answer);
+
         quizView.innerHTML = `
             <div class="quiz-header">
                 <h2>Quiz - ${this.getCourseTitle(this.currentQuiz.courseId)}</h2>
@@ -189,8 +201,12 @@ const veloAcademyApp = {
     selectAnswer(answerIndex) {
         if (!this.currentQuiz) return;
 
+        console.log(`Selecionando resposta ${answerIndex} para questão ${this.currentQuiz.currentQuestion + 1}`);
+
         // Salvar a resposta do usuário
         this.currentQuiz.userAnswers[this.currentQuiz.currentQuestion] = answerIndex;
+
+        console.log('Respostas atualizadas:', this.currentQuiz.userAnswers);
 
         // Marcar visualmente a opção selecionada
         const options = document.querySelectorAll('.quiz-option');
@@ -282,10 +298,21 @@ const veloAcademyApp = {
             return;
         }
 
+        console.log('Respostas do usuário:', this.currentQuiz.userAnswers);
+        console.log('Perguntas do quiz:', this.currentQuiz.questions);
+
         // Calcular pontuação
         let score = 0;
         this.currentQuiz.questions.forEach((question, index) => {
-            if (this.currentQuiz.userAnswers[index] === question.answer) {
+            const userAnswer = this.currentQuiz.userAnswers[index];
+            const correctAnswer = question.answer;
+            
+            console.log(`Questão ${index + 1}:`);
+            console.log(`  - Resposta do usuário: ${userAnswer}`);
+            console.log(`  - Resposta correta: ${correctAnswer}`);
+            console.log(`  - Acertou: ${userAnswer === correctAnswer}`);
+            
+            if (userAnswer === correctAnswer) {
                 score++;
             }
         });
@@ -367,23 +394,55 @@ const veloAcademyApp = {
             const courseId = this.currentQuiz.courseId;
             const answers = JSON.stringify(this.currentQuiz.userAnswers);
 
+            console.log('Dados para certificado:', {
+                userName: userName,
+                courseId: courseId,
+                answers: this.currentQuiz.userAnswers
+            });
+
             const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userName)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
             
-            console.log('Gerando certificado via Apps Script:', url);
+            console.log('URL do Apps Script para certificado:', url);
+            console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);
+            
+            // Verificar se a URL do Apps Script está configurada
+            if (!this.appsScriptConfig.scriptUrl || this.appsScriptConfig.scriptUrl.includes('1ABC123DEF456')) {
+                throw new Error('URL do Google Apps Script não configurada corretamente');
+            }
+            
+            // Tentar fazer uma requisição para verificar se o Apps Script está funcionando
+            try {
+                const testResponse = await fetch(this.appsScriptConfig.scriptUrl + '?action=test');
+                if (!testResponse.ok) {
+                    throw new Error(`Apps Script não respondeu: ${testResponse.status}`);
+                }
+            } catch (testError) {
+                console.error('Erro ao testar Apps Script:', testError);
+                throw new Error('Google Apps Script não está acessível. Verifique a URL.');
+            }
             
             // Abrir em nova aba para o certificado
-            window.open(url, '_blank');
+            const newWindow = window.open(url, '_blank');
             
-            // Voltar para o curso após gerar o certificado
-            setTimeout(() => {
-                this.returnToCourse();
-            }, 1000);
+            if (newWindow) {
+                console.log('Nova aba aberta com sucesso');
+                // Aguardar um pouco antes de voltar ao curso
+                setTimeout(() => {
+                    console.log('Retornando ao curso...');
+                    this.returnToCourse();
+                }, 3000);
+            } else {
+                console.warn('Popup bloqueado pelo navegador');
+                alert('Popup bloqueado. Permita popups para este site e tente novamente.');
+            }
             
         } catch (error) {
             console.error('Erro ao gerar certificado:', error);
-            alert('Erro ao gerar o certificado. Tente novamente.');
+            alert(`Erro ao gerar o certificado: ${error.message}`);
         }
     },
+
+
 
     // Função auxiliar para obter o título do curso
     getCourseTitle(courseId) {

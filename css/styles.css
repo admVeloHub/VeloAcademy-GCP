@@ -330,6 +330,7 @@ body:has(.hero-section) .hero-section {
     box-sizing: border-box;
     position: relative;
     height: 80px;
+    margin-top: 20px;
 }
 
 #course-view .btn-secondary {
@@ -344,11 +345,11 @@ body:has(.hero-section) .hero-section {
     text-align: center;
     margin: 0;
     width: auto;
-    position: absolute;
-    left: 50%;
-    top: 40%;
-    transform: translate(-50%, -50%);
-    z-index: 100;
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    z-index: 1;
 }
 
 #course-view .course-title-section h1 {
