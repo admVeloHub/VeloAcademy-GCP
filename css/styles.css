@@ -83,22 +83,25 @@ header {
     position: sticky;
     top: 0;
     z-index: 100;
-    max-height: 80px;
+    max-height: 90px;
     overflow: hidden;
     width: 100%;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 .header-container {
     display: flex;
     justify-content: center;
     align-items: center;
     position: relative;
+    padding: 0 20px;
 }
 .logo { 
     position: absolute;
-    left: 20px;
+    left: 60px;
     top: 60%;
-    transform: translateY(-50%) scale(2.10);
+    transform: translateY(-50%) scale(1.2);
     z-index: 10;
+    transition: all 0.3s ease;
 }
 .logo i { font-size: 2.8rem; color: var(--cor-accent); }
 .logo-image {
@@ -107,9 +110,11 @@ header {
     object-fit: contain;
     border-radius: 4px;
     transition: transform 0.3s ease;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
 }
 .logo-image:hover {
-    transform: scale(1.1);
+    transform: scale(1.05);
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
 }
 /* Navegação */
 .nav-menu {
@@ -147,7 +152,7 @@ header {
 .theme-switch-wrapper {
     cursor: pointer;
     position: absolute;
-    right: 10px;
+    right: 20px;
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
@@ -850,6 +855,26 @@ footer p {
         font-size: 0.9em;
     }
 
+    /* Responsividade do Header */
+    .header-container {
+        padding: 0 10px;
+    }
+    
+    .logo {
+        left: 10px;
+    }
+    
+    .logo-image {
+        width: 140px;
+        height: 40px;
+    }
+    
+    .theme-switch-wrapper {
+        right: 10px;
+        width: 35px;
+        height: 35px;
+    }
+
     #courses-grid {
         grid-template-columns: 1fr;
         gap: 20px;
@@ -931,8 +956,16 @@ footer p {
     }
 
     .logo {
-        flex-direction: column;
-        gap: 10px;
+        position: relative;
+        left: auto;
+        top: auto;
+        transform: none;
+        margin-bottom: 10px;
+    }
+    
+    .logo-image {
+        width: 120px;
+        height: 35px;
     }
 
     .nav-menu {
