@@ -255,6 +255,8 @@ const veloAcademyApp = {
                 if (response.ok) {
                     // Se funcionou, abrir em nova aba para o certificado
                     window.open(url, '_blank');
+                    // Mostrar resultado local também
+                    this.processQuizLocally();
                 } else {
                     throw new Error('Apps Script não respondeu');
                 }
@@ -264,18 +266,21 @@ const veloAcademyApp = {
                 this.processQuizLocally();
             }
             
-            // Voltar para o curso
-            this.returnToCourse();
-            
         } catch (error) {
             console.error('Erro ao enviar quiz:', error);
             alert('Erro ao enviar o quiz. Tente novamente.');
+            // Em caso de erro, também mostrar resultado local
+            this.processQuizLocally();
         }
     },
 
     // Função para processar quiz localmente (fallback)
     processQuizLocally() {
-        if (!this.currentQuiz) return;
+        console.log('=== PROCESSANDO QUIZ LOCALMENTE ===');
+        if (!this.currentQuiz) {
+            console.error('Nenhum quiz carregado para processar');
+            return;
+        }
 
         // Calcular pontuação
         let score = 0;
@@ -289,14 +294,22 @@ const veloAcademyApp = {
         const finalGrade = (score / totalQuestions) * 10;
         const passingScore = this.currentQuiz.passingScore;
 
+        console.log('Pontuação calculada:', { score, totalQuestions, finalGrade, passingScore });
+
         // Mostrar resultado
         this.showLocalQuizResult(finalGrade, passingScore, totalQuestions);
     },
 
     // Função para mostrar resultado local
     showLocalQuizResult(finalGrade, passingScore, totalQuestions) {
+        console.log('=== MOSTRANDO RESULTADO LOCAL ===');
         const quizView = document.getElementById('quiz-view');
-        if (!quizView) return;
+        if (!quizView) {
+            console.error('Elemento quiz-view não encontrado');
+            return;
+        }
+
+        console.log('Elemento quiz-view encontrado, atualizando conteúdo...');
 
         const isPassed = finalGrade >= passingScore;
         const resultClass = isPassed ? 'passed' : 'failed';
@@ -305,7 +318,7 @@ const veloAcademyApp = {
             ? 'Parabéns! Você foi aprovado no quiz.' 
             : `Você precisa de pelo menos ${passingScore} pontos para ser aprovado.`;
 
-        quizView.innerHTML = `
+        const resultHTML = `
             <div class="quiz-results ${resultClass}">
                 <div class="result-header">
                     <h2>Resultado do Quiz</h2>
@@ -329,10 +342,18 @@ const veloAcademyApp = {
                 </div>
             </div>
         `;
+
+        console.log('HTML do resultado gerado, aplicando ao DOM...');
+        quizView.innerHTML = resultHTML;
+        console.log('Resultado aplicado com sucesso');
+        
+        // Garantir que a view do quiz esteja ativa
+        this.switchView('quiz-view');
     },
 
     // Função para voltar ao curso
     returnToCourse() {
+        console.log('=== VOLTANDO AO CURSO ===');
         this.currentQuiz = null;
         this.switchView('course-view');
     },
