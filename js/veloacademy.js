@@ -65,14 +65,15 @@ const veloAcademyApp = {
                 console.log('Perguntas têm respostas corretas:', hasAnswers);
                 
                 if (!hasAnswers) {
-                    console.log('Apps Script não retornou respostas corretas, usando quiz local');
-                    throw new Error('Apps Script não retornou respostas corretas');
+                    console.error('Apps Script não retornou respostas corretas');
+                    alert('Erro: Quiz não configurado corretamente. Entre em contato com o suporte.');
+                    return false;
                 }
                 
                 this.currentQuiz = {
                     courseId: courseId,
                     questions: data.questions,
-                    passingScore: data.passingScore,
+                    passingScore: data.passingScore || 6, // Fallback para nota mínima se não fornecida
                     currentQuestion: 0,
                     userAnswers: [],
                     startTime: Date.now()
@@ -91,47 +92,12 @@ const veloAcademyApp = {
             console.error('Mensagem:', error.message);
             console.error('Stack trace:', error.stack);
             
-            console.log('Tentando carregar quiz local como fallback...');
-            return await this.loadQuizFromLocal(courseId);
-        }
-    },
-
-    // Função para carregar quiz local como fallback
-    async loadQuizFromLocal(courseId) {
-        try {
-            console.log('=== CARREGANDO QUIZ LOCAL ===');
-            console.log('Course ID:', courseId);
-            
-            const response = await fetch(`./quiz/${courseId}-quiz.json`);
-            
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-            }
-            
-            const quizData = await response.json();
-            console.log('Quiz local carregado:', quizData);
-            
-            this.currentQuiz = {
-                courseId: courseId,
-                questions: quizData.questions,
-                passingScore: quizData.passingScore,
-                currentQuestion: 0,
-                userAnswers: [],
-                startTime: Date.now()
-            };
-            
-            console.log('Quiz local carregado com sucesso:', this.currentQuiz);
-            this.showQuizInterface();
-            return true;
-            
-        } catch (error) {
-            console.error('=== ERRO AO CARREGAR QUIZ LOCAL ===');
-            console.error('Erro:', error);
-            
             alert('Erro ao carregar o quiz. Verifique se os arquivos estão disponíveis.');
             return false;
         }
     },
+
+
 
     // Função para iniciar o quiz
     startQuiz(courseId) {
