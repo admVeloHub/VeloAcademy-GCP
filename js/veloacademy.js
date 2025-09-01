@@ -446,6 +446,19 @@ const veloAcademyApp = {
 
     // Função auxiliar para obter o título do curso
     getCourseTitle(courseId) {
+        // Mapeamento específico para IDs de quiz
+        const quizTitles = {
+            'pix': 'PIX: Normas e Segurança',
+            'credito': 'Crédito do Trabalhador: Análise e Concessão',
+            'credito-pessoal': 'Crédito Pessoal'
+        };
+        
+        // Se for um quiz, usar o mapeamento
+        if (quizTitles[courseId]) {
+            return quizTitles[courseId];
+        }
+        
+        // Caso contrário, buscar no banco de dados de cursos
         const course = this.courseDatabase[courseId];
         return course ? course.title : 'Curso';
     },
@@ -1242,6 +1255,8 @@ const veloAcademyApp = {
                         } else if (section.subtitle === 'Crédito Pessoal') {
                             quizCourseId = 'credito-pessoal';
                         }
+                        
+                        console.log(`Adicionando quiz para seção: ${section.subtitle} com ID: ${quizCourseId}`);
                         
                         moduleHtml += `
                             <div class="quiz-section">
