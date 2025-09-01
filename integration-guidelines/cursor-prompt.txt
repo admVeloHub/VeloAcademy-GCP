@@ -1,0 +1,37 @@
+CURSOR PROMPT - INTEGRAÇÃO VELOACADEMY
+
+Leia a pasta "integration-guidelines" e aplique as seguintes alterações na minha página HTML para integrá-la ao projeto VeloAcademy:
+
+1. PRIMEIRO: Analise o arquivo README.md na pasta integration-guidelines para entender os padrões de design
+
+2. APLIQUE ESTAS ALTERAÇÕES NA MINHA PÁGINA:
+
+   a) ESTRUTURA HTML:
+   - Substitua todo o HTML pelo template em template-page.html
+   - Mantenha apenas o conteúdo específico da minha página
+   - Use o título correto da minha página
+
+   b) CSS:
+   - Remova todos os estilos customizados
+   - Use apenas o arquivo styles.css do projeto
+   - Aplique as classes .btn, .btn-primary, .btn-secondary
+   - Use .dashboard-card para cards/seções
+
+   c) NAVEGAÇÃO:
+   - Inclua o header completo com todas as abas
+   - Marque a aba atual como "active"
+   - Mantenha os links corretos
+
+   d) FUNCIONALIDADES:
+   - Inclua o script veloacademy.js
+   - Preserve o toggle de tema
+
+3. VERIFICAÇÕES:
+   - Página deve funcionar com tema claro/escuro
+   - Deve ser responsiva
+   - Deve manter consistência visual
+   - Todos os links devem funcionar
+
+4. USE O CHECKLIST em checklist-integration.md para verificar se tudo está correto
+
+Execute estas alterações agora e me mostre o resultado final.

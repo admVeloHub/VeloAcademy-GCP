@@ -1233,8 +1233,16 @@ const veloAcademyApp = {
                     });
                     
                     // Adicionar botão de quiz para seções específicas
-                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX') {
-                        const quizCourseId = section.subtitle === 'Crédito do Trabalhador' ? 'credito' : 'pix';
+                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal') {
+                        let quizCourseId;
+                        if (section.subtitle === 'Crédito do Trabalhador') {
+                            quizCourseId = 'credito';
+                        } else if (section.subtitle === 'Chaves PIX') {
+                            quizCourseId = 'pix';
+                        } else if (section.subtitle === 'Crédito Pessoal') {
+                            quizCourseId = 'credito-pessoal';
+                        }
+                        
                         moduleHtml += `
                             <div class="quiz-section">
                                 <button class="btn-quiz" onclick="veloAcademyApp.startQuiz('${quizCourseId}')">

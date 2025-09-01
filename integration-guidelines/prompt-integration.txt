@@ -1,0 +1,91 @@
+PROMPT PARA INTEGRAÇÃO DE LAYOUT - VELOACADEMY
+
+Olá! Você está trabalhando em uma página que será integrada ao projeto VeloAcademy. Para garantir consistência visual e funcional, siga estas instruções:
+
+1. LEIA O ARQUIVO README.md nesta pasta para entender os padrões de design
+
+2. APLIQUE AS SEGUINTES ALTERAÇÕES NA SUA PÁGINA:
+
+   a) ESTRUTURA HTML:
+   - Use a estrutura base fornecida no README.md
+   - Inclua o header padrão com navegação completa
+   - Mantenha o atributo data-theme="light" no html
+   - Use o título no formato "[Nome da Página] - VeloAcademy"
+
+   b) CSS:
+   - Remova todos os estilos customizados que não sigam o padrão VeloAcademy
+   - Use APENAS as variáveis CSS definidas no projeto
+   - Aplique as classes .btn, .btn-primary, .btn-secondary para botões
+   - Use .dashboard-card para cards/seções
+   - Mantenha a fonte Poppins
+
+   c) NAVEGAÇÃO:
+   - Inclua TODAS as abas: Home, Cursos, Conquistas, Auto Feedback, VeloHub
+   - Marque a aba atual como "active"
+   - Mantenha os links corretos para cada página
+
+   d) FUNCIONALIDADES:
+   - Inclua o script veloacademy.js
+   - Mantenha o toggle de tema funcionando
+   - Preserve a responsividade
+
+3. VERIFICAÇÕES OBRIGATÓRIAS:
+   - A página deve funcionar com tema claro e escuro
+   - Deve ser responsiva em mobile e desktop
+   - Deve manter consistência visual com index.html e cursos.html
+   - Todos os links de navegação devem funcionar
+
+4. EXEMPLO DE ESTRUTURA FINAL:
+   ```html
+   <!DOCTYPE html>
+   <html lang="pt-BR" data-theme="light">
+   <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Sua Página - VeloAcademy</title>
+       <link rel="stylesheet" href="./css/styles.css">
+       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+       <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+       <link rel="icon" type="image/png" href="./academy.png">
+   </head>
+   <body>
+       <header>
+           <div class="container header-container">
+               <div class="logo" id="logo-container">
+                   <img id="logo-image" class="logo-image" src="./academy.png" alt="VeloAcademy Logo">
+               </div>
+               
+               <nav class="nav-menu">
+                   <a href="./index.html" class="nav-link">Home</a>
+                   <a href="./cursos.html" class="nav-link">Cursos</a>
+                   <a href="./conquistas.html" class="nav-link">Conquistas</a>
+                   <a href="./auto-feedback.html" class="nav-link active">Auto Feedback</a>
+                   <a href="https://velohub.vercel.app" class="nav-link" target="_blank">VeloHub</a>
+               </nav>
+
+               <div class="theme-switch-wrapper" id="theme-toggle">
+                   <i class='bx bx-sun theme-icon'></i>
+                   <i class='bx bx-moon theme-icon'></i>
+               </div>
+           </div>
+       </header>
+
+       <main>
+           <div class="container main-container">
+               <!-- SEU CONTEÚDO AQUI -->
+           </div>
+       </main>
+
+       <script src="./js/veloacademy.js"></script>
+   </body>
+   </html>
+   ```
+
+5. APÓS APLICAR AS ALTERAÇÕES:
+   - Teste a página no navegador
+   - Verifique se o tema escuro funciona
+   - Teste a responsividade
+   - Confirme que todos os links funcionam
+
+IMPORTANTE: Mantenha apenas o conteúdo específico da sua página. Todo o layout, cores, tipografia e navegação devem seguir o padrão VeloAcademy.
+
