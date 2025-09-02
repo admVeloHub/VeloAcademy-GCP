@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Conquistas - VeloAcademy</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&display=swap">
+    <link rel="icon" type="image/png" href="./academy.png">
+</head>
+<body>
+
+    <header>
+        <div class="container header-container">
+            <div class="logo" id="logo-container">
+                <img id="logo-image" class="logo-image" src="./academy.png" alt="VeloAcademy Logo">
+            </div>
+            
+            <nav class="nav-menu">
+                <a href="./home.html" class="nav-link">Home</a>
+                <a href="./cursos.html" class="nav-link">Cursos</a>
+                <a href="./conquistas.html" class="nav-link active">Conquistas</a>
+                <a href="./auto-feedback.html" class="nav-link">Auto Feedback</a>
+                <a href="https://velohub.vercel.app" class="nav-link" target="_blank">VeloHub</a>
+            </nav>
+
+            <div class="user-section">
+                <div class="user-info" id="user-info">
+                    <img id="user-avatar" class="user-avatar" src="" alt="Avatar">
+                    <span id="user-name" class="user-name"></span>
+                    <button id="logout-btn" class="logout-btn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+            
+            <div class="theme-switch-wrapper" id="theme-toggle">
+                <span class="theme-icon">☀️</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container main-container">
+            <!-- Painel de Medalhas -->
+            <div class="medalhas-container">
+                <h2 class="medalhas-titulo">Painel de Medalhas</h2>
+                
+                <!-- Grid de Medalhas -->
+                <div class="medalhas-grid">
+                    <div class="medalha-item unlocked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-medal"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Primeira Conquista</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-award"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Mestre dos Quiz</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-star"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Estrela Brilhante</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-crown"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Rei da Velocidade</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-fire"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Chama Eterna</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-gem"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Diamante Precioso</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-heart"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Coração de Ouro</span>
+                    </div>
+                    
+                    <div class="medalha-item locked">
+                        <div class="medalha-icon">
+                            <i class="fas fa-trophy"></i>
+                            <div class="medalha-fita"></div>
+                        </div>
+                        <span class="medalha-nome">Troféu Máximo</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Painel de Certificados -->
+            <div class="certificados-container">
+                <h2 class="certificados-titulo">Meus Certificados</h2>
+                
+                <!-- Grid de Certificados -->
+                <div class="certificados-grid">
+                    <div class="certificado-item unlocked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-handshake"></i>
+                        </div>
+                        <span class="certificado-nome">Seja Bem Vindo</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-credit-card"></i>
+                        </div>
+                        <span class="certificado-nome">Crédito do Trabalhador</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-mobile-alt"></i>
+                        </div>
+                        <span class="certificado-nome">Chaves PIX</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-calculator"></i>
+                        </div>
+                        <span class="certificado-nome">Antecipação da Restituição</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <span class="certificado-nome">Crédito Pessoal</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-shield-alt"></i>
+                        </div>
+                        <span class="certificado-nome">Segurança da Informação</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-comments"></i>
+                        </div>
+                        <span class="certificado-nome">Comunicação Empática</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-volume-up"></i>
+                        </div>
+                        <span class="certificado-nome">Linguagem Positiva</span>
+                    </div>
+                    
+                    <div class="certificado-item locked">
+                        <div class="certificado-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <span class="certificado-nome">Resolução de Conflitos</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Atividades Recentes -->
+            <section class="activity-section">
+                <h2>Atividades Recentes</h2>
+                <div class="activity-list">
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Antecipação de Restituição</h4>
+                            <p>Curso concluído com sucesso</p>
+                            <span class="activity-time">Há 2 horas</span>
+                        </div>
+                    </div>
+                    
+                    <div class="activity-item">
+                        <div class="activity-icon">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <h4>Reciclagem de Telefonia</h4>
+                            <p>Curso concluído com sucesso</p>
+                            <span class="activity-time">Ontem</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Recomendados para Mim -->
+            <section class="recommended-section">
+                <h2>Recomendados para Mim</h2>
+                <div class="suggestions-grid">
+                    <div class="suggestion-card">
+                        <h3 class="suggestion-title">Quiz Antecipação de Restituição</h3>
+                        <p class="suggestion-text">Teste seus conhecimentos sobre Antecipação de Restituição com perguntas específicas e feedback detalhado.</p>
+                        <button class="suggestion-btn">Fazer Quiz</button>
+                    </div>
+
+                    <div class="suggestion-card">
+                        <h3 class="suggestion-title">Quiz Crédito do Trabalhador</h3>
+                        <p class="suggestion-text">Avalie seu domínio sobre Crédito do Trabalhador através de um quiz completo e interativo.</p>
+                        <button class="suggestion-btn">Fazer Quiz</button>
+                    </div>
+
+                    <div class="suggestion-card">
+                        <h3 class="suggestion-title">Treinamento de Empréstimo Pessoal</h3>
+                        <p class="suggestion-text">Aprimore seus conhecimentos sobre Empréstimo Pessoal com conteúdo atualizado e prático.</p>
+                        <button class="suggestion-btn">Ver Curso</button>
+                    </div>
+                </div>
+            </section>
+        </div>
+    </main>
+
+    <script src="./js/veloacademy.js"></script>
+    <script src="./js/theme-toggle.js"></script>
+</body>
+</html>

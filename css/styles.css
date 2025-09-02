@@ -1,44 +1,195 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root {
-    /* Tema Claro (Padrão) */
-    --cor-fundo: #f0f4f8;
-    --cor-container: #ffffff;
-    --cor-card: #ffffff;
-    --cor-texto-principal: #071a2f;
-    --cor-texto-secundario: #5a677e;
-    --cor-accent: #007bff;
+    /* PALETA OFICIAL VELOHUB */
+    --white: #F3F7FC;
+    --gray: #272A30;
+    --blue-dark: #000058;
+    --blue-medium: #1634FF;
+    --blue-light: #1694FF;
+    --blue-opaque: #006AB9;
+    --yellow: #FCC200;
+    --green: #15A237;
+
+    /* Tema Claro (Padrão) - PADRONIZADO VELOHUB */
+    --cor-fundo: #f0f4f8;        /* Fundo principal da aplicação */
+    --cor-container: #f2f6fa;     /* Container principal - Cinza 2% mais claro que o fundo */
+    --cor-card: #f2f6fa;         /* Fundo dos cards - Cinza 2% mais claro que o fundo */
+    --cor-texto-principal: var(--gray);
+    --cor-texto-secundario: var(--blue-dark);
+    --cor-texto: var(--gray);  /* Alias para compatibilidade */
+    --cor-accent: var(--blue-medium);
     --cor-borda: rgba(0, 0, 0, 0.1);
     --cor-sombra: rgba(0, 0, 0, 0.1);
 
-    /* Tema Escuro */
-    --cor-fundo-escuro: #0a1929;
-    --cor-container-escuro: #112240;
-    --cor-card-escuro: #1d3557;
-    --cor-texto-principal-escuro: #e6f1ff;
-    --cor-texto-secundario-escuro: #a8b2d1;
-    --cor-accent-escuro: #4dabf7;
-    --cor-borda-escuro: rgba(77, 171, 247, 0.2);
-    --cor-sombra-escuro: rgba(0, 0, 0, 0.4);
+    /* Tema Escuro - IMPLEMENTADO SEGUINDO GUIDELINE */
+    --cor-fundo-escuro: var(--gray);        /* #272A30 - Cinza escuro */
+    --cor-container-escuro: rgb(50, 58, 66);        /* #323a42 - Cinza 2% mais claro que o fundo claro */
+    --cor-card-escuro: #323a42;                     /* #323a42 - Cinza 2% mais claro que o fundo claro */
 
-    --borda-raio: 8px;
+    --borda-raio: 12px;           /* Atualizado para 12px conforme guideline */
     --espaco: 16px;
 }
 
-[data-theme="dark"] {
+/* Tema escuro - APLICADO AUTOMATICAMENTE */
+.dark {
     --cor-fundo: var(--cor-fundo-escuro);
     --cor-container: var(--cor-container-escuro);
     --cor-card: var(--cor-card-escuro);
-    --cor-texto-principal: var(--cor-texto-principal-escuro);
-    --cor-texto-secundario: var(--cor-texto-secundario-escuro);
-    --cor-accent: var(--cor-accent-escuro);
-    --cor-borda: var(--cor-borda-escuro);
-    --cor-sombra: var(--cor-sombra-escuro);
+}
+
+/* Ajustes de texto para tema escuro */
+.dark {
+    --cor-texto-principal: var(--white);
+    --cor-texto-secundario: var(--blue-light);
+    --cor-texto: var(--white);
+}
+
+/* Ajustes de botões para tema escuro */
+.dark .btn-secondary {
+    border-color: var(--blue-light);
+    color: var(--blue-light);
+}
+
+.dark .btn-secondary:hover {
+    background-color: var(--blue-light);
+    color: var(--gray);
+}
+
+/* Ajustes de cards para tema escuro */
+.dark .course-card {
+    background: linear-gradient(135deg, var(--cor-card) 0%, rgba(50, 58, 66, 0.1) 100%);
+}
+
+.dark .dashboard-card {
+    background-color: var(--cor-container);
+}
+
+.dark .activity-section {
+    background-color: var(--cor-container);
+}
+
+.dark .activity-item {
+    background-color: var(--cor-fundo);
+}
+
+/* Ajustes de textos dos cards para tema escuro */
+.dark .course-card h3 {
+    color: var(--white);
+}
+
+.dark .course-card p {
+    color: var(--blue-light);
+}
+
+.dark .course-stats {
+    color: var(--blue-light);
+}
+
+/* Ajustes de textos dos dashboard cards para tema escuro */
+.dark .dashboard-card h3 {
+    color: var(--white);
+}
+
+.dark .dashboard-card p {
+    color: var(--blue-light);
+}
+
+.dark .activity-section h2 {
+    color: var(--white);
+}
+
+.dark .activity-content h4 {
+    color: var(--white);
+}
+
+.dark .activity-content p {
+    color: var(--blue-light);
+}
+
+/* Ajustes de textos do hero section para tema escuro */
+.dark .hero-title {
+    color: var(--white);
+}
+
+.dark .hero-subtitle {
+    color: var(--blue-light);
+}
+
+/* Ajustes de títulos principais para tema escuro */
+.dark h1 {
+    color: var(--blue-light);
+}
+
+.dark h2 {
+    color: var(--white);
+}
+
+.dark h3 {
+    color: var(--white);
+}
+
+/* Ajustes de parágrafos para tema escuro */
+.dark p {
+    color: var(--blue-light);
+}
+
+/* Ajustes de navegação para tema escuro */
+.dark .nav-link {
+    color: var(--blue-light);
+}
+
+.dark .nav-link:hover {
+    color: var(--white);
+    background-color: rgba(22, 148, 255, 0.1);
+}
+
+.dark .nav-link.active {
+    color: var(--white);
+    background-color: var(--blue-medium);
 }
 
 /* Reset e Base */
 *, *::before, *::after {
     box-sizing: border-box;
+}
+
+/* Classes CSS para Containers - IMPLEMENTADO SEGUINDO GUIDELINE */
+.velohub-container {
+    background-color: var(--cor-container);
+    border-radius: var(--borda-raio);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 16px 0;
+    border: 1px solid rgba(22, 52, 255, 0.1);
+}
+
+.velohub-card {
+    background-color: var(--cor-card);
+    border-radius: var(--borda-raio);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 20px;
+    margin: 16px 0;
+    border: 1px solid rgba(22, 52, 255, 0.1);
+}
+
+.velohub-modal {
+    background-color: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+/* Regras para Tema Escuro - IMPLEMENTADO SEGUINDO GUIDELINE */
+.dark .velohub-container {
+    background-color: #323a42;  /* rgb(50, 58, 66) */
+}
+
+.dark .velohub-card {
+    background-color: #323a42;  /* rgb(50, 58, 66) */
+}
+
+.dark .velohub-modal {
+    background-color: #323a42;  /* rgb(50, 58, 66) */
 }
 
 body, html {
@@ -64,20 +215,20 @@ h1, h2, h3 {
 
 h1 {
     font-size: 2.2rem;
-    border-bottom: 2px solid var(--cor-accent);
+    border-bottom: 2px solid var(--blue-medium);
     padding-bottom: 10px;
     margin-bottom: 30px;
-    color: var(--cor-accent);
+    color: var(--blue-medium);
 }
 
 p {
     line-height: 1.6;
-    color: var(--cor-texto-secundario);
+    color: var(--blue-dark);
 }
 
-/* Header */
+/* Header - Tema Claro */
 header {
-    background-color: var(--cor-container);
+    background-color: var(--cor-container);  /* #f2f6fa - Cinza claro */
     border-bottom: 1px solid var(--cor-borda);
     padding: 12px 0;
     position: sticky;
@@ -87,6 +238,13 @@ header {
     overflow: hidden;
     width: 100%;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+/* Header - Tema Escuro */
+.dark header {
+    background-color: var(--blue-opaque);    /* #006AB9 - Azul opaco específico */
+    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 4px 20px rgba(0, 102, 171, 0.3);
 }
 .header-container {
     display: flex;
@@ -121,13 +279,13 @@ header {
     display: flex;
     gap: 20px;
     align-items: center;
-    background-color: #f8f9fa;
+    background-color: var(--cor-container);  /* Usa cor padrão dos containers */
     padding: 8px 16px;
-    border-radius: 8px;
+    border-radius: var(--borda-raio);
 }
 
 .nav-link {
-    color: #007bff;
+    color: var(--blue-medium);
     text-decoration: none;
     font-weight: 500;
     padding: 10px 20px;
@@ -138,14 +296,14 @@ header {
 }
 
 .nav-link:hover {
-    color: #0056b3;
-    background-color: rgba(0, 123, 255, 0.1);
+    color: var(--blue-dark);
+    background-color: rgba(22, 52, 255, 0.1);
 }
 
 .nav-link.active {
     color: white;
-    background-color: #007bff;
-    box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    background-color: var(--blue-medium);
+    box-shadow: 0 2px 8px rgba(22, 52, 255, 0.3);
 }
 
 /* Theme Toggle */
@@ -158,7 +316,7 @@ header {
     z-index: 10;
     width: 40px;
     height: 40px;
-    border-radius: 8px;
+    border-radius: var(--borda-raio);
     background: var(--cor-fundo);
     border: 1px solid var(--cor-borda);
     display: flex;
@@ -176,11 +334,13 @@ header {
     font-size: 1.2rem;
     color: var(--cor-texto-secundario);
     transition: all 0.3s ease;
+    display: block;
 }
 
 .theme-icon.active {
     opacity: 1;
     color: var(--cor-accent);
+    transform: scale(1.1);
 }
 
 /* Main e Sistema de Views */
@@ -355,7 +515,7 @@ body:has(.hero-section) .hero-section {
 #course-view .course-title-section h1 {
     margin: 0 0 4px 0;
     font-size: 1.8rem;
-    color: var(--cor-texto-principal);
+    color: var(--blue-dark);
     border: none;
     padding: 0;
     line-height: 1.2;
@@ -363,7 +523,7 @@ body:has(.hero-section) .hero-section {
 
 #course-view .course-title-section p {
     font-size: 0.9rem;
-    color: var(--cor-texto-secundario);
+    color: var(--gray);
     margin: 0;
     line-height: 1.3;
 }
@@ -389,7 +549,7 @@ body:has(.hero-section) .hero-section {
     left: 0;
     width: 4px;
     height: 100%;
-    background: linear-gradient(180deg, var(--cor-accent), #4dabf7);
+    background: linear-gradient(180deg, var(--blue-medium), var(--blue-light));
     transform: scaleY(0);
     transition: transform 0.3s ease;
 }
@@ -409,13 +569,13 @@ body:has(.hero-section) .hero-section {
     border-bottom: 1px solid var(--cor-borda);
     padding-bottom: 10px;
     margin-bottom: 10px;
-    color: var(--cor-accent);
+    color: var(--blue-dark);
 }
 
 .module-subtitle {
     margin: 10px 0 0 0;
     font-size: 1.1rem;
-    color: var(--cor-texto-principal);
+    color: var(--blue-dark);
     font-weight: 500;
     padding: 12px 15px;
     background: var(--cor-container);
@@ -577,13 +737,13 @@ body:has(.hero-section) .hero-section {
 }
 .btn-secondary {
     background-color: transparent;
-    border: 1px solid var(--cor-texto-secundario);
-    color: var(--cor-texto-secundario);
+    border: 1px solid var(--blue-opaque);
+    color: var(--blue-opaque);
     margin-bottom: 25px;
 }
 .btn-secondary:hover {
-    background-color: var(--cor-texto-secundario);
-    color: var(--cor-fundo);
+    background-color: var(--blue-opaque);
+    color: var(--white);
 }
 
 /* Botões desabilitados (mantido da versão anterior) */
@@ -1041,6 +1201,14 @@ footer p {
         align-self: flex-start;
         margin-bottom: 0;
         flex-shrink: 0;
+        background-color: transparent;
+        border: 1px solid var(--blue-opaque);
+        color: var(--blue-opaque);
+    }
+    
+    #course-view .btn-secondary:hover {
+        background-color: var(--blue-opaque);
+        color: var(--white);
     }
 
     /* Header do curso */
@@ -1640,6 +1808,11 @@ footer p {
 /* ============================================= */
 
 @media (max-width: 768px) {
+    #courses-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
     .header-container {
         flex-direction: column;
         gap: var(--espaco-md);
@@ -1692,7 +1865,7 @@ footer p {
 /* Cards de Cursos - Layout Melhorado */
 #courses-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(3, 1fr);
     gap: 30px;
     margin-top: 30px;
     width: 100%;
@@ -1719,7 +1892,7 @@ footer p {
     left: 0;
     right: 0;
     height: 4px;
-    background: linear-gradient(90deg, var(--cor-accent), #4dabf7, var(--cor-accent));
+    background: linear-gradient(90deg, var(--blue-medium), var(--blue-light), var(--blue-medium));
     transform: scaleX(0);
     transition: transform 0.3s ease;
 }
@@ -1738,7 +1911,7 @@ footer p {
     margin: 0 0 15px 0;
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--cor-texto-principal);
+    color: var(--blue-dark);
     line-height: 1.3;
     display: flex;
     align-items: center;
@@ -1751,7 +1924,7 @@ footer p {
 }
 
 .course-card p {
-    color: var(--cor-texto-secundario);
+    color: var(--gray);
     line-height: 1.6;
     margin-bottom: 20px;
     font-size: 0.95rem;
@@ -1763,7 +1936,7 @@ footer p {
     align-items: center;
     margin-top: 20px;
     padding-top: 20px;
-    border-top: 1px solid var(--cor-borda);
+    border-top: 1px solid var(--blue-opaque);
 }
 
 .course-stats {
@@ -1780,7 +1953,7 @@ footer p {
 }
 
 .course-badge {
-    background: linear-gradient(135deg, var(--cor-accent), #4dabf7);
+    background: linear-gradient(135deg, var(--blue-medium), var(--blue-light));
     color: white;
     padding: 6px 12px;
     border-radius: 20px;
@@ -1790,31 +1963,40 @@ footer p {
     letter-spacing: 0.5px;
 }
 
-/* Especial para o curso de Onboarding */
+/* Especial para o curso de Onboarding - ESSENCIAL */
 .course-card[data-course="onboarding"] h3::before {
     content: '🚀';
 }
 
 .course-card[data-course="onboarding"] .course-badge {
-    background: linear-gradient(135deg, #28a745, #20c997);
+    background: linear-gradient(135deg, var(--blue-medium) 0%, var(--blue-medium) 60%, var(--blue-light) 100%);
 }
 
-/* Especial para cursos de segurança */
+/* Especial para cursos de segurança - RECICLAGEM */
 .course-card[data-course="cs004"] h3::before {
     content: '🔒';
 }
 
 .course-card[data-course="cs004"] .course-badge {
-    background: linear-gradient(135deg, #dc3545, #fd7e14);
+    background: linear-gradient(135deg, var(--yellow) 0%, var(--yellow) 60%, var(--blue-medium) 100%);
 }
 
-/* Especial para cursos de atendimento */
+/* Especial para cursos de atendimento - OPCIONAL */
 .course-card[data-course="cs003"] h3::before {
     content: '💬';
 }
 
 .course-card[data-course="cs003"] .course-badge {
-    background: linear-gradient(135deg, #6f42c1, #e83e8c);
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-dark) 60%, var(--blue-opaque) 100%);
+}
+
+/* Especial para cursos de operações - ATUALIZAÇÃO */
+.course-card[data-course="operacoes"] h3::before {
+    content: '📈';
+}
+
+.course-card[data-course="operacoes"] .course-badge {
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-dark) 60%, var(--yellow) 100%);
 }
 
 /* ================== ESTILOS DO QUIZ ================== */
@@ -1835,13 +2017,13 @@ footer p {
 }
 
 .quiz-header h2 {
-    color: var(--cor-accent);
+    color: var(--blue-dark);
     margin-bottom: 10px;
     font-size: 1.8rem;
 }
 
 .quiz-info {
-    color: var(--cor-texto-secundario);
+    color: var(--gray);
     font-size: 0.9rem;
 }
 
@@ -1854,7 +2036,7 @@ footer p {
 }
 
 .quiz-question h3 {
-    color: var(--cor-texto-principal);
+    color: var(--blue-dark);
     margin-bottom: 25px;
     font-size: 1.2rem;
     line-height: 1.5;
@@ -1888,7 +2070,7 @@ footer p {
 }
 
 .option-text {
-    color: var(--cor-texto-principal);
+    color: var(--blue-dark);
     font-size: 1rem;
     line-height: 1.4;
 }
@@ -1921,12 +2103,14 @@ footer p {
 }
 
 .quiz-navigation .btn-secondary {
-    background: var(--cor-texto-secundario);
-    color: white;
+    background: transparent;
+    border: 1px solid var(--blue-opaque);
+    color: var(--blue-opaque);
 }
 
 .quiz-navigation .btn-secondary:hover {
-    background: #495057;
+    background: var(--blue-opaque);
+    color: var(--white);
     transform: translateY(-2px);
 }
 
@@ -1963,7 +2147,7 @@ footer p {
 }
 
 .btn-quiz {
-    background: linear-gradient(135deg, var(--cor-accent), #4dabf7);
+    background: linear-gradient(135deg, var(--blue-medium), var(--blue-light));
     color: white;
     border: none;
     padding: 12px 24px;
@@ -1972,7 +2156,7 @@ footer p {
     font-weight: 500;
     cursor: pointer;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 4px 12px rgba(22, 52, 255, 0.3);
 }
 
 .btn-quiz:hover {
@@ -2000,7 +2184,7 @@ footer {
 }
 
 .result-header h2 {
-    color: var(--cor-accent);
+    color: var(--blue-dark);
     margin-bottom: 10px;
     font-size: 1.8rem;
 }
@@ -2036,9 +2220,9 @@ footer {
     justify-content: center;
     align-items: center;
     position: relative;
-    background: linear-gradient(135deg, var(--cor-accent), #4dabf7);
+    background: linear-gradient(135deg, var(--blue-medium), var(--blue-light));
     color: white;
-    box-shadow: 0 8px 25px rgba(0, 123, 255, 0.3);
+    box-shadow: 0 8px 25px rgba(22, 52, 255, 0.3);
 }
 
 .score-number {
@@ -2105,4 +2289,404 @@ footer {
     .result-status-image {
         max-width: 225px;
     }
+}
+
+/* ============================================= */
+/* == CONTAINERS OFICIAIS VELOHUB == */
+/* ============================================= */
+
+/* Container Principal (Destacado) */
+.container-main {
+    background-color: var(--white);
+    border-radius: var(--borda-raio);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    padding: 24px;
+    margin: 16px;
+}
+
+/* Container Secundário (Mesmo Plano) */
+.container-secondary {
+    background: transparent;
+    border: 1.5px solid var(--blue-dark);
+    border-radius: 8px;
+    padding: 16px;
+    margin: 8px;
+}
+
+/* ============================================= */
+/* == PAINEL DE MEDALHAS == */
+/* ============================================= */
+
+.medalhas-container {
+    width: 90%;
+    height: 35vh;
+    background-color: var(--cor-container);
+    border-radius: var(--borda-raio);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin: 0 auto;
+    position: relative;
+    padding: 20px;
+    overflow: hidden;
+}
+
+.medalhas-titulo {
+    font-family: 'Poppins', sans-serif;
+    color: var(--cor-accent);
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+/* Grid de Medalhas */
+.medalhas-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 50px 20px 20px 20px;
+    height: calc(100% - 70px);
+    align-content: start;
+}
+
+.medalha-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.medalha-item:hover {
+    transform: translateY(-2px);
+    background-color: rgba(252, 194, 0, 0.1);
+}
+
+.medalha-icon {
+    position: relative;
+    margin-bottom: 8px;
+}
+
+.medalha-item i {
+    font-size: 2.5rem;
+    transition: all 0.3s ease;
+    position: relative;
+    z-index: 2;
+}
+
+.medalha-fita {
+    position: absolute;
+    top: -8px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 20px;
+    height: 25px;
+    background: linear-gradient(135deg, #dc3545, #c82333);
+    border-radius: 2px 2px 0 0;
+    z-index: 1;
+}
+
+.medalha-fita::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 16px;
+    height: 20px;
+    background: linear-gradient(135deg, var(--cor-accent), var(--cor-texto-secundario));
+    border-radius: 1px 1px 0 0;
+}
+
+.medalha-item.locked i {
+    color: #FCC200;
+    opacity: 0.4;
+    filter: grayscale(0.8);
+}
+
+.medalha-item.unlocked i {
+    color: #FCC200;
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(252, 194, 0, 0.6));
+}
+
+.medalha-item.locked .medalha-fita {
+    opacity: 0.4;
+    filter: grayscale(0.8);
+}
+
+.medalha-item.unlocked .medalha-fita {
+    opacity: 1;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.medalha-nome {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--cor-texto-secundario);
+    line-height: 1.2;
+}
+
+.medalha-item.unlocked .medalha-nome {
+    color: var(--cor-texto-principal);
+    font-weight: 600;
+}
+
+/* ============================================= */
+/* == PAINEL DE CERTIFICADOS == */
+/* ============================================= */
+
+.certificados-container {
+    width: 90%;
+    height: 35vh;
+    background-color: var(--cor-container);
+    border-radius: var(--borda-raio);
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    margin: 40px auto 0 auto;
+    position: relative;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+.certificados-titulo {
+    font-family: 'Poppins', sans-serif;
+    color: var(--cor-accent);
+    font-size: 24px;
+    font-weight: 600;
+    margin: 0;
+    position: absolute;
+    top: 20px;
+    left: 20px;
+}
+
+/* Grid de Certificados */
+.certificados-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    padding: 50px 20px 20px 20px;
+    min-height: calc(100% - 70px);
+    align-content: start;
+}
+
+.certificado-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 15px;
+    border-radius: 12px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.certificado-item:hover {
+    transform: translateY(-2px);
+    background-color: rgba(0, 123, 255, 0.1);
+}
+
+.certificado-icon {
+    margin-bottom: 8px;
+}
+
+.certificado-item i {
+    font-size: 2.5rem;
+    transition: all 0.3s ease;
+}
+
+.certificado-item.locked i {
+    color: var(--cor-texto-secundario);
+    opacity: 0.4;
+    filter: grayscale(0.8);
+}
+
+.certificado-item.unlocked i {
+    color: var(--cor-accent);
+    opacity: 1;
+    filter: drop-shadow(0 0 8px rgba(0, 123, 255, 0.6));
+}
+
+.certificado-nome {
+    font-family: 'Poppins', sans-serif;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--cor-texto-secundario);
+    line-height: 1.2;
+    text-align: center;
+}
+
+.certificado-item.unlocked .certificado-nome {
+    color: var(--cor-texto-principal);
+    font-weight: 600;
+}
+
+/* ============================================= */
+/* == ATIVIDADES RECENTES == */
+/* ============================================= */
+
+.activity-section {
+    width: 90%;
+    background-color: var(--cor-container);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    padding: 30px;
+    margin: 40px auto 0 auto;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+}
+
+.activity-section h2 {
+    margin-bottom: 25px;
+    color: var(--cor-texto-principal);
+    font-size: 1.5rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.activities-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.activity-card {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 15px;
+    background-color: var(--cor-fundo);
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+}
+
+.activity-card:hover {
+    background-color: var(--cor-borda);
+}
+
+.activity-card.completed .activity-icon {
+    color: #15A237;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    background-color: var(--cor-accent);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.activity-icon i {
+    color: var(--white);
+    font-size: 1rem;
+}
+
+.activity-content h4 {
+    margin-bottom: 5px;
+    color: var(--cor-texto-principal);
+    font-size: 1rem;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.activity-content p {
+    margin-bottom: 5px;
+    color: var(--cor-texto-secundario);
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+}
+
+.activity-time {
+    color: var(--cor-accent);
+    font-size: 0.8rem;
+    font-weight: 500;
+    font-family: 'Poppins', sans-serif;
+}
+
+/* ============================================= */
+/* == RECOMENDADOS PARA MIM == */
+/* ============================================= */
+
+.recommended-section {
+    margin: 40px 0;
+}
+
+.recommended-section h2 {
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--cor-texto-principal);
+    margin-bottom: var(--espaco-lg);
+    font-family: 'Poppins', sans-serif;
+}
+
+.suggestions-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 30px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.suggestion-card {
+    background: var(--cor-container);
+    border-radius: 16px;
+    padding: 30px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    border: 1px solid var(--cor-borda);
+    aspect-ratio: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.suggestion-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 8px 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+.suggestion-title {
+    font-family: 'Poppins', sans-serif;
+    color: var(--cor-accent);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    line-height: 1.3;
+}
+
+.suggestion-text {
+    font-family: 'Anton', sans-serif;
+    color: var(--cor-texto-principal);
+    font-size: 14px;
+    line-height: 1.5;
+    margin: 0 0 30px 0;
+    flex: 1;
+}
+
+.suggestion-btn {
+    background: transparent;
+    border: 2px solid var(--cor-accent);
+    color: var(--cor-accent);
+    font-family: 'Anton', sans-serif;
+    font-size: 14px;
+    font-weight: 300;
+    padding: 12px 24px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    align-self: center;
+    margin-top: auto;
+}
+
+.suggestion-btn:hover {
+    background: var(--cor-accent);
+    color: var(--cor-container);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 123, 255, 0.3);
 }

@@ -93,5 +93,27 @@
                 ]
             }
         ]
+    },
+    "operacoes": {
+        "title": "Operações na Bolsa de Valores",
+        "description": "Aprenda os fundamentos e estratégias para operar com segurança no mercado financeiro.",
+        "modules": [
+            {
+                "title": "Módulo 1: Fundamentos do Mercado",
+                "lessons": [
+                    { "id": "l9-1", "title": "Introdução à Bolsa de Valores", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l9-2", "title": "Tipos de Ordens e Operações", "type": "audio", "duration": "20 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l9-3", "title": "Análise Técnica Básica", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" }
+                ]
+            },
+            {
+                "title": "Módulo 2: Estratégias e Gestão de Risco",
+                "lessons": [
+                    { "id": "l10-1", "title": "Stop Loss e Take Profit", "type": "video", "duration": "18 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l10-2", "title": "Diversificação de Carteira", "type": "audio", "duration": "25 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
+                    { "id": "l10-3", "title": "Psicologia do Trading", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" }
+                ]
+            }
+        ]
     }
 }

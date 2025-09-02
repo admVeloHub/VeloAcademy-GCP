@@ -936,9 +936,11 @@ const veloAcademyApp = {
 
             'onboarding': 'Essencial',
 
-            'cs004': 'Segurança',
+            'cs004': 'Reciclagem',
 
-            'cs003': 'Atendimento'
+            'cs003': 'Opcional',
+
+            'operacoes': 'Atualização'
 
         };
 

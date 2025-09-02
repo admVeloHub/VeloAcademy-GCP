@@ -11,7 +11,7 @@
         "R$ 300,00 em 3 parcelas",
         "R$ 750,00 em 5 parcelas"
       ],
-      "answer": 0
+      "answer": 1
     },
     {
       "question": "Qual é a condição para que a análise de crédito via Open Finance seja concluída com sucesso?",
@@ -31,7 +31,7 @@
         "O símbolo não tem importância e pode ser ignorado.",
         "Isso indica que o crédito foi aprovado automaticamente."
       ],
-      "answer": 0
+      "answer": 1
     },
     {
       "question": "O cliente pode ter mais de um contrato de Empréstimo Pessoal Velotax ativo ao mesmo tempo?",
@@ -71,7 +71,7 @@
         "O erro é do banco do cliente e não há solução.",
         "O processo só avança se o cliente fizer o cadastro completo novamente."
       ],
-      "answer": 0
+      "answer": 1
     },
     {
       "question": "Em caso de não pagamento das parcelas, quais consequências podem ocorrer?",
