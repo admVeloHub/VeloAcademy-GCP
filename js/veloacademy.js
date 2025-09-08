@@ -1713,78 +1713,79 @@ const veloAcademyApp = {
     },
 
     initUserInfo() {
-
+        console.log('=== Inicializando informações do usuário (veloacademy.js) ===');
         const userName = localStorage.getItem('userName');
-
         const userPicture = localStorage.getItem('userPicture');
-
+        
+        console.log('Nome do usuário encontrado:', userName);
+        console.log('Foto do usuário encontrada:', userPicture);
         
         // Atualizar nome do usuário
-
         const userNameElement = document.getElementById('user-name');
-
+        console.log('Elemento user-name encontrado:', !!userNameElement);
         if (userNameElement) {
-
             userNameElement.textContent = userName || 'Usuário';
-
+            console.log('Nome do usuário atualizado:', userNameElement.textContent);
         }
-
         
         // Atualizar avatar do usuário
-
         const userAvatar = document.getElementById('user-avatar');
-
+        console.log('Elemento user-avatar encontrado:', !!userAvatar);
         if (userAvatar) {
-
             if (userPicture) {
-
                 userAvatar.src = userPicture;
-
                 userAvatar.style.display = 'block';
-
+                console.log('Avatar do usuário atualizado:', userPicture);
             } else {
-
                 userAvatar.style.display = 'none';
-
                 const userInfo = document.getElementById('user-info');
-
                 if (userInfo) {
-
                     userInfo.classList.add('no-avatar');
-
                 }
-
+                console.log('Avatar oculto - sem foto');
             }
-
         }
-
+        
+        // Verificar se o elemento user-info está visível
+        const userInfo = document.getElementById('user-info');
+        console.log('Elemento user-info encontrado:', !!userInfo);
+        if (userInfo) {
+            console.log('Classes do user-info:', userInfo.className);
+            console.log('Estilo display:', window.getComputedStyle(userInfo).display);
+            
+            // Garantir que o elemento esteja visível (remover hidden-nav se existir)
+            if (userInfo.classList.contains('hidden-nav')) {
+                userInfo.classList.remove('hidden-nav');
+                console.log('Classe hidden-nav removida do user-info');
+            }
+            
+            // Garantir que o elemento esteja visível
+            userInfo.style.display = 'flex';
+            console.log('Display do user-info definido como flex');
+        }
     },
 
     initLogout() {
-
+        console.log('=== Inicializando logout (veloacademy.js) ===');
         const logoutBtn = document.getElementById('logout-btn');
-
+        console.log('Botão logout encontrado:', !!logoutBtn);
+        
         if (logoutBtn) {
-
             logoutBtn.addEventListener('click', () => {
-
+                console.log('Logout clicado');
                 // Limpar dados do usuário
-
                 localStorage.removeItem('userEmail');
-
                 localStorage.removeItem('userName');
-
                 localStorage.removeItem('userPicture');
-
+                localStorage.removeItem('dadosAtendenteChatbot');
                 
                 // Redirecionar para landing page
-
                 window.location.href = './index.html';
-
             });
-
+            console.log('Event listener de logout adicionado');
+        } else {
+            console.error('Botão de logout não encontrado!');
         }
-
     }
 
 };
