@@ -1744,16 +1744,21 @@ const veloAcademyApp = {
         if (userNameElement) {
             userNameElement.textContent = userName || 'Usuário';
             console.log('Nome do usuário atualizado:', userNameElement.textContent);
+            console.log('Texto atual do elemento:', userNameElement.textContent);
+        } else {
+            console.error('Elemento user-name não encontrado!');
         }
         
         // Atualizar avatar do usuário
         const userAvatar = document.getElementById('user-avatar');
         console.log('Elemento user-avatar encontrado:', !!userAvatar);
         if (userAvatar) {
+            console.log('Avatar atual antes da atualização:', userAvatar.src);
             if (userPicture) {
                 userAvatar.src = userPicture;
                 userAvatar.style.display = 'block';
                 console.log('Avatar do usuário atualizado:', userPicture);
+                console.log('Avatar após atualização:', userAvatar.src);
             } else {
                 userAvatar.style.display = 'none';
                 const userInfo = document.getElementById('user-info');
@@ -1762,6 +1767,8 @@ const veloAcademyApp = {
                 }
                 console.log('Avatar oculto - sem foto');
             }
+        } else {
+            console.error('Elemento user-avatar não encontrado!');
         }
         
         // Verificar se o elemento user-info está visível
@@ -1780,6 +1787,18 @@ const veloAcademyApp = {
             // Garantir que o elemento esteja visível
             userInfo.style.display = 'flex';
             console.log('Display do user-info definido como flex');
+            
+            // Forçar atualização dos dados
+            console.log('=== FORÇANDO ATUALIZAÇÃO DOS DADOS ===');
+            if (userNameElement) {
+                userNameElement.textContent = userName;
+                console.log('Nome forçado para:', userName);
+            }
+            if (userAvatar && userPicture) {
+                userAvatar.src = userPicture;
+                userAvatar.style.display = 'block';
+                console.log('Avatar forçado para:', userPicture);
+            }
         }
     },
 
