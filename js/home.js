@@ -346,9 +346,11 @@ const homeApp = {
             if (typeof isSessionValid === 'function' && typeof getUserSession === 'function') {
                 if (isSessionValid()) {
                     const session = getUserSession();
-                    console.log('Usuário já está logado, redirecionando para cursos');
-                    // Usuário já está logado, redirecionar para cursos
-                    window.location.href = './cursos.html';
+                    console.log('Usuário já está logado, mostrando botões do header');
+                    // Usuário já está logado, mostrar botões do header e informações do usuário
+                    this.hideModal();
+                    this.showHeaderButtons();
+                    this.initUserInfo();
                 } else {
                     console.log('Usuário não está logado, mostrando modal de login');
                     // Garantir que o modal está oculto inicialmente
@@ -361,8 +363,10 @@ const homeApp = {
                 const userName = localStorage.getItem('userName');
                 
                 if (userEmail && userName) {
-                    console.log('Dados antigos encontrados, redirecionando para cursos');
-                    window.location.href = './cursos.html';
+                    console.log('Dados antigos encontrados, mostrando botões do header');
+                    this.hideModal();
+                    this.showHeaderButtons();
+                    this.initUserInfo();
                 } else {
                     console.log('Nenhum dado encontrado, mostrando modal de login');
                     this.hideModal();
