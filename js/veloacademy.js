@@ -631,8 +631,16 @@ const veloAcademyApp = {
 
             }
 
-            this.courseDatabase = await response.json();
-            console.log('Courses loaded successfully:', this.courseDatabase);
+            const data = await response.json();
+            console.log('Courses loaded successfully:', data);
+            
+            // Verificar se os dados foram carregados corretamente
+            if (data && Object.keys(data).length > 0) {
+                this.courseDatabase = data;
+                console.log('Using cursos.json data');
+            } else {
+                throw new Error('Empty or invalid data from cursos.json');
+            }
 
         } catch (error) {
 
