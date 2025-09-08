@@ -1721,15 +1721,22 @@ const veloAcademyApp = {
         const userName = localStorage.getItem('userName');
         const userPicture = localStorage.getItem('userPicture');
         
+        console.log('Dados do localStorage:', { userName, userPicture });
+        
         // Atualizar nome do usuário
         const userNameElement = document.getElementById('user-name');
+        console.log('Elemento user-name encontrado:', !!userNameElement);
         if (userNameElement) {
             userNameElement.textContent = userName || 'Usuário';
             console.log('Nome do usuário atualizado:', userName);
+            console.log('Texto atual do elemento:', userNameElement.textContent);
+        } else {
+            console.error('Elemento user-name não encontrado!');
         }
         
         // Atualizar avatar do usuário
         const userAvatar = document.getElementById('user-avatar');
+        console.log('Elemento user-avatar encontrado:', !!userAvatar);
         if (userAvatar) {
             if (userPicture) {
                 userAvatar.src = userPicture;
@@ -1741,7 +1748,18 @@ const veloAcademyApp = {
                 if (userInfo) {
                     userInfo.classList.add('no-avatar');
                 }
+                console.log('Avatar oculto - sem foto');
             }
+        } else {
+            console.error('Elemento user-avatar não encontrado!');
+        }
+        
+        // Garantir que o elemento user-info esteja visível
+        const userInfo = document.getElementById('user-info');
+        console.log('Elemento user-info encontrado:', !!userInfo);
+        if (userInfo) {
+            userInfo.style.display = 'flex';
+            console.log('Display do user-info definido como flex');
         }
     },
 
