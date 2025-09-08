@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="icon" type="image/png" href="./academy.png">
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 <body>
 
@@ -18,11 +19,12 @@
             </div>
             
             <nav class="nav-menu">
-                <a href="./index.html" class="nav-link active">Home</a>
-                <a href="./cursos.html" class="nav-link">Cursos</a>
-                <a href="./conquistas.html" class="nav-link">Conquistas</a>
-                <a href="./auto-feedback.html" class="nav-link">Auto Feedback</a>
-                <a href="https://velohub.vercel.app" class="nav-link" target="_blank">VeloHub</a>
+                <!-- Todos os botões ocultos até login -->
+                <a href="./index.html" class="nav-link active hidden-nav">Home</a>
+                <a href="./cursos.html" class="nav-link hidden-nav">Cursos</a>
+                <a href="./conquistas.html" class="nav-link hidden-nav">Conquistas</a>
+                <a href="./auto-feedback.html" class="nav-link hidden-nav">Auto Feedback</a>
+                <a href="https://velohub.vercel.app" class="nav-link hidden-nav" target="_blank">VeloHub</a>
             </nav>
 
 
@@ -41,10 +43,10 @@
                     <h1 class="hero-title">Bem-vindo à <span class="accent-text">VeloAcademy</span></h1>
                     <p class="hero-subtitle">A plataforma de treinamento e desenvolvimento de excelência do Atendimento Velotax</p>
                     <div class="hero-buttons">
-                        <a href="./cursos.html" class="btn btn-primary">
+                        <button id="hero-explorar-cursos-btn" class="btn btn-primary">
                             <i class="fas fa-graduation-cap"></i>
                             Explorar Cursos
-                        </a>
+                        </button>
                     </div>
                 </div>
                 <div class="hero-image">
@@ -93,7 +95,7 @@
                          </div>
                          <h3>Meus Cursos</h3>
                          <p>Continue de onde parou</p>
-                         <a href="./cursos.html" class="btn btn-primary">Ver Cursos</a>
+                         <button id="dashboard-ver-cursos-btn" class="btn btn-primary">Ver Cursos</button>
                      </div>
                      
                      <div class="dashboard-card">
@@ -127,8 +129,40 @@
         </div>
     </main>
 
+    <!-- Modal de Login -->
+    <div id="login-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="modal-body">
+                <img src="./academy.png" alt="VeloAcademy" class="modal-logo">
+                <p>Faça login para acessar os cursos</p>
+                <div id="g_id_onload"
+                     data-client_id="827325386401-ahi2f9ume9i7lc28lau7j4qlviv5d22k.apps.googleusercontent.com"
+                     data-callback="handleCredentialResponse"
+                     data-auto_prompt="false">
+                </div>
+                <div class="g_id_signin" 
+                     data-type="standard" 
+                     data-size="large" 
+                     data-theme="outline" 
+                     data-text="sign_in_with" 
+                     data-shape="rectangular" 
+                     data-logo_alignment="left">
+                </div>
+                
+                <div id="login-error" class="login-error hidden">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <span>Erro ao fazer login. Tente novamente.</span>
+                </div>
+                
+                <div class="login-info">
+                    <p><strong>Domínio autorizado:</strong> @velotax.com.br</p>
+                </div>
+            </div>
+        </div>
+    </div>
 
-
+    <script src="./google-signin-config.js"></script>
+    <script src="./js/home.js"></script>
     <script src="./js/veloacademy.js"></script>
     <script src="./js/theme-toggle.js"></script>
 </body>

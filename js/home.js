@@ -10,26 +10,47 @@ const homeApp = {
     tokenClient: null,
 
     init() {
+tenh        console.log('=== Inicializando homeApp ===');
         this.initElements();
         this.initAnimations();
         this.checkConnectivity();
         this.verificarIdentificacao();
+        console.log('=== homeApp inicializado com sucesso ===');
     },
 
     initElements() {
-        this.identificacaoOverlay = document.getElementById('identificacao-overlay');
-        this.errorMsg = document.getElementById('identificacao-error');
+        console.log('=== Inicializando elementos ===');
+        this.loginModal = document.getElementById('login-modal');
+        this.errorMsg = document.getElementById('login-error');
         
-        // Botão de login
-        const loginBtn = document.getElementById('login-btn');
-        if (loginBtn) {
-            loginBtn.addEventListener('click', () => this.showOverlay());
+        console.log('Modal encontrado:', !!this.loginModal);
+        console.log('Error message encontrado:', !!this.errorMsg);
+        
+        // Botão Explorar Cursos do Hero
+        const heroExplorarCursosBtn = document.getElementById('hero-explorar-cursos-btn');
+        console.log('Botão Explorar Cursos encontrado:', !!heroExplorarCursosBtn);
+        if (heroExplorarCursosBtn) {
+            heroExplorarCursosBtn.addEventListener('click', () => {
+                console.log('Botão Explorar Cursos clicado!');
+                this.showModal();
+            });
+        }
+        
+        // Botão Ver Cursos do Dashboard
+        const dashboardVerCursosBtn = document.getElementById('dashboard-ver-cursos-btn');
+        console.log('Botão Ver Cursos encontrado:', !!dashboardVerCursosBtn);
+        if (dashboardVerCursosBtn) {
+            dashboardVerCursosBtn.addEventListener('click', () => {
+                console.log('Botão Ver Cursos clicado!');
+                this.showModal();
+            });
         }
     },
 
     // ================== VERIFICAÇÃO DE CONECTIVIDADE ==================
     checkConnectivity() {
         // USAR A MESMA LÓGICA DO CHAT INTERNO (QUE FUNCIONA)
+        console.log('=== Verificando conectividade ===');
         console.log('Inicializando Google Sign-In como no chat interno');
         this.initGoogleSignIn();
     },
@@ -51,27 +72,57 @@ const homeApp = {
     },
 
     // ================== FUNÇÕES DE CONTROLE DE UI ==================
-    showOverlay() {
-        this.identificacaoOverlay.classList.remove('hidden');
-        document.body.style.overflow = 'hidden';
+    showModal() {
+        console.log('=== Tentando mostrar modal ===');
+        console.log('Modal element:', this.loginModal);
+        if (this.loginModal) {
+            this.loginModal.classList.add('show');
+            document.body.style.overflow = 'hidden';
+            console.log('Modal mostrado com sucesso');
+            console.log('Classes do modal:', this.loginModal.className);
+        } else {
+            console.error('Modal element não encontrado!');
+        }
     },
 
-    hideOverlay() {
-        this.identificacaoOverlay.classList.add('hidden');
-        document.body.style.overflow = 'auto';
+    hideModal() {
+        console.log('=== Ocultando modal ===');
+        if (this.loginModal) {
+            this.loginModal.classList.remove('show');
+            document.body.style.overflow = 'auto';
+            console.log('Modal ocultado com sucesso');
+        } else {
+            console.error('Modal element não encontrado para ocultar!');
+        }
+    },
+
+    showHeaderButtons() {
+        // Mostrar botões do header após login
+        console.log('=== Mostrando botões do header ===');
+        const hiddenNavs = document.querySelectorAll('.hidden-nav');
+        console.log('Elementos hidden-nav encontrados:', hiddenNavs.length);
+        hiddenNavs.forEach(nav => {
+            nav.classList.remove('hidden-nav');
+            console.log('Removida classe hidden-nav de:', nav.textContent);
+            console.log('Classes após remoção:', nav.className);
+        });
     },
 
     // ================== LÓGICA DE AUTENTICAÇÃO ==================
     waitForGoogleScript() {
         return new Promise((resolve, reject) => {
+            console.log('=== Aguardando script do Google ===');
             const script = document.querySelector('script[src="https://accounts.google.com/gsi/client"]');
             if (!script) {
+                console.error('Script Google Identity Services não encontrado no HTML');
                 return reject(new Error('Script Google Identity Services não encontrado no HTML.'));
             }
             if (window.google && window.google.accounts) {
+                console.log('Google script já carregado');
                 return resolve(window.google.accounts);
             }
             script.onload = () => {
+                console.log('Script Google carregado via onload');
                 if (window.google && window.google.accounts) {
                     resolve(window.google.accounts);
                 } else {
@@ -80,38 +131,43 @@ const homeApp = {
             };
             script.onerror = () => {
                 console.warn('Google Sign-In não carregou - usando modo offline');
-                this.setupOfflineLogin();
                 reject(new Error('Erro ao carregar o script Google Identity Services.'));
             };
         });
     },
 
     initGoogleSignIn() {
+        console.log('=== Inicializando Google Sign-In ===');
         this.waitForGoogleScript().then(accounts => {
+            console.log('Google Script carregado com sucesso');
             this.tokenClient = accounts.oauth2.initTokenClient({
                 client_id: this.CLIENT_ID,
                 scope: 'profile email',
                 callback: (response) => this.handleGoogleSignIn(response)
             });
             
-            const googleSigninButton = document.getElementById('google-signin-button');
-            if (googleSigninButton) {
-                // Usar exatamente a mesma lógica do chat interno
-                googleSigninButton.addEventListener('click', () => this.tokenClient.requestAccessToken());
-            }
+            // O Google Sign-In é inicializado automaticamente pelo script
+            // Não precisamos adicionar event listeners manualmente
+            console.log('Google Sign-In configurado com sucesso');
         }).catch(error => {
             console.error('Erro ao inicializar Google Sign-In:', error);
-            this.errorMsg.textContent = 'Erro ao carregar autenticação do Google. Verifique sua conexão ou tente novamente mais tarde.';
-            this.errorMsg.classList.remove('hidden');
+            if (this.errorMsg) {
+                this.errorMsg.textContent = 'Erro ao carregar autenticação do Google. Verifique sua conexão ou tente novamente mais tarde.';
+                this.errorMsg.classList.remove('hidden');
+            }
         });
     },
 
     handleGoogleSignIn(response) {
+        console.log('=== handleGoogleSignIn chamada ===');
+        console.log('Response:', response);
+        
         fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
             headers: { Authorization: `Bearer ${response.access_token}` }
         })
         .then(res => res.json())
         .then(user => {
+            console.log('Dados do usuário recebidos:', user);
             if (user.email && user.email.endsWith(this.DOMINIO_PERMITIDO)) {
                 // Login bem-sucedido - usar mesma lógica do chat interno
                 const dadosUsuario = { 
@@ -127,27 +183,40 @@ const homeApp = {
                 localStorage.setItem('userPicture', user.picture);
                 localStorage.setItem('dadosAtendenteChatbot', JSON.stringify(dadosUsuario));
                 
-                this.hideOverlay();
+                this.hideModal();
                 
-                // Redirecionar para home após 1 segundo
+                // Mostrar mensagem de sucesso
+                console.log('Login realizado com sucesso:', user.name);
+                
+                // Mostrar botões do header após login
+                this.showHeaderButtons();
+                
+                // Redirecionar para cursos após login
                 setTimeout(() => {
-                    window.location.href = './home.html';
+                    window.location.href = './cursos.html';
                 }, 1000);
                 
             } else {
                 // Email não autorizado - mesma mensagem do chat interno
-                this.errorMsg.textContent = 'Acesso permitido apenas para e-mails @velotax.com.br!';
-                this.errorMsg.classList.remove('hidden');
+                console.log('Email não autorizado:', user.email);
+                if (this.errorMsg) {
+                    this.errorMsg.textContent = 'Acesso permitido apenas para e-mails @velotax.com.br!';
+                    this.errorMsg.classList.remove('hidden');
+                }
             }
         })
-        .catch(() => {
+        .catch(error => {
             // Mesmo tratamento de erro do chat interno
-            this.errorMsg.textContent = 'Erro ao verificar login. Tente novamente.';
-            this.errorMsg.classList.remove('hidden');
+            console.error('Erro ao verificar login:', error);
+            if (this.errorMsg) {
+                this.errorMsg.textContent = 'Erro ao verificar login. Tente novamente.';
+                this.errorMsg.classList.remove('hidden');
+            }
         });
     },
 
     verificarIdentificacao() {
+        console.log('=== Verificando identificação ===');
         const umDiaEmMs = 24 * 60 * 60 * 1000;
         let dadosSalvos = null;
         
@@ -155,26 +224,36 @@ const homeApp = {
             const dadosSalvosString = localStorage.getItem('dadosAtendenteChatbot');
             if (dadosSalvosString) dadosSalvos = JSON.parse(dadosSalvosString);
         } catch (e) {
+            console.log('Erro ao parsear dados salvos:', e);
             localStorage.removeItem('dadosAtendenteChatbot');
         }
+
+        console.log('Dados salvos encontrados:', dadosSalvos);
 
         if (dadosSalvos && 
             dadosSalvos.email && 
             dadosSalvos.email.endsWith(this.DOMINIO_PERMITIDO) && 
             (Date.now() - dadosSalvos.timestamp < umDiaEmMs)) {
             
-            // Usuário já está logado, redirecionar para home
-            window.location.href = './home.html';
+            console.log('Usuário já está logado, mostrando botões do header');
+            // Usuário já está logado, ocultar modal e mostrar botões do header
+            this.hideModal();
+            this.showHeaderButtons();
         } else {
+            console.log('Usuário não está logado, limpando dados e ocultando modal');
             // Limpar dados inválidos
             localStorage.removeItem('dadosAtendenteChatbot');
             localStorage.removeItem('userEmail');
             localStorage.removeItem('userName');
             localStorage.removeItem('userPicture');
+            
+            // Garantir que o modal está oculto inicialmente
+            this.hideModal();
         }
     },
 
     initAnimations() {
+        console.log('=== Inicializando animações ===');
         // Animação de entrada dos elementos
         const observerOptions = {
             threshold: 0.1,
@@ -192,6 +271,7 @@ const homeApp = {
 
         // Observar elementos para animação
         const animatedElements = document.querySelectorAll('.hero-content, .hero-image');
+        console.log('Elementos para animação encontrados:', animatedElements.length);
         animatedElements.forEach(el => {
             el.style.opacity = '0';
             el.style.transform = 'translateY(30px)';
@@ -201,7 +281,22 @@ const homeApp = {
     }
 };
 
+// Função global para o Google Sign-In
+function handleCredentialResponse(response) {
+    console.log('=== handleCredentialResponse chamada ===');
+    console.log('Resposta do Google Sign-In:', response);
+    if (homeApp && homeApp.handleGoogleSignIn) {
+        homeApp.handleGoogleSignIn(response);
+    } else {
+        console.error('homeApp não está disponível ou handleGoogleSignIn não existe');
+    }
+}
+
 // Inicializar quando o DOM estiver carregado
 document.addEventListener('DOMContentLoaded', () => {
-    homeApp.init();
+    console.log('DOM carregado, inicializando homeApp...');
+    // Pequeno delay para garantir que todos os elementos estejam prontos
+    setTimeout(() => {
+        homeApp.init();
+    }, 100);
 });

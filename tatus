@@ -1,0 +1,5 @@
+[33ma5d8dbe[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m Fix: Corrigir erro de sintaxe JSON em cursos.json e melhorar carregamento
+[33m3a750c3[m Fix: Melhorar carregamento de cursos.json e debug de fallback
+[33ma22c4a4[m Force Vercel redeploy - cache clear
+[33m2cd1725[m Reinicialização completa do repositório com conteúdo atualizado
+[33m6612fd3[m Atualização do curso Onboarding: novos links de vídeos e PDFs, renomeação de títulos e remoção de podcast

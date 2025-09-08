@@ -1592,6 +1592,8 @@ footer p {
 /* Ocultar botões do header até login */
 .hidden-nav {
     display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
 }
 
 /* Modal de Login Elegante */

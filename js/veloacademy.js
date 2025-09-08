@@ -223,11 +223,12 @@ const veloAcademyApp = {
     // Função para enviar quiz para o Apps Script
     async submitQuizToAppsScript() {
         try {
-            const userName = localStorage.getItem('userName') || 'Usuário';
+            // Obter dados completos do usuário autenticado
+            const userData = this.getAuthenticatedUserData();
             const courseId = this.currentQuiz.courseId;
             const answers = JSON.stringify(this.currentQuiz.userAnswers);
 
-            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userName)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
+            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
             
             console.log('Enviando quiz para Apps Script:', url);
             
@@ -250,6 +251,21 @@ const veloAcademyApp = {
             
         } catch (error) {
             console.error('Erro ao enviar quiz:', error);
+            
+            // Verificar se é erro de autenticação
+            if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
+                alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
+                // Limpar dados inválidos e redirecionar
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPicture');
+                localStorage.removeItem('dadosAtendenteChatbot');
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 2000);
+                return;
+            }
+            
             alert('Erro ao enviar o quiz. Tente novamente.');
             // Em caso de erro, também mostrar resultado local
             this.processQuizLocally();
@@ -352,21 +368,65 @@ const veloAcademyApp = {
         this.switchView('course-view');
     },
 
+    // Função para obter dados completos do usuário logado
+    getAuthenticatedUserData() {
+        console.log('=== OBTENDO DADOS DO USUÁRIO AUTENTICADO ===');
+        
+        // Tentar obter dados do localStorage
+        const userName = localStorage.getItem('userName');
+        const userEmail = localStorage.getItem('userEmail');
+        const userPicture = localStorage.getItem('userPicture');
+        
+        // Tentar obter dados do objeto salvo no chatbot
+        let dadosCompletos = null;
+        try {
+            const dadosSalvosString = localStorage.getItem('dadosAtendenteChatbot');
+            if (dadosSalvosString) {
+                dadosCompletos = JSON.parse(dadosSalvosString);
+            }
+        } catch (e) {
+            console.warn('Erro ao parsear dados do usuário:', e);
+        }
+        
+        // Validar se o usuário está realmente logado
+        if (!userName || !userEmail) {
+            throw new Error('Usuário não está autenticado. Faça login novamente.');
+        }
+        
+        // Verificar se o email é do domínio autorizado
+        if (!userEmail.endsWith('@velotax.com.br')) {
+            throw new Error('Email não autorizado para emissão de certificado.');
+        }
+        
+        // Usar dados mais completos se disponíveis
+        const userData = {
+            name: dadosCompletos?.nome || userName,
+            email: dadosCompletos?.email || userEmail,
+            picture: dadosCompletos?.picture || userPicture,
+            timestamp: dadosCompletos?.timestamp || Date.now()
+        };
+        
+        console.log('Dados do usuário autenticado:', userData);
+        return userData;
+    },
+
     // Função para gerar certificado
     async generateCertificate() {
         console.log('=== GERANDO CERTIFICADO ===');
         try {
-            const userName = localStorage.getItem('userName') || 'Usuário';
+            // Obter dados completos do usuário autenticado
+            const userData = this.getAuthenticatedUserData();
             const courseId = this.currentQuiz.courseId;
             const answers = JSON.stringify(this.currentQuiz.userAnswers);
 
             console.log('Dados para certificado:', {
-                userName: userName,
+                userName: userData.name,
+                userEmail: userData.email,
                 courseId: courseId,
                 answers: this.currentQuiz.userAnswers
             });
 
-            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userName)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
+            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
             
             console.log('URL do Apps Script para certificado:', url);
             console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);
@@ -392,11 +452,15 @@ const veloAcademyApp = {
             
             if (newWindow) {
                 console.log('Nova aba aberta com sucesso');
+                
+                // Mostrar mensagem de instrução para o usuário
+                alert('Certificado sendo gerado...\n\nSe aparecer "You need access":\n1. Clique em "Open the document directly"\n2. O certificado será gerado com seu nome\n3. Aguarde alguns segundos para o processamento');
+                
                 // Aguardar um pouco antes de voltar ao curso
                 setTimeout(() => {
                     console.log('Retornando ao curso...');
                     this.returnToCourse();
-                }, 3000);
+                }, 5000); // Aumentei o tempo para 5 segundos
             } else {
                 console.warn('Popup bloqueado pelo navegador');
                 alert('Popup bloqueado. Permita popups para este site e tente novamente.');
@@ -404,6 +468,21 @@ const veloAcademyApp = {
             
         } catch (error) {
             console.error('Erro ao gerar certificado:', error);
+            
+            // Verificar se é erro de autenticação
+            if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
+                alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
+                // Limpar dados inválidos e redirecionar
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPicture');
+                localStorage.removeItem('dadosAtendenteChatbot');
+                setTimeout(() => {
+                    window.location.href = './index.html';
+                }, 2000);
+                return;
+            }
+            
             alert(`Erro ao gerar o certificado: ${error.message}`);
         }
     },
