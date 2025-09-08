@@ -1,7 +1,6 @@
 // JavaScript para a página Home da VeloAcademy (Landing Page)
 const homeApp = {
     // ================== CONFIGURAÇÕES GLOBAIS ==================
-    DOMINIO_PERMITIDO: "@velotax.com.br",
     CLIENT_ID: '278491073220-eb4ogvn3aifu0ut9mq3rvu5r9r9l3137.apps.googleusercontent.com',
 
     // ================== ELEMENTOS DO DOM ==================
@@ -220,7 +219,7 @@ const homeApp = {
             const payload = this.decodeJWT(response.credential);
             console.log('Payload do JWT:', payload);
             
-            if (payload && payload.email && payload.email.endsWith(this.DOMINIO_PERMITIDO)) {
+            if (payload && payload.email && isAuthorizedDomain(payload.email)) {
                 // Login bem-sucedido
                 const dadosUsuario = { 
                     nome: payload.name, 
@@ -228,6 +227,14 @@ const homeApp = {
                     picture: payload.picture,
                     timestamp: Date.now() 
                 };
+                
+                // Usar função centralizada para salvar sessão
+                const userData = {
+                    name: payload.name,
+                    email: payload.email,
+                    picture: payload.picture
+                };
+                saveUserSession(userData);
                 
                 // Salvar dados do usuário (mesmo formato do chat interno)
                 localStorage.setItem('userEmail', payload.email);

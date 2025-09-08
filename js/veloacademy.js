@@ -1,5 +1,4 @@
 const veloAcademyApp = {
-    DOMINIO_PERMITIDO: "@velotax.com.br",
 
     courseDatabase: {},
 
@@ -527,8 +526,8 @@ const veloAcademyApp = {
         this.initLogo();
         console.log('Logo initialized');
 
-        this.verificarIdentificacao();
-        console.log('Identificação verificada');
+        checkAuthenticationState();
+        console.log('Estado de autenticação verificado');
 
         this.initLogout();
         console.log('Logout initialized');
@@ -1717,51 +1716,6 @@ const veloAcademyApp = {
 
     },
 
-    showHeaderButtons() {
-        // Mostrar botões do header após login
-        console.log('=== Mostrando botões do header ===');
-        const hiddenNavs = document.querySelectorAll('.hidden-nav');
-        console.log('Elementos hidden-nav encontrados:', hiddenNavs.length);
-        hiddenNavs.forEach(nav => {
-            nav.classList.remove('hidden-nav');
-            console.log('Removida classe hidden-nav de:', nav.textContent);
-            console.log('Classes após remoção:', nav.className);
-        });
-    },
-
-    verificarIdentificacao() {
-        console.log('=== Verificando identificação ===');
-        const seisHorasEmMs = 6 * 60 * 60 * 1000; // 6 horas em milissegundos
-        let dadosSalvos = null;
-        
-        try {
-            const dadosSalvosString = localStorage.getItem('dadosAtendenteChatbot');
-            if (dadosSalvosString) dadosSalvos = JSON.parse(dadosSalvosString);
-        } catch (e) {
-            console.log('Erro ao parsear dados salvos:', e);
-            localStorage.removeItem('dadosAtendenteChatbot');
-        }
-
-        console.log('Dados salvos encontrados:', dadosSalvos);
-
-        if (dadosSalvos && 
-            dadosSalvos.email && 
-            dadosSalvos.email.endsWith(this.DOMINIO_PERMITIDO) && 
-            (Date.now() - dadosSalvos.timestamp < seisHorasEmMs)) {
-            
-            console.log('Usuário já está logado, mostrando botões do header');
-            // Usuário já está logado, mostrar botões do header
-            this.showHeaderButtons();
-            this.initUserInfo();
-        } else {
-            console.log('Usuário não está logado, limpando dados');
-            // Limpar dados inválidos
-            localStorage.removeItem('dadosAtendenteChatbot');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userPicture');
-        }
-    },
 
     initUserInfo() {
         console.log('=== Inicializando informações do usuário ===');
