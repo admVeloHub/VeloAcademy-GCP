@@ -333,7 +333,7 @@ const homeApp = {
 
     verificarIdentificacao() {
         console.log('=== Verificando identificação ===');
-        const umDiaEmMs = 24 * 60 * 60 * 1000;
+        const seisHorasEmMs = 6 * 60 * 60 * 1000; // 6 horas em milissegundos
         let dadosSalvos = null;
         
         try {
@@ -349,7 +349,7 @@ const homeApp = {
         if (dadosSalvos && 
             dadosSalvos.email && 
             dadosSalvos.email.endsWith(this.DOMINIO_PERMITIDO) && 
-            (Date.now() - dadosSalvos.timestamp < umDiaEmMs)) {
+            (Date.now() - dadosSalvos.timestamp < seisHorasEmMs)) {
             
             console.log('Usuário já está logado, mostrando botões do header');
             // Usuário já está logado, ocultar modal e mostrar botões do header
