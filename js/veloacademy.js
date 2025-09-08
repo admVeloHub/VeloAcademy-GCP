@@ -1717,120 +1717,50 @@ const veloAcademyApp = {
     },
 
     initUserInfo() {
-        console.log('=== Inicializando informações do usuário (veloacademy.js) ===');
-        
-        // Verificar se o usuário está logado
-        const userEmail = localStorage.getItem('userEmail');
+        console.log('=== Inicializando informações do usuário ===');
         const userName = localStorage.getItem('userName');
         const userPicture = localStorage.getItem('userPicture');
         
-        console.log('Email do usuário encontrado:', userEmail);
-        console.log('Nome do usuário encontrado:', userName);
-        console.log('Foto do usuário encontrada:', userPicture);
-        
-        // Se não há dados do usuário, não mostrar o botão
-        if (!userEmail || !userName) {
-            console.log('Usuário não está logado, ocultando botão de usuário');
-            const userInfo = document.getElementById('user-info');
-            if (userInfo) {
-                userInfo.style.display = 'none';
-            }
-            return;
-        }
-        
         // Atualizar nome do usuário
         const userNameElement = document.getElementById('user-name');
-        console.log('Elemento user-name encontrado:', !!userNameElement);
         if (userNameElement) {
             userNameElement.textContent = userName || 'Usuário';
-            console.log('Nome do usuário atualizado:', userNameElement.textContent);
-            console.log('Texto atual do elemento:', userNameElement.textContent);
-        } else {
-            console.error('Elemento user-name não encontrado!');
+            console.log('Nome do usuário atualizado:', userName);
         }
         
         // Atualizar avatar do usuário
         const userAvatar = document.getElementById('user-avatar');
-        console.log('Elemento user-avatar encontrado:', !!userAvatar);
         if (userAvatar) {
-            console.log('Avatar atual antes da atualização:', userAvatar.src);
             if (userPicture) {
                 userAvatar.src = userPicture;
                 userAvatar.style.display = 'block';
                 console.log('Avatar do usuário atualizado:', userPicture);
-                console.log('Avatar após atualização:', userAvatar.src);
             } else {
                 userAvatar.style.display = 'none';
                 const userInfo = document.getElementById('user-info');
                 if (userInfo) {
                     userInfo.classList.add('no-avatar');
                 }
-                console.log('Avatar oculto - sem foto');
-            }
-        } else {
-            console.error('Elemento user-avatar não encontrado!');
-        }
-        
-        // Verificar se o elemento user-info está visível
-        const userInfo = document.getElementById('user-info');
-        console.log('Elemento user-info encontrado:', !!userInfo);
-        if (userInfo) {
-            console.log('Classes do user-info:', userInfo.className);
-            console.log('Estilo display:', window.getComputedStyle(userInfo).display);
-            
-            // Garantir que o elemento esteja visível (remover hidden-nav se existir)
-            if (userInfo.classList.contains('hidden-nav')) {
-                userInfo.classList.remove('hidden-nav');
-                console.log('Classe hidden-nav removida do user-info');
-            }
-            
-            // Garantir que o elemento esteja visível
-            userInfo.style.display = 'flex';
-            console.log('Display do user-info definido como flex');
-            
-            // Forçar atualização dos dados
-            console.log('=== FORÇANDO ATUALIZAÇÃO DOS DADOS ===');
-            if (userNameElement) {
-                userNameElement.textContent = userName;
-                console.log('Nome forçado para:', userName);
-            }
-            if (userAvatar && userPicture) {
-                userAvatar.src = userPicture;
-                userAvatar.style.display = 'block';
-                console.log('Avatar forçado para:', userPicture);
             }
         }
     },
 
     initLogout() {
-        console.log('=== Inicializando logout (veloacademy.js) ===');
+        console.log('=== Inicializando logout ===');
         const logoutBtn = document.getElementById('logout-btn');
-        console.log('Botão logout encontrado:', !!logoutBtn);
-        
         if (logoutBtn) {
-            // Remover event listeners existentes para evitar duplicação
-            const newLogoutBtn = logoutBtn.cloneNode(true);
-            logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
-            
-            newLogoutBtn.addEventListener('click', (e) => {
-                console.log('=== Logout clicado ===');
-                e.preventDefault();
-                e.stopPropagation();
-                
+            logoutBtn.addEventListener('click', () => {
+                console.log('Logout clicado');
                 // Limpar dados do usuário
                 localStorage.removeItem('userEmail');
                 localStorage.removeItem('userName');
                 localStorage.removeItem('userPicture');
                 localStorage.removeItem('dadosAtendenteChatbot');
                 
-                console.log('Dados do usuário limpos');
-                
-                // Redirecionar para landing page
+                // Redirecionar para página inicial
                 window.location.href = './index.html';
             });
-            console.log('Event listener de logout adicionado com sucesso');
-        } else {
-            console.error('Botão de logout não encontrado!');
+            console.log('Event listener de logout adicionado');
         }
     }
 
