@@ -1563,6 +1563,122 @@ footer p {
     height: 20px;
 }
 
+/* Botão Explorar Cursos no Header */
+.btn-explorar-cursos {
+    background: linear-gradient(135deg, var(--cor-accent), #0056b3);
+    color: white !important;
+    border: none;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+}
+
+.btn-explorar-cursos:hover {
+    background: linear-gradient(135deg, #0056b3, var(--cor-accent));
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
+}
+
+.btn-explorar-cursos i {
+    font-size: 16px;
+}
+
+/* Ocultar botões do header até login */
+.hidden-nav {
+    display: none !important;
+}
+
+/* Modal de Login Elegante */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content {
+    background: white;
+    border-radius: 16px;
+    padding: 0;
+    max-width: 400px;
+    width: 90%;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.7);
+    transition: transform 0.3s ease;
+    overflow: hidden;
+}
+
+.modal-overlay.show .modal-content {
+    transform: scale(1);
+}
+
+.modal-body {
+    padding: 40px 30px;
+    text-align: center;
+}
+
+.modal-logo {
+    width: 200px;
+    height: auto;
+    margin-bottom: 30px;
+    border-radius: 12px;
+    object-fit: contain;
+}
+
+.modal-body p {
+    margin: 0 0 30px 0;
+    color: #666;
+    font-size: 14px;
+}
+
+.modal-body .g_id_signin {
+    margin: 20px 0;
+}
+
+.login-error {
+    background-color: #fee;
+    color: #c33;
+    padding: 12px;
+    border-radius: 8px;
+    margin: 15px 0;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.login-info {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    font-size: 12px;
+    color: #666;
+}
+
+.login-info p {
+    margin: 5px 0;
+}
+
 .identificacao-error {
     color: var(--cor-erro);
     background-color: rgba(244, 67, 54, 0.1);
