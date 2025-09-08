@@ -509,8 +509,7 @@ const veloAcademyApp = {
     },
 
     async init() {
-
-        console.log('Initializing VeloAcademy app...');
+        console.log('=== Inicializando VeloAcademy app ===');
         
         await this.loadConfig();
         console.log('Config loaded');
@@ -522,13 +521,18 @@ const veloAcademyApp = {
         console.log('Courses rendered');
 
         this.initTheme();
+        console.log('Theme initialized');
 
         this.initLogo();
+        console.log('Logo initialized');
 
         this.initUserInfo();
+        console.log('User info initialized');
 
         this.initLogout();
-
+        console.log('Logout initialized');
+        
+        console.log('=== VeloAcademy app inicializado com sucesso ===');
     },
 
     async loadConfig() {
@@ -1714,11 +1718,25 @@ const veloAcademyApp = {
 
     initUserInfo() {
         console.log('=== Inicializando informações do usuário (veloacademy.js) ===');
+        
+        // Verificar se o usuário está logado
+        const userEmail = localStorage.getItem('userEmail');
         const userName = localStorage.getItem('userName');
         const userPicture = localStorage.getItem('userPicture');
         
+        console.log('Email do usuário encontrado:', userEmail);
         console.log('Nome do usuário encontrado:', userName);
         console.log('Foto do usuário encontrada:', userPicture);
+        
+        // Se não há dados do usuário, não mostrar o botão
+        if (!userEmail || !userName) {
+            console.log('Usuário não está logado, ocultando botão de usuário');
+            const userInfo = document.getElementById('user-info');
+            if (userInfo) {
+                userInfo.style.display = 'none';
+            }
+            return;
+        }
         
         // Atualizar nome do usuário
         const userNameElement = document.getElementById('user-name');
@@ -1771,18 +1789,27 @@ const veloAcademyApp = {
         console.log('Botão logout encontrado:', !!logoutBtn);
         
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
-                console.log('Logout clicado');
+            // Remover event listeners existentes para evitar duplicação
+            const newLogoutBtn = logoutBtn.cloneNode(true);
+            logoutBtn.parentNode.replaceChild(newLogoutBtn, logoutBtn);
+            
+            newLogoutBtn.addEventListener('click', (e) => {
+                console.log('=== Logout clicado ===');
+                e.preventDefault();
+                e.stopPropagation();
+                
                 // Limpar dados do usuário
                 localStorage.removeItem('userEmail');
                 localStorage.removeItem('userName');
                 localStorage.removeItem('userPicture');
                 localStorage.removeItem('dadosAtendenteChatbot');
                 
+                console.log('Dados do usuário limpos');
+                
                 // Redirecionar para landing page
                 window.location.href = './index.html';
             });
-            console.log('Event listener de logout adicionado');
+            console.log('Event listener de logout adicionado com sucesso');
         } else {
             console.error('Botão de logout não encontrado!');
         }
@@ -1791,9 +1818,11 @@ const veloAcademyApp = {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-
-    veloAcademyApp.init();
-
+    console.log('DOM carregado, inicializando VeloAcademy...');
+    // Pequeno delay para garantir que todos os elementos estejam prontos
+    setTimeout(() => {
+        veloAcademyApp.init();
+    }, 100);
 });
 
 
