@@ -339,41 +339,36 @@ const homeApp = {
     },
 
     verificarIdentificacao() {
-        console.log('=== Verificando identificação ===');
-        const seisHorasEmMs = 6 * 60 * 60 * 1000; // 6 horas em milissegundos
-        let dadosSalvos = null;
+        console.log('=== Verificando identificação (home) ===');
         
-        try {
-            const dadosSalvosString = localStorage.getItem('dadosAtendenteChatbot');
-            if (dadosSalvosString) dadosSalvos = JSON.parse(dadosSalvosString);
-        } catch (e) {
-            console.log('Erro ao parsear dados salvos:', e);
-            localStorage.removeItem('dadosAtendenteChatbot');
-        }
-
-        console.log('Dados salvos encontrados:', dadosSalvos);
-
-        if (dadosSalvos && 
-            dadosSalvos.email && 
-            dadosSalvos.email.endsWith(this.DOMINIO_PERMITIDO) && 
-            (Date.now() - dadosSalvos.timestamp < seisHorasEmMs)) {
-            
-            console.log('Usuário já está logado, mostrando botões do header');
-            // Usuário já está logado, ocultar modal e mostrar botões do header
-            this.hideModal();
-            this.showHeaderButtons();
-            this.initUserInfo();
-        } else {
-            console.log('Usuário não está logado, limpando dados e ocultando modal');
-            // Limpar dados inválidos
-            localStorage.removeItem('dadosAtendenteChatbot');
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userPicture');
-            
-            // Garantir que o modal está oculto inicialmente
-            this.hideModal();
-        }
+        // Aguardar um pouco para garantir que auth.js foi carregado
+        setTimeout(() => {
+            if (typeof isSessionValid === 'function' && typeof getUserSession === 'function') {
+                if (isSessionValid()) {
+                    const session = getUserSession();
+                    console.log('Usuário já está logado, redirecionando para cursos');
+                    // Usuário já está logado, redirecionar para cursos
+                    window.location.href = './cursos.html';
+                } else {
+                    console.log('Usuário não está logado, mostrando modal de login');
+                    // Garantir que o modal está oculto inicialmente
+                    this.hideModal();
+                }
+            } else {
+                console.log('auth.js não carregado, usando lógica de fallback');
+                // Fallback: verificar dados antigos
+                const userEmail = localStorage.getItem('userEmail');
+                const userName = localStorage.getItem('userName');
+                
+                if (userEmail && userName) {
+                    console.log('Dados antigos encontrados, redirecionando para cursos');
+                    window.location.href = './cursos.html';
+                } else {
+                    console.log('Nenhum dado encontrado, mostrando modal de login');
+                    this.hideModal();
+                }
+            }
+        }, 100);
     },
 
     initAnimations() {
