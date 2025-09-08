@@ -2,7 +2,7 @@
 const homeApp = {
     // ================== CONFIGURAÇÕES GLOBAIS ==================
     DOMINIO_PERMITIDO: "@velotax.com.br",
-    CLIENT_ID: '827325386401-ahi2f9ume9i7lc28lau7j4qlviv5d22k.apps.googleusercontent.com',
+    CLIENT_ID: '278491073220-eb4ogvn3aifu0ut9mq3rvu5r9r9l3137.apps.googleusercontent.com',
 
     // ================== ELEMENTOS DO DOM ==================
     identificacaoOverlay: null,
