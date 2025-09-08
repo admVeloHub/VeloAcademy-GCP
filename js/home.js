@@ -10,11 +10,17 @@ const homeApp = {
     tokenClient: null,
 
     init() {
-tenh        console.log('=== Inicializando homeApp ===');
+        console.log('=== Inicializando homeApp ===');
         this.initElements();
         this.initAnimations();
         this.checkConnectivity();
         this.verificarIdentificacao();
+        
+        // Verificação adicional para botões que podem ser carregados depois
+        setTimeout(() => {
+            this.verifyButtonsLoaded();
+        }, 500);
+        
         console.log('=== homeApp inicializado com sucesso ===');
     },
 
@@ -30,20 +36,65 @@ tenh        console.log('=== Inicializando homeApp ===');
         const heroExplorarCursosBtn = document.getElementById('hero-explorar-cursos-btn');
         console.log('Botão Explorar Cursos encontrado:', !!heroExplorarCursosBtn);
         if (heroExplorarCursosBtn) {
-            heroExplorarCursosBtn.addEventListener('click', () => {
-                console.log('Botão Explorar Cursos clicado!');
+            heroExplorarCursosBtn.addEventListener('click', (e) => {
+                console.log('=== Botão Explorar Cursos clicado! ===');
+                e.preventDefault();
                 this.showModal();
             });
+            heroExplorarCursosBtn.setAttribute('data-listener-added', 'true');
+            console.log('Event listener adicionado ao botão hero');
         }
         
         // Botão Ver Cursos do Dashboard
         const dashboardVerCursosBtn = document.getElementById('dashboard-ver-cursos-btn');
         console.log('Botão Ver Cursos encontrado:', !!dashboardVerCursosBtn);
+        console.log('Elemento do botão dashboard:', dashboardVerCursosBtn);
         if (dashboardVerCursosBtn) {
-            dashboardVerCursosBtn.addEventListener('click', () => {
-                console.log('Botão Ver Cursos clicado!');
+            console.log('Adicionando event listener ao botão dashboard...');
+            dashboardVerCursosBtn.addEventListener('click', (e) => {
+                console.log('=== Botão Ver Cursos clicado! ===');
+                console.log('Event:', e);
+                e.preventDefault();
                 this.showModal();
             });
+            dashboardVerCursosBtn.setAttribute('data-listener-added', 'true');
+            console.log('Event listener adicionado com sucesso ao botão dashboard');
+        } else {
+            console.error('ERRO: Botão dashboard não encontrado!');
+        }
+    },
+
+    verifyButtonsLoaded() {
+        console.log('=== Verificando se botões foram carregados ===');
+        
+        // Verificar botão do dashboard novamente
+        const dashboardBtn = document.getElementById('dashboard-ver-cursos-btn');
+        console.log('Botão dashboard na verificação tardia:', !!dashboardBtn);
+        
+        if (dashboardBtn && !dashboardBtn.hasAttribute('data-listener-added')) {
+            console.log('Adicionando event listener tardio ao botão dashboard...');
+            dashboardBtn.addEventListener('click', (e) => {
+                console.log('=== Botão Ver Cursos clicado (listener tardio)! ===');
+                e.preventDefault();
+                this.showModal();
+            });
+            dashboardBtn.setAttribute('data-listener-added', 'true');
+            console.log('Event listener tardio adicionado com sucesso');
+        }
+        
+        // Verificar botão do hero também
+        const heroBtn = document.getElementById('hero-explorar-cursos-btn');
+        console.log('Botão hero na verificação tardia:', !!heroBtn);
+        
+        if (heroBtn && !heroBtn.hasAttribute('data-listener-added')) {
+            console.log('Adicionando event listener tardio ao botão hero...');
+            heroBtn.addEventListener('click', (e) => {
+                console.log('=== Botão Explorar Cursos clicado (listener tardio)! ===');
+                e.preventDefault();
+                this.showModal();
+            });
+            heroBtn.setAttribute('data-listener-added', 'true');
+            console.log('Event listener tardio adicionado com sucesso');
         }
     },
 
