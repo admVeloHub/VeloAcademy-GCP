@@ -526,8 +526,15 @@ const veloAcademyApp = {
         this.initLogo();
         console.log('Logo initialized');
 
-        checkAuthenticationState();
-        console.log('Estado de autenticação verificado');
+        // Aguardar um pouco para garantir que auth.js foi carregado
+        setTimeout(() => {
+            if (typeof checkAuthenticationState === 'function') {
+                checkAuthenticationState();
+                console.log('Estado de autenticação verificado');
+            } else {
+                console.error('Função checkAuthenticationState não encontrada - auth.js pode não ter carregado');
+            }
+        }, 100);
 
         this.initLogout();
         console.log('Logout initialized');

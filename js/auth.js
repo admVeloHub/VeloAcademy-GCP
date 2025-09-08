@@ -126,11 +126,27 @@ function showHeaderButtons(userData) {
  */
 function checkAuthenticationState() {
     console.log('=== Verificando estado de autenticação ===');
+    console.log('URL atual:', window.location.pathname);
+    
+    // Verificar se há dados no localStorage (compatibilidade)
+    const userEmail = localStorage.getItem('userEmail');
+    const userName = localStorage.getItem('userName');
+    const userPicture = localStorage.getItem('userPicture');
+    console.log('Dados do localStorage:', { userEmail, userName, userPicture });
     
     if (isSessionValid()) {
         const session = getUserSession();
         console.log('Sessão válida encontrada:', session);
         showHeaderButtons(session.user);
+    } else if (userEmail && userName) {
+        // Fallback: usar dados antigos do localStorage se existirem
+        console.log('Usando dados antigos do localStorage como fallback');
+        const userData = {
+            name: userName,
+            email: userEmail,
+            picture: userPicture
+        };
+        showHeaderButtons(userData);
     } else {
         console.log('Sessão inválida ou expirada');
         // Se a sessão for inválida ou não existir, limpa qualquer resquício
