@@ -1,4 +1,5 @@
 // js/auth.js - Sistema de Autenticação Centralizado para VeloAcademy
+console.log('=== auth.js carregado ===');
 
 // Chave padrão para o localStorage
 const USER_SESSION_KEY = 'veloacademy_user_session';

@@ -526,6 +526,9 @@ const veloAcademyApp = {
         this.initLogo();
         console.log('Logo initialized');
 
+        this.initLogout();
+        console.log('Logout initialized');
+        
         // Aguardar um pouco para garantir que auth.js foi carregado
         setTimeout(() => {
             if (typeof checkAuthenticationState === 'function') {
@@ -533,11 +536,17 @@ const veloAcademyApp = {
                 console.log('Estado de autenticação verificado');
             } else {
                 console.error('Função checkAuthenticationState não encontrada - auth.js pode não ter carregado');
+                // Fallback: tentar novamente após mais tempo
+                setTimeout(() => {
+                    if (typeof checkAuthenticationState === 'function') {
+                        checkAuthenticationState();
+                        console.log('Estado de autenticação verificado (tentativa 2)');
+                    } else {
+                        console.error('auth.js ainda não carregado após 500ms');
+                    }
+                }, 400);
             }
-        }, 100);
-
-        this.initLogout();
-        console.log('Logout initialized');
+        }, 200);
         
         console.log('=== VeloAcademy app inicializado com sucesso ===');
     },
@@ -1614,21 +1623,15 @@ const veloAcademyApp = {
         docElement.setAttribute('data-theme', savedTheme);
 
         const updateIcons = (theme) => {
-
-            if (theme === 'light') {
-
-                sunIcon.classList.add('active');
-
-                moonIcon.classList.remove('active');
-
-            } else {
-
-                sunIcon.classList.remove('active');
-
-                moonIcon.classList.add('active');
-
+            if (sunIcon && moonIcon) {
+                if (theme === 'light') {
+                    sunIcon.classList.add('active');
+                    moonIcon.classList.remove('active');
+                } else {
+                    sunIcon.classList.remove('active');
+                    moonIcon.classList.add('active');
+                }
             }
-
         };
 
         updateIcons(savedTheme);
