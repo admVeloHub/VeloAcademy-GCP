@@ -14,6 +14,7 @@ const homeApp = {
         this.initElements();
         this.initAnimations();
         this.checkConnectivity();
+        this.initLogout();
         this.verificarIdentificacao();
         
         // Verificação adicional para botões que podem ser carregados depois
@@ -242,6 +243,9 @@ const homeApp = {
                 // Mostrar botões do header após login
                 this.showHeaderButtons();
                 
+                // Inicializar informações do usuário
+                this.initUserInfo();
+                
                 // Redirecionar para cursos após login
                 setTimeout(() => {
                     window.location.href = './cursos.html';
@@ -279,6 +283,54 @@ const homeApp = {
         }
     },
 
+    initUserInfo() {
+        console.log('=== Inicializando informações do usuário ===');
+        const userName = localStorage.getItem('userName');
+        const userPicture = localStorage.getItem('userPicture');
+        
+        // Atualizar nome do usuário
+        const userNameElement = document.getElementById('user-name');
+        if (userNameElement) {
+            userNameElement.textContent = userName || 'Usuário';
+            console.log('Nome do usuário atualizado:', userName);
+        }
+        
+        // Atualizar avatar do usuário
+        const userAvatar = document.getElementById('user-avatar');
+        if (userAvatar) {
+            if (userPicture) {
+                userAvatar.src = userPicture;
+                userAvatar.style.display = 'block';
+                console.log('Avatar do usuário atualizado:', userPicture);
+            } else {
+                userAvatar.style.display = 'none';
+                const userInfo = document.getElementById('user-info');
+                if (userInfo) {
+                    userInfo.classList.add('no-avatar');
+                }
+            }
+        }
+    },
+
+    initLogout() {
+        console.log('=== Inicializando logout ===');
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                console.log('Logout clicado');
+                // Limpar dados do usuário
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPicture');
+                localStorage.removeItem('dadosAtendenteChatbot');
+                
+                // Redirecionar para página inicial
+                window.location.href = './index.html';
+            });
+            console.log('Event listener de logout adicionado');
+        }
+    },
+
     verificarIdentificacao() {
         console.log('=== Verificando identificação ===');
         const umDiaEmMs = 24 * 60 * 60 * 1000;
@@ -303,6 +355,7 @@ const homeApp = {
             // Usuário já está logado, ocultar modal e mostrar botões do header
             this.hideModal();
             this.showHeaderButtons();
+            this.initUserInfo();
         } else {
             console.log('Usuário não está logado, limpando dados e ocultando modal');
             // Limpar dados inválidos
