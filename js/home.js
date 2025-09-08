@@ -213,31 +213,31 @@ const homeApp = {
         console.log('=== handleGoogleSignIn chamada ===');
         console.log('Response:', response);
         
-        fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
-            headers: { Authorization: `Bearer ${response.access_token}` }
-        })
-        .then(res => res.json())
-        .then(user => {
-            console.log('Dados do usuário recebidos:', user);
-            if (user.email && user.email.endsWith(this.DOMINIO_PERMITIDO)) {
-                // Login bem-sucedido - usar mesma lógica do chat interno
+        // Decodificar o JWT token do Google Identity Services
+        try {
+            // O response.credential é um JWT token que contém os dados do usuário
+            const payload = this.decodeJWT(response.credential);
+            console.log('Payload do JWT:', payload);
+            
+            if (payload && payload.email && payload.email.endsWith(this.DOMINIO_PERMITIDO)) {
+                // Login bem-sucedido
                 const dadosUsuario = { 
-                    nome: user.name, 
-                    email: user.email, 
-                    picture: user.picture,
+                    nome: payload.name, 
+                    email: payload.email, 
+                    picture: payload.picture,
                     timestamp: Date.now() 
                 };
                 
                 // Salvar dados do usuário (mesmo formato do chat interno)
-                localStorage.setItem('userEmail', user.email);
-                localStorage.setItem('userName', user.name);
-                localStorage.setItem('userPicture', user.picture);
+                localStorage.setItem('userEmail', payload.email);
+                localStorage.setItem('userName', payload.name);
+                localStorage.setItem('userPicture', payload.picture);
                 localStorage.setItem('dadosAtendenteChatbot', JSON.stringify(dadosUsuario));
                 
                 this.hideModal();
                 
                 // Mostrar mensagem de sucesso
-                console.log('Login realizado com sucesso:', user.name);
+                console.log('Login realizado com sucesso:', payload.name);
                 
                 // Mostrar botões do header após login
                 this.showHeaderButtons();
@@ -248,22 +248,35 @@ const homeApp = {
                 }, 1000);
                 
             } else {
-                // Email não autorizado - mesma mensagem do chat interno
-                console.log('Email não autorizado:', user.email);
+                // Email não autorizado
+                console.log('Email não autorizado:', payload?.email);
                 if (this.errorMsg) {
                     this.errorMsg.textContent = 'Acesso permitido apenas para e-mails @velotax.com.br!';
                     this.errorMsg.classList.remove('hidden');
                 }
             }
-        })
-        .catch(error => {
-            // Mesmo tratamento de erro do chat interno
-            console.error('Erro ao verificar login:', error);
+        } catch (error) {
+            console.error('Erro ao decodificar JWT:', error);
             if (this.errorMsg) {
-                this.errorMsg.textContent = 'Erro ao verificar login. Tente novamente.';
+                this.errorMsg.textContent = 'Erro ao processar login. Tente novamente.';
                 this.errorMsg.classList.remove('hidden');
             }
-        });
+        }
+    },
+
+    // Função para decodificar JWT token
+    decodeJWT(token) {
+        try {
+            const base64Url = token.split('.')[1];
+            const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+            const jsonPayload = decodeURIComponent(atob(base64).split('').map(function(c) {
+                return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
+            }).join(''));
+            return JSON.parse(jsonPayload);
+        } catch (error) {
+            console.error('Erro ao decodificar JWT:', error);
+            return null;
+        }
     },
 
     verificarIdentificacao() {
