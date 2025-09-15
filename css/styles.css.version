@@ -1,0 +1,16 @@
+# Versionamento - styles.css
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.1.0 - 2024-12-19
+- Modificado layout dos botões do header no modo noturno
+- .nav-menu no modo escuro: cor do header com contorno cinza
+- .user-info no modo escuro: cor do header com contorno cinza
+- .nav-menu no modo claro: adicionado contorno azul opaco
+- .user-info no modo claro: adicionado contorno azul opaco
+- Melhorada consistência visual entre header e botões
+
+## v1.0.0 - Versão inicial
+- Sistema de temas claro/escuro implementado
+- Estilos base do VeloAcademy
+- Paleta de cores oficial Velohub
+- Layout responsivo

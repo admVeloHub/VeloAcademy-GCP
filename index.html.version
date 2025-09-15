@@ -1,0 +1,12 @@
+# Versionamento - index.html
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.1.0 - 2024-12-19
+- Removida mensagem de erro fixa do modal de login
+- Adicionado elemento login-error-text para mensagens dinâmicas
+- Melhorada estrutura do modal de login para suportar mensagens personalizadas
+
+## v1.0.0 - Versão inicial
+- Página inicial do VeloAcademy
+- Modal de login integrado
+- Estrutura base da landing page

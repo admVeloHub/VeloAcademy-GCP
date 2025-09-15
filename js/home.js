@@ -39,7 +39,7 @@ const homeApp = {
             heroExplorarCursosBtn.addEventListener('click', (e) => {
                 console.log('=== Botão Explorar Cursos clicado! ===');
                 e.preventDefault();
-                this.showModal();
+                this.handleExplorarCursosClick();
             });
             heroExplorarCursosBtn.setAttribute('data-listener-added', 'true');
             console.log('Event listener adicionado ao botão hero');
@@ -55,12 +55,25 @@ const homeApp = {
                 console.log('=== Botão Ver Cursos clicado! ===');
                 console.log('Event:', e);
                 e.preventDefault();
-                this.showModal();
+                this.handleExplorarCursosClick();
             });
             dashboardVerCursosBtn.setAttribute('data-listener-added', 'true');
             console.log('Event listener adicionado com sucesso ao botão dashboard');
         } else {
             console.error('ERRO: Botão dashboard não encontrado!');
+        }
+    },
+
+    handleExplorarCursosClick() {
+        console.log('=== Verificando sessão antes de mostrar modal ===');
+        
+        // Verificar se há uma sessão válida
+        if (typeof isSessionValid === 'function' && isSessionValid()) {
+            console.log('Sessão válida encontrada, redirecionando para cursos');
+            window.location.href = './cursos.html';
+        } else {
+            console.log('Sessão inválida ou não encontrada, mostrando modal de login');
+            this.showModal();
         }
     },
 
@@ -127,8 +140,8 @@ const homeApp = {
         console.log('=== Tentando mostrar modal ===');
         console.log('Modal element:', this.loginModal);
         if (this.loginModal) {
-            this.loginModal.classList.add('show');
-            document.body.style.overflow = 'hidden';
+        this.loginModal.classList.add('show');
+        document.body.style.overflow = 'hidden';
             console.log('Modal mostrado com sucesso');
             console.log('Classes do modal:', this.loginModal.className);
         } else {
@@ -139,8 +152,8 @@ const homeApp = {
     hideModal() {
         console.log('=== Ocultando modal ===');
         if (this.loginModal) {
-            this.loginModal.classList.remove('show');
-            document.body.style.overflow = 'auto';
+        this.loginModal.classList.remove('show');
+        document.body.style.overflow = 'auto';
             console.log('Modal ocultado com sucesso');
         } else {
             console.error('Modal element não encontrado para ocultar!');
@@ -203,8 +216,8 @@ const homeApp = {
         }).catch(error => {
             console.error('Erro ao inicializar Google Sign-In:', error);
             if (this.errorMsg) {
-                this.errorMsg.textContent = 'Erro ao carregar autenticação do Google. Verifique sua conexão ou tente novamente mais tarde.';
-                this.errorMsg.classList.remove('hidden');
+            this.errorMsg.textContent = 'Erro ao carregar autenticação do Google. Verifique sua conexão ou tente novamente mais tarde.';
+            this.errorMsg.classList.remove('hidden');
             }
         });
     },
@@ -261,17 +274,19 @@ const homeApp = {
             } else {
                 // Email não autorizado
                 console.log('Email não autorizado:', payload?.email);
-                if (this.errorMsg) {
-                    this.errorMsg.textContent = 'Acesso permitido apenas para e-mails @velotax.com.br!';
-                    this.errorMsg.classList.remove('hidden');
-                }
+                this.showErrorMessage('Acesso negado. Apenas e-mails @velotax.com.br são autorizados.');
             }
         } catch (error) {
             console.error('Erro ao decodificar JWT:', error);
-            if (this.errorMsg) {
-                this.errorMsg.textContent = 'Erro ao processar login. Tente novamente.';
-                this.errorMsg.classList.remove('hidden');
-            }
+            this.showErrorMessage('Erro ao processar login. Tente novamente.');
+        }
+    },
+
+    showErrorMessage(message) {
+        const errorTextElement = document.getElementById('login-error-text');
+        if (errorTextElement && this.errorMsg) {
+            errorTextElement.textContent = message;
+            this.errorMsg.classList.remove('hidden');
         }
     },
 
@@ -326,9 +341,9 @@ const homeApp = {
             logoutBtn.addEventListener('click', () => {
                 console.log('Logout clicado');
                 // Limpar dados do usuário
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userPicture');
+            localStorage.removeItem('userEmail');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userPicture');
                 localStorage.removeItem('dadosAtendenteChatbot');
                 
                 // Redirecionar para página inicial
@@ -409,7 +424,7 @@ function handleCredentialResponse(response) {
     console.log('=== handleCredentialResponse chamada ===');
     console.log('Resposta do Google Sign-In:', response);
     if (homeApp && homeApp.handleGoogleSignIn) {
-        homeApp.handleGoogleSignIn(response);
+    homeApp.handleGoogleSignIn(response);
     } else {
         console.error('homeApp não está disponível ou handleGoogleSignIn não existe');
     }
@@ -420,6 +435,6 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log('DOM carregado, inicializando homeApp...');
     // Pequeno delay para garantir que todos os elementos estejam prontos
     setTimeout(() => {
-        homeApp.init();
+    homeApp.init();
     }, 100);
 });

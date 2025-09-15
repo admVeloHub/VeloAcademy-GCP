@@ -246,6 +246,18 @@ header {
     border-bottom: 1px solid rgba(255, 255, 255, 0.2);
     box-shadow: 0 4px 20px rgba(0, 102, 171, 0.3);
 }
+
+/* Navegação - Tema Escuro */
+.dark .nav-menu {
+    background-color: var(--blue-opaque);  /* Mesma cor do header */
+    border: 1px solid var(--gray);  /* Contorno cinza */
+}
+
+/* User Info - Tema Escuro */
+.dark .user-info {
+    background-color: var(--blue-opaque);  /* Mesma cor do header */
+    border: 1px solid var(--gray);  /* Contorno cinza */
+}
 .header-container {
     display: flex;
     justify-content: center;
@@ -282,6 +294,7 @@ header {
     background-color: var(--cor-container);  /* Usa cor padrão dos containers */
     padding: 8px 16px;
     border-radius: var(--borda-raio);
+    border: 1px solid var(--blue-opaque);  /* Contorno azul opaco no modo claro */
 }
 
 .nav-link {
@@ -1311,7 +1324,7 @@ footer p {
     gap: 10px;
     padding: 8px 12px;
     background-color: var(--cor-container);
-    border: 1px solid var(--cor-borda);
+    border: 1px solid var(--blue-opaque);  /* Contorno azul opaco no modo claro */
     border-radius: 20px;
     transition: all 0.3s ease;
     position: absolute;

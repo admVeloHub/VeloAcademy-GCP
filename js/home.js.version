@@ -1,0 +1,15 @@
+# Versionamento - home.js
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.1.0 - 2024-12-19
+- Corrigido botão "Explorar Cursos" para verificar sessão antes de mostrar modal
+- Adicionada função handleExplorarCursosClick() para verificação de sessão
+- Removida mensagem de erro fixa do modal de login
+- Adicionada mensagem de "acesso negado" para emails não autorizados
+- Criada função showErrorMessage() para exibir mensagens dinâmicas
+- Melhorada experiência do usuário com verificação de sessão
+
+## v1.0.0 - Versão inicial
+- Sistema de login com Google Sign-In implementado
+- Modal de login funcional
+- Integração com sistema de autenticação
