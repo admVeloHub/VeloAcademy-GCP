@@ -971,6 +971,11 @@ const veloAcademyApp = {
 
         for (const courseId in this.courseDatabase) {
 
+            // Ocultar temporariamente outros cursos, mostrar apenas onboarding
+            if (courseId !== 'onboarding') {
+                continue;
+            }
+
             const course = this.courseDatabase[courseId];
 
             const card = document.createElement('div');

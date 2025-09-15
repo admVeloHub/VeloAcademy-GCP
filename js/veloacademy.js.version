@@ -1,6 +1,11 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.4.0 - 2024-12-19
+- Ocultados temporariamente outros cursos além do onboarding
+- Mantida funcionalidade completa dos cursos ocultos
+- Apenas curso "Onboarding de Atendimento Velotax" visível na interface
+
 ## v1.3.0 - 2024-12-19
 - Habilitado botão "Fazer Quiz" para seção "CRM e Tabulação de Chamados"
 - Adicionado suporte ao quiz de tabulação (ID: tabulacao)
