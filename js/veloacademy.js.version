@@ -1,0 +1,19 @@
+# Versionamento - veloacademy.js
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.2.0 - 2024-12-19
+- Reorganização dos módulos nos dados de fallback
+- Criado novo Módulo 2: "Atendimento Velotax" com CRM e Tabulação
+- Módulo 3: "Conhecendo os Produtos Velotax" (antigo módulo 2)
+- IDs das lições reorganizados para evitar conflitos
+- Sincronizado com atualizações do cursos.json
+
+## v1.1.0 - 2024-12-19
+- Atualizado dados de fallback para treinamento de crédito do trabalhador
+- Sincronizado com atualizações do cursos.json
+- Adicionado material extra "Pontos de Atenção" nos dados de fallback
+- Novos links do Google Drive implementados
+
+## v1.0.0 - Versão inicial
+- Sistema de fallback implementado
+- Estrutura base dos cursos configurada

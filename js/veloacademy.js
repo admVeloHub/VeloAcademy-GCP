@@ -872,7 +872,31 @@ const veloAcademyApp = {
 
                     {
 
-                        title: 'Módulo 2: Conhecendo os Produtos Velotax',
+                        title: 'Módulo 2: Atendimento Velotax',
+
+                        sections: [
+
+                            {
+
+                                subtitle: 'CRM e Tabulação de Chamados',
+
+                                lessons: [
+
+                                    { id: 'l2-1', title: 'Aula - Conhecendo o CRM', type: 'video', duration: 'Aguardando link', filePath: '#' },
+
+                                    { id: 'l2-2', title: 'Ebook - Tabulação', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws/view?usp=drive_link' }
+
+                                ]
+
+                            }
+
+                        ]
+
+                    },
+
+                    {
+
+                        title: 'Módulo 3: Conhecendo os Produtos Velotax',
 
                         sections: [
 
@@ -882,11 +906,13 @@ const veloAcademyApp = {
 
                                 lessons: [
 
-                                    { id: 'l2-1', title: 'Crédito do Trabalhador', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1G6V9Ih6z4NDyLyamv6aYJksR-reQV2Tv/view?usp=drive_link' },
+                                    { id: 'l3-1', title: 'Crédito do Trabalhador', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1o6HvddPS-Dbybp-vG1-mhQG5-3KjtH_i/view?usp=drive_link' },
 
-                                    { id: 'l2-2', title: 'Possíveis ocorrências - Crédito do Trabalhador', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link' },
+                                    { id: 'l3-2', title: 'Possíveis ocorrências - Crédito do Trabalhador', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link' },
 
-                                    { id: 'l2-3', title: 'Treinamento - Crédito do Trabalhador', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/17aG4cX8xwXqgX_wOVyUi7b-v5zGyeGC3/view?usp=drive_link' }
+                                    { id: 'l3-3', title: 'Treinamento - Crédito do Trabalhador', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1zcpwmnyKHKtUFnUs3Nuu9YcQyvL577nj/view?usp=drive_link' },
+
+                                    { id: 'l3-4', title: 'Material Extra - Pontos de Atenção', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/16xbXdqwMJFoX-16KVlK_LqTkTg2CPDOE/view?usp=drive_link' }
 
                                 ]
 

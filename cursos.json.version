@@ -1,0 +1,20 @@
+# Versionamento - cursos.json
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.2.0 - 2024-12-19
+- Reorganização dos módulos: Módulo 2 renomeado para Módulo 3
+- Criado novo Módulo 2: "Atendimento Velotax"
+- Adicionado treinamento "CRM e Tabulação de Chamados"
+- Aula "Conhecendo o CRM" (aguardando link)
+- Ebook de tabulação adicionado
+- IDs das lições reorganizados para evitar conflitos
+
+## v1.1.0 - 2024-12-19
+- Atualizado vídeo do treinamento de crédito do trabalhador
+- Adicionado material extra "Pontos de Atenção" para download
+- Atualizado ebook de crédito do trabalhador
+- Novos links do Google Drive implementados
+
+## v1.0.0 - Versão inicial
+- Estrutura base dos cursos implementada
+- Treinamentos essenciais configurados

@@ -17,34 +17,47 @@
                 ]
             },
             {
-                "title": "Módulo 2: Conhecendo os Produtos Velotax",
+                "title": "Módulo 2: Atendimento Velotax",
+                "sections": [
+                    {
+                        "subtitle": "CRM e Tabulação de Chamados",
+                        "lessons": [
+                            { "id": "l2-1", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "Aguardando link", "filePath": "#", "driveId": null },
+                            { "id": "l2-2", "title": "Ebook - Tabulação", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws/view?usp=drive_link", "driveId": "19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws" }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Módulo 3: Conhecendo os Produtos Velotax",
                 "sections": [
                     {
                         "subtitle": "Crédito do Trabalhador",
                         "lessons": [
-                            { "id": "l2-1", "title": "Aula - Crédito do Trabalhador", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/143DQpZhtIHkTsiPtfwheAVn6gmpxD05s/view?usp=drive_link", "driveId": "143DQpZhtIHkTsiPtfwheAVn6gmpxD05s" },
-                            { "id": "l2-2", "title": "Possíveis ocorrências - Crédito do Trabalhador", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link", "driveId": "1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ" },
-                            { "id": "l2-3", "title": "Ebook Crédito do Trabalhador", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1nfd82FWOh_-HdTMrtSnSKUif9UW_C9Ae/view?usp=drive_link", "driveId": "1nfd82FWOh_-HdTMrtSnSKUif9UW_C9Ae" }
+                            { "id": "l3-1", "title": "Aula - Crédito do Trabalhador", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1o6HvddPS-Dbybp-vG1-mhQG5-3KjtH_i/view?usp=drive_link", "driveId": "1o6HvddPS-Dbybp-vG1-mhQG5-3KjtH_i" },
+                            { "id": "l3-2", "title": "Possíveis ocorrências - Crédito do Trabalhador", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link", "driveId": "1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ" },
+                            { "id": "l3-3", "title": "Ebook Crédito do Trabalhador", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1zcpwmnyKHKtUFnUs3Nuu9YcQyvL577nj/view?usp=drive_link", "driveId": "1zcpwmnyKHKtUFnUs3Nuu9YcQyvL577nj" },
+                            { "id": "l3-4", "title": "Material Extra - Pontos de Atenção", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/16xbXdqwMJFoX-16KVlK_LqTkTg2CPDOE/view?usp=drive_link", "driveId": "16xbXdqwMJFoX-16KVlK_LqTkTg2CPDOE" }
                         ]
                     },
                     {
                         "subtitle": "Chaves PIX",
                         "lessons": [
-                            { "id": "l2-5", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link", "driveId": "1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7" },
-                            { "id": "l2-6", "title": "Ebook Chaves PIX", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1XT5u5c5FlXEKqTggTg9uoDhDGae8BSGe/view?usp=drive_link", "driveId": "1XT5u5c5FlXEKqTggTg9uoDhDGae8BSGe" }
+                            { "id": "l3-5", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link", "driveId": "1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7" },
+                            { "id": "l3-6", "title": "Ebook Chaves PIX", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1XT5u5c5FlXEKqTggTg9uoDhDGae8BSGe/view?usp=drive_link", "driveId": "1XT5u5c5FlXEKqTggTg9uoDhDGae8BSGe" }
                         ]
                     },
                     {
                         "subtitle": "Antecipação da Restituição",
                         "lessons": [
-                            { "id": "l2-7", "title": "Em breve - Conteúdo sobre Antecipação da Restituição", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                            { "id": "l3-7", "title": "Em breve - Conteúdo sobre Antecipação da Restituição", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
                         ]
                     },
                     {
                         "subtitle": "Crédito Pessoal",
                         "lessons": [
-                            { "id": "l2-8", "title": "Aula - Crédito Pessoal", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link", "driveId": "1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0" },
-                            { "id": "l2-9", "title": "Ebook Crédito Pessoal", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1di7HGnHfPdu6YHZ2JGMY2JCN0PsNIa2F/view?usp=drive_link", "driveId": "1di7HGnHfPdu6YHZ2JGMY2JCN0PsNIa2F" }
+                            { "id": "l3-8", "title": "Aula - Crédito Pessoal", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link", "driveId": "1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0" },
+                            { "id": "l3-9", "title": "Ebook Crédito Pessoal", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1di7HGnHfPdu6YHZ2JGMY2JCN0PsNIa2F/view?usp=drive_link", "driveId": "1di7HGnHfPdu6YHZ2JGMY2JCN0PsNIa2F" }
                         ]
                     }
                 ]
