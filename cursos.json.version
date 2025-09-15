@@ -1,6 +1,11 @@
 # Versionamento - cursos.json
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.3.0 - 2024-12-19
+- Atualizado link da aula "Conhecendo o CRM" com vídeo funcional
+- Duração da aula atualizada para 15 minutos
+- Link do Google Drive implementado: 1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44
+
 ## v1.2.0 - 2024-12-19
 - Reorganização dos módulos: Módulo 2 renomeado para Módulo 3
 - Criado novo Módulo 2: "Atendimento Velotax"

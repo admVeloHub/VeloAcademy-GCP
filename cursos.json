@@ -22,7 +22,7 @@
                     {
                         "subtitle": "CRM e Tabulação de Chamados",
                         "lessons": [
-                            { "id": "l2-1", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "Aguardando link", "filePath": "#", "driveId": null },
+                            { "id": "l2-1", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44/view?usp=drive_link", "driveId": "1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44" },
                             { "id": "l2-2", "title": "Ebook - Tabulação", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws/view?usp=drive_link", "driveId": "19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws" }
                         ]
                     }

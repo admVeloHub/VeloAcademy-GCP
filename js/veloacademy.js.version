@@ -1,6 +1,11 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.0 - 2024-12-19
+- Atualizado link da aula "Conhecendo o CRM" nos dados de fallback
+- Duração da aula atualizada para 15 minutos
+- Sincronizado com atualizações do cursos.json
+
 ## v1.4.0 - 2024-12-19
 - Ocultados temporariamente outros cursos além do onboarding
 - Mantida funcionalidade completa dos cursos ocultos
