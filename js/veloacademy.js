@@ -1347,7 +1347,7 @@ const veloAcademyApp = {
                     });
                     
                     // Adicionar botão de quiz para seções específicas
-                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal') {
+                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal' || section.subtitle === 'CRM e Tabulação de Chamados') {
                         let quizCourseId;
                         if (section.subtitle === 'Crédito do Trabalhador') {
                             quizCourseId = 'credito';
@@ -1355,6 +1355,8 @@ const veloAcademyApp = {
                             quizCourseId = 'pix';
                         } else if (section.subtitle === 'Crédito Pessoal') {
                             quizCourseId = 'credito-pessoal';
+                        } else if (section.subtitle === 'CRM e Tabulação de Chamados') {
+                            quizCourseId = 'tabulacao';
                         }
                         
                         console.log(`Adicionando quiz para seção: ${section.subtitle} com ID: ${quizCourseId}`);

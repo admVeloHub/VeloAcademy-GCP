@@ -1,6 +1,11 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.3.0 - 2024-12-19
+- Habilitado botão "Fazer Quiz" para seção "CRM e Tabulação de Chamados"
+- Adicionado suporte ao quiz de tabulação (ID: tabulacao)
+- Integração completa com sistema de quiz e certificação
+
 ## v1.2.0 - 2024-12-19
 - Reorganização dos módulos nos dados de fallback
 - Criado novo Módulo 2: "Atendimento Velotax" com CRM e Tabulação

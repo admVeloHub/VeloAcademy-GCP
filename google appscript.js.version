@@ -1,0 +1,13 @@
+# Versionamento - google appscript.js
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.1.0 - 2024-12-19
+- Adicionado quiz "Tabulação no Atendimento" (ID: tabulacao)
+- 8 perguntas sobre práticas de tabulação de chamados
+- Nota mínima para aprovação: 6 pontos
+- Integrado com sistema de certificação
+
+## v1.0.0 - Versão inicial
+- Sistema de quiz implementado
+- Quizzes disponíveis: pix, credito, credito-pessoal
+- Sistema de certificação configurado

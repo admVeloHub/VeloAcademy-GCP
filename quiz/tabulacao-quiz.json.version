@@ -1,0 +1,8 @@
+# Versionamento - tabulacao-quiz.json
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.0.0 - 2024-12-19
+- Criado quiz "Tabulação no Atendimento"
+- 8 perguntas sobre práticas de tabulação de chamados
+- Nota mínima para aprovação: 6 pontos
+- Integrado com sistema de certificação

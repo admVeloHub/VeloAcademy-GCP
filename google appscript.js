@@ -53,6 +53,20 @@ const coursesData = {
       { question: "O cliente realizou o consentimento do Open Finance, mas a tela não avançou. Ele pergunta se houve erro. Qual a resposta correta?", options: ["Não, a análise pode levar entre 2 e 5 minutos, basta aguardar.", "Sim, o processo falhou e deve ser reiniciado.", "O erro é do banco do cliente e não há solução.", "O processo só avança se o cliente fizer o cadastro completo novamente."], answer: 0 },
       { question: "Em caso de não pagamento das parcelas, quais consequências podem ocorrer?", options: ["Apenas bloqueio do aplicativo Velotax", "Cobrança judicial imediata", "Negativação em órgãos de proteção ao crédito e, em alguns casos, protesto em cartório", "Cancelamento automático do contrato sem consequências"], answer: 2 }
     ]
+  },
+  'tabulacao': {
+    title: 'Tabulação no Atendimento',
+    passingScore: 6,
+    questions: [
+      { question: "Qual é o objetivo principal da tabulação de chamados no atendimento?", options: ["Aumentar o tempo de atendimento", "Registrar e organizar informações dos clientes para acompanhamento", "Reduzir o número de chamadas", "Automatizar completamente o atendimento"], answer: 1 },
+      { question: "Durante a tabulação, qual informação é considerada mais crítica para o acompanhamento do caso?", options: ["Horário da chamada", "Nome completo do cliente e CPF", "Duração da conversa", "Número do protocolo"], answer: 1 },
+      { question: "Qual é a melhor prática ao tabular um chamado de reclamação?", options: ["Registrar apenas o problema relatado", "Incluir problema, solução oferecida e status do caso", "Anotar somente o nome do cliente", "Deixar em branco se não houver solução imediata"], answer: 1 },
+      { question: "Quando um cliente solicita cancelamento de produto, o que deve ser registrado na tabulação?", options: ["Apenas a solicitação de cancelamento", "Motivo do cancelamento, data da solicitação e próximos passos", "Somente o nome do produto", "Apenas o protocolo gerado"], answer: 1 },
+      { question: "Qual é o prazo recomendado para atualização de chamados em aberto?", options: ["A cada 24 horas", "A cada 48 horas", "A cada 72 horas", "Conforme acordado com o cliente"], answer: 3 },
+      { question: "Na tabulação de chamados, qual campo é obrigatório para identificação única do cliente?", options: ["Nome completo", "CPF", "Telefone", "Email"], answer: 1 },
+      { question: "Quando um chamado é escalado para outro setor, o que deve ser registrado?", options: ["Apenas o setor de destino", "Motivo da escalação, setor de destino e prazo de retorno", "Somente o protocolo", "Apenas a data da escalação"], answer: 1 },
+      { question: "Qual é a importância de classificar corretamente o tipo de chamado na tabulação?", options: ["Facilita o relatório mensal", "Permite direcionamento adequado e análise de tendências", "Reduz o tempo de atendimento", "Automatiza o processo de resposta"], answer: 1 }
+    ]
   }
 };
 
