@@ -14,6 +14,19 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 16:15:00
+### Tipo: GitHub Push
+### Versão: v1.1.0
+### Arquivos Modificados:
+- css/styles.css
+- index.html
+- js/home.js
+- css/styles.css.version
+- index.html.version
+- js/home.js.version
+### Descrição: Correções no sistema de login e melhorias de layout - Corrigido botão Explorar Cursos para verificar sessão, removida mensagem de erro fixa, adicionada mensagem de acesso negado, modificado layout dos botões do header
+### Commit Hash: 6985069
+
 ### Data/Hora: 2024-12-19 15:30:00
 ### Tipo: GitHub Push
 ### Versão: v1.4.0
