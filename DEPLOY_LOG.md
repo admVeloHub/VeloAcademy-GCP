@@ -14,6 +14,17 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 16:45:00
+### Tipo: GitHub Push
+### Versão: v1.3.0 (cursos.json), v1.5.0 (veloacademy.js)
+### Arquivos Modificados:
+- cursos.json
+- cursos.json.version
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Atualizar link da aula 'Conhecendo o CRM' - Link do vídeo implementado, duração atualizada para 15 minutos, aula agora funcional
+### Commit Hash: 636b348
+
 ### Data/Hora: 2024-12-19 16:15:00
 ### Tipo: GitHub Push
 ### Versão: v1.1.0
