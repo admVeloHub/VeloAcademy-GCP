@@ -526,7 +526,7 @@ const veloAcademyApp = {
                 approved: approved
             });
             
-            const url = `${this.appsScriptConfig.scriptUrl}?action=submitResult&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}&approved=${approved}`;
+            const url = `${this.appsScriptConfig.scriptUrl}?action=downloadCertificate&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}`;
             
             console.log('URL do Apps Script para certificado:', url);
             console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);

@@ -1,6 +1,12 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.4 - 2024-12-19
+- Alteração da URL de envio para action=downloadCertificate
+- Removido parâmetro approved da URL (não mais necessário)
+- URL otimizada para download direto do certificado
+- Parâmetros mantidos: name, email, courseId, score, totalQuestions, finalGrade
+
 ## v1.5.3 - 2024-12-19
 - Alteração da URL de envio para action=submitResult
 - Novos parâmetros: score, totalQuestions, finalGrade, approved
