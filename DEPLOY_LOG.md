@@ -14,6 +14,27 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 18:30:00
+### Tipo: GitHub Push
+### Versão: v2.1.0 (cursos.json), v1.4.1 (veloacademy.js), v1.3.0 (styles.css), v1.2.0 (index.html), v1.2.0 (home.js), v1.0.0 (toast.js)
+### Arquivos Modificados:
+- cursos.json
+- cursos.json.version
+- js/veloacademy.js
+- js/veloacademy.js.version
+- css/styles.css
+- css/styles.css.version
+- index.html
+- index.html.version
+- js/home.js
+- js/home.js.version
+- js/toast.js (novo)
+- js/toast.js.version (novo)
+- .cursorrules (novo)
+- SSO_Implementation_Guide.md (novo)
+### Descrição: Implementação de sistema de toast notifications e reestruturação completa dos cursos - Sistema de toast para login (sucesso/erro), reestruturação dos cursos com novo curso Produtos Velotax (2 módulos agrupados), quizzes funcionando corretamente, melhorias no header, ambos os cursos marcados como Essencial
+### Commit Hash: 1e54e92
+
 ### Data/Hora: 2024-12-19 16:45:00
 ### Tipo: GitHub Push
 ### Versão: v1.3.0 (cursos.json), v1.5.0 (veloacademy.js)
