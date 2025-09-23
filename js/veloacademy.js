@@ -102,10 +102,12 @@ const veloAcademyApp = {
                         passingScore: data.passingScore || 6, // Fallback para nota mínima se não fornecida
                         currentQuestion: 0,
                         userAnswers: [],
-                        startTime: Date.now()
+                        startTime: Date.now(),
+                        optionMappings: data.optionMappings || {} // Mapeamento de opções randomizadas
                     };
                     
                     console.log('Quiz carregado com sucesso via JSONP:', this.currentQuiz);
+                    console.log('Mapeamento de opções recebido:', this.currentQuiz.optionMappings);
                     this.showQuizInterface();
                     resolve(true);
                 } else {
@@ -269,12 +271,9 @@ const veloAcademyApp = {
                 const courseId = this.currentQuiz.courseId;
                 const answers = JSON.stringify(this.currentQuiz.userAnswers);
                 
-                // Criar mapeamento de respostas para compatibilidade
-                const answerMappings = this.currentQuiz.userAnswers.map((answer, index) => ({
-                    questionIndex: index,
-                    selectedAnswer: answer,
-                    isCorrect: answer === this.currentQuiz.questions[index].answer
-                }));
+                // Criar mapeamento de opções randomizadas (formato correto para o backend)
+                const answerMappings = this.currentQuiz.optionMappings || {};
+                console.log('Enviando answerMappings (formato correto):', answerMappings);
 
                 const callbackName = 'submitCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 console.log('Submit callback name:', callbackName);

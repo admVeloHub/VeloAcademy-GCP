@@ -1,6 +1,13 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.1 - 2024-12-19
+- Correção do formato do answerMappings para compatibilidade com backend
+- Alterado de formato de array para objeto de mapeamento de índices
+- Adicionado armazenamento de optionMappings no currentQuiz
+- Logs de debug adicionados para verificação do mapeamento
+- Formato correto: {"0": 2, "1": 0, "2": 3, "3": 1} (índice randomizado -> índice original)
+
 ## v1.5.0 - 2024-12-19
 - Implementação completa do sistema JSONP para integração com Google Apps Script
 - Substituição de fetch() por JSONP para contornar limitações de CORS
