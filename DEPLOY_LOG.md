@@ -14,6 +14,15 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 20:00:00
+### Tipo: GitHub Push
+### Versão: v1.5.4 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Alteração da URL para action=downloadCertificate - Removido parâmetro approved. URL otimizada para download direto do certificado
+### Commit Hash: b61a8c8
+
 ### Data/Hora: 2024-12-19 19:45:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.3 (veloacademy.js)
