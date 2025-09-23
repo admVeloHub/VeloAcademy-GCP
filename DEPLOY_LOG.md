@@ -14,6 +14,15 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 19:15:00
+### Tipo: GitHub Push
+### Versão: v1.5.1 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Correção do formato answerMappings para compatibilidade com backend - Alterado de array para objeto de mapeamento de índices, formato correto para servidor Google Apps Script
+### Commit Hash: 4d3ceb2
+
 ### Data/Hora: 2024-12-19 19:00:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.0 (veloacademy.js)
