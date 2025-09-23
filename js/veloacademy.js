@@ -500,24 +500,33 @@ const veloAcademyApp = {
             // Obter dados completos do usuário autenticado
             const userData = this.getAuthenticatedUserData();
             const courseId = this.currentQuiz.courseId;
-            const answers = JSON.stringify(this.currentQuiz.userAnswers);
+            
+            // Calcular pontuação para envio
+            let score = 0;
+            this.currentQuiz.questions.forEach((question, index) => {
+                const userAnswer = this.currentQuiz.userAnswers[index];
+                const correctAnswer = question.answer;
+                if (userAnswer === correctAnswer) {
+                    score++;
+                }
+            });
+            
+            const totalQuestions = this.currentQuiz.questions.length;
+            const finalGrade = (score / totalQuestions) * 10;
+            const passingScore = this.currentQuiz.passingScore || 6;
+            const approved = finalGrade >= passingScore;
 
             console.log('Dados para certificado:', {
                 userName: userData.name,
                 userEmail: userData.email,
                 courseId: courseId,
-                answers: this.currentQuiz.userAnswers,
-                answerMappings: this.currentQuiz.optionMappings
+                score: score,
+                totalQuestions: totalQuestions,
+                finalGrade: finalGrade,
+                approved: approved
             });
-
-            // Obter answerMappings do quiz atual
-            const answerMappings = this.currentQuiz.optionMappings || {};
-            const answerMappingsJson = JSON.stringify(answerMappings);
             
-            console.log('AnswerMappings para certificado:', answerMappings);
-            console.log('AnswerMappings JSON:', answerMappingsJson);
-            
-            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}&answerMappings=${encodeURIComponent(answerMappingsJson)}`;
+            const url = `${this.appsScriptConfig.scriptUrl}?action=submitResult&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}&approved=${approved}`;
             
             console.log('URL do Apps Script para certificado:', url);
             console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);

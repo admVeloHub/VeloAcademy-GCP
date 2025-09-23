@@ -1,6 +1,13 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.3 - 2024-12-19
+- Alteração da URL de envio para action=submitResult
+- Novos parâmetros: score, totalQuestions, finalGrade, approved
+- Removidos parâmetros: answers, answerMappings (não mais necessários)
+- Cálculo de pontuação integrado na função generateCertificate()
+- URL simplificada e otimizada para o novo backend
+
 ## v1.5.2 - 2024-12-19
 - Correção crítica: URL do certificado agora inclui answerMappings
 - Adicionado parâmetro answerMappings na função generateCertificate()
