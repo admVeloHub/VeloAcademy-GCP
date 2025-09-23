@@ -506,10 +506,18 @@ const veloAcademyApp = {
                 userName: userData.name,
                 userEmail: userData.email,
                 courseId: courseId,
-                answers: this.currentQuiz.userAnswers
+                answers: this.currentQuiz.userAnswers,
+                answerMappings: this.currentQuiz.optionMappings
             });
 
-            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
+            // Obter answerMappings do quiz atual
+            const answerMappings = this.currentQuiz.optionMappings || {};
+            const answerMappingsJson = JSON.stringify(answerMappings);
+            
+            console.log('AnswerMappings para certificado:', answerMappings);
+            console.log('AnswerMappings JSON:', answerMappingsJson);
+            
+            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}&answerMappings=${encodeURIComponent(answerMappingsJson)}`;
             
             console.log('URL do Apps Script para certificado:', url);
             console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);

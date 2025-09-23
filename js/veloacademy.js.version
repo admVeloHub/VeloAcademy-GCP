@@ -1,6 +1,13 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.2 - 2024-12-19
+- Correção crítica: URL do certificado agora inclui answerMappings
+- Adicionado parâmetro answerMappings na função generateCertificate()
+- Logs de debug adicionados para verificação do mapeamento no certificado
+- URL do certificado agora completa com todos os parâmetros necessários
+- Prioridade ALTA: Sistema de certificados agora funcional
+
 ## v1.5.1 - 2024-12-19
 - Correção do formato do answerMappings para compatibilidade com backend
 - Alterado de formato de array para objeto de mapeamento de índices
