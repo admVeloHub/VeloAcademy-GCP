@@ -1,16 +1,34 @@
 # Versionamento - styles.css
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.3.0 - 2024-12-19
+- Sistema de toast notifications implementado
+- Removidos estilos do elemento de erro fixo do modal
+- Adicionados estilos para toasts de sucesso e erro
+- Animações suaves para entrada e saída dos toasts
+- Barra de progresso animada nos toasts
+- Suporte completo ao tema escuro para toasts
+- Responsividade para dispositivos móveis
+- Integração com paleta de cores oficial VeloHub
+
+## v1.2.0 - 2024-12-19
+- Sistema de tema escuro implementado e funcionando
+- Paleta de cores oficial VeloHub aplicada
+- Containers e cards padronizados
+- Tipografia Poppins e Anton implementada
+- Sistema de animações nos cards de cursos
+- Grid responsivo para cursos
+- Estilos para quiz e resultados
+
 ## v1.1.0 - 2024-12-19
-- Modificado layout dos botões do header no modo noturno
-- .nav-menu no modo escuro: cor do header com contorno cinza
-- .user-info no modo escuro: cor do header com contorno cinza
-- .nav-menu no modo claro: adicionado contorno azul opaco
-- .user-info no modo claro: adicionado contorno azul opaco
-- Melhorada consistência visual entre header e botões
+- Layout guidelines VeloHub implementado
+- Sistema de cores padronizado
+- Containers principais e secundários
+- Botões e inputs padronizados
+- Modal de login elegante
+- Dashboard e seções do usuário
 
 ## v1.0.0 - Versão inicial
-- Sistema de temas claro/escuro implementado
-- Estilos base do VeloAcademy
-- Paleta de cores oficial Velohub
-- Layout responsivo
+- Estilos base implementados
+- Layout responsivo básico
+- Cores e tipografia iniciais

@@ -1,0 +1,11 @@
+# Versionamento - toast.js
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.0.0 - 2024-12-19
+- Sistema de toast notifications implementado
+- Suporte a toasts de sucesso e erro
+- Animações suaves de entrada e saída
+- Auto-remoção com barra de progresso
+- Responsivo para mobile e desktop
+- Compatível com tema claro e escuro
+- Integração com sistema de login do VeloAcademy

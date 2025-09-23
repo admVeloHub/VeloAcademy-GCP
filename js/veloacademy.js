@@ -858,13 +858,23 @@ const veloAcademyApp = {
 
                         title: 'Módulo 1: Treinamentos Essenciais',
 
-                        lessons: [
+                        sections: [
 
-                            { id: 'l1-1', title: 'Treinamento de atendimento ao cliente', type: 'video', duration: '5 min', filePath: 'https://drive.google.com/file/d/1LdjDs0eiD-6nQOnpPdb-Ig8zDAZNVZWs/view?usp=sharing' },
+                            {
 
-                            { id: 'l1-2', title: 'Treinamento de qualidade', type: 'video', duration: '10 min', filePath: 'https://drive.google.com/file/d/1hLlrViKOIYd9yf9VqUldn4OvdIhjkQiN/view?usp=drive_link' },
+                                subtitle: 'Seja Bem Vindo',
 
-                            { id: 'l1-3', title: 'Treinamento via redes sociais', type: 'video', duration: '8 min', filePath: 'https://drive.google.com/file/d/1DKe3UJU4ydHK2wH3w2PFUOG0OHRx3cPc/view?usp=drive_link' }
+                                lessons: [
+
+                                    { id: 'l1-1', title: 'Bem vindo ao VeloAcademy', type: 'video', duration: '5 min', filePath: 'https://drive.google.com/file/d/1ZsiIxvii07xahTVTZURDENX4C3FVTEqf/view?usp=drive_link' },
+
+                                    { id: 'l1-2', title: 'Sobre o Velotax', type: 'video', duration: '10 min', filePath: '#' },
+
+                                    { id: 'l1-3', title: 'O Escritório', type: 'video', duration: '8 min', filePath: '#' }
+
+                                ]
+
+                            }
 
                         ]
 
@@ -882,9 +892,9 @@ const veloAcademyApp = {
 
                                 lessons: [
 
-                                    { id: 'l2-1', title: 'Aula - Conhecendo o CRM', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44/view?usp=drive_link' },
+                                    { id: 'l2-1', title: 'Aula - Conhecendo o CRM', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2/view?usp=drive_link' },
 
-                                    { id: 'l2-2', title: 'Ebook - Tabulação', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws/view?usp=drive_link' }
+                                    { id: 'l2-2', title: 'Ebook - Tabulação', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja/view?usp=drive_link' }
 
                                 ]
 
@@ -892,11 +902,23 @@ const veloAcademyApp = {
 
                         ]
 
-                    },
+                    }
+
+                ]
+
+            },
+
+            'produtos': {
+
+                title: 'Produtos Velotax',
+
+                description: 'Conheça todos os produtos e serviços oferecidos pela Velotax.',
+
+                modules: [
 
                     {
 
-                        title: 'Módulo 3: Conhecendo os Produtos Velotax',
+                        title: 'Módulo 1: Produtos de Crédito',
 
                         sections: [
 
@@ -906,13 +928,39 @@ const veloAcademyApp = {
 
                                 lessons: [
 
-                                    { id: 'l3-1', title: 'Crédito do Trabalhador', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1o6HvddPS-Dbybp-vG1-mhQG5-3KjtH_i/view?usp=drive_link' },
+                                    { id: 'p1-1', title: 'Aula - Crédito do Trabalhador', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1oyCZhnat7UAK8xACBwFJtILAIGaQJZsC/view?usp=drive_link' },
 
-                                    { id: 'l3-2', title: 'Possíveis ocorrências - Crédito do Trabalhador', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link' },
+                                    { id: 'p1-2', title: 'Possíveis ocorrências - Crédito do Trabalhador', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link' },
 
-                                    { id: 'l3-3', title: 'Treinamento - Crédito do Trabalhador', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1zcpwmnyKHKtUFnUs3Nuu9YcQyvL577nj/view?usp=drive_link' },
+                                    { id: 'p1-3', title: 'Ebook Crédito do Trabalhador', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1uH8XemtAyqWDMc98kwneLNMNo6MoUWum/view?usp=drive_link' },
 
-                                    { id: 'l3-4', title: 'Material Extra - Pontos de Atenção', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/16xbXdqwMJFoX-16KVlK_LqTkTg2CPDOE/view?usp=drive_link' }
+                                    { id: 'p1-4', title: 'Ebook - Pontos de atenção', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/1YHyhpyaks91L6pcxbA7eo5Tnya27-SRR/view?usp=drive_link' }
+
+                                ]
+
+                            },
+
+                            {
+
+                                subtitle: 'Crédito Pessoal',
+
+                                lessons: [
+
+                                    { id: 'p2-1', title: 'Aula - Crédito Pessoal', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link' },
+
+                                    { id: 'p2-2', title: 'Ebook Crédito Pessoal', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1yjDZP8IoE5BM6gW1Ii4gvthdj9-4jCk0/view?usp=drive_link' }
+
+                                ]
+
+                            },
+
+                            {
+
+                                subtitle: 'Antecipação de Restituição',
+
+                                lessons: [
+
+                                    { id: 'p3-1', title: 'Em breve - Conteúdo sobre Antecipação da Restituição', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
 
                                 ]
 
@@ -924,7 +972,31 @@ const veloAcademyApp = {
 
                                 lessons: [
 
-                                    { id: 'l2-4', title: 'Treinamento Portabilidade PIX', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
+                                    { id: 'p4-1', title: 'Aula - Portabilidade PIX', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link' },
+
+                                    { id: 'p4-2', title: 'Ebook Chave Pix', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B/view?usp=drive_link' }
+
+                                ]
+
+                            }
+
+                        ]
+
+                    },
+
+                    {
+
+                        title: 'Módulo 2: Produtos para Investidores',
+
+                        sections: [
+
+                            {
+
+                                subtitle: 'VeloPrime',
+
+                                lessons: [
+
+                                    { id: 'p5-1', title: 'Em breve - Conteúdo sobre VeloPrime', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
 
                                 ]
 
@@ -932,11 +1004,23 @@ const veloAcademyApp = {
 
                             {
 
-                                subtitle: 'Antecipação da Restituição',
+                                subtitle: 'Concierge',
 
                                 lessons: [
 
-                                    { id: 'l2-5', title: 'Em breve - Conteúdo sobre Antecipação da Restituição', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
+                                    { id: 'p6-1', title: 'Em breve - Conteúdo sobre Concierge', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
+
+                                ]
+
+                            },
+
+                            {
+
+                                subtitle: 'VeloPay',
+
+                                lessons: [
+
+                                    { id: 'p7-1', title: 'Em breve - Conteúdo sobre VeloPay', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
 
                                 ]
 
@@ -971,8 +1055,8 @@ const veloAcademyApp = {
 
         for (const courseId in this.courseDatabase) {
 
-            // Ocultar temporariamente outros cursos, mostrar apenas onboarding
-            if (courseId !== 'onboarding') {
+            // Mostrar apenas onboarding e produtos
+            if (courseId !== 'onboarding' && courseId !== 'produtos') {
                 continue;
             }
 
@@ -1073,6 +1157,8 @@ const veloAcademyApp = {
         const types = {
 
             'onboarding': 'Essencial',
+
+            'produtos': 'Essencial',
 
             'cs004': 'Reciclagem',
 

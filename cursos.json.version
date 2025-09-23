@@ -1,25 +1,25 @@
 # Versionamento - cursos.json
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
-## v1.3.0 - 2024-12-19
-- Atualizado link da aula "Conhecendo o CRM" com vídeo funcional
-- Duração da aula atualizada para 15 minutos
-- Link do Google Drive implementado: 1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44
+## v2.1.0 - 2024-12-19
+- Reformulação da estrutura do curso Produtos Velotax
+- Módulo 1: Produtos de Crédito (Crédito do Trabalhador, Crédito Pessoal, Antecipação de Restituição, Chaves PIX)
+- Módulo 2: Produtos para Investidores (VeloPrime, Concierge, VeloPay)
+- Mantida estrutura de subtítulos para compatibilidade com sistema de quizzes
+- Quizzes funcionando corretamente com mapeamento por subtítulos
+- Organização mais lógica e intuitiva dos produtos
 
-## v1.2.0 - 2024-12-19
-- Reorganização dos módulos: Módulo 2 renomeado para Módulo 3
-- Criado novo Módulo 2: "Atendimento Velotax"
-- Adicionado treinamento "CRM e Tabulação de Chamados"
-- Aula "Conhecendo o CRM" (aguardando link)
-- Ebook de tabulação adicionado
-- IDs das lições reorganizados para evitar conflitos
-
-## v1.1.0 - 2024-12-19
-- Atualizado vídeo do treinamento de crédito do trabalhador
-- Adicionado material extra "Pontos de Atenção" para download
-- Atualizado ebook de crédito do trabalhador
-- Novos links do Google Drive implementados
+## v2.0.0 - 2024-12-19
+- Reestruturação completa dos cursos
+- Criado novo curso "Produtos Velotax" com etiqueta "Atualização"
+- Reorganizado módulo "Conhecendo os Produtos Velotax" do Onboarding
+- Cada produto agora é um módulo individual no curso Produtos
+- Atualizados links de materiais de apoio conforme especificado
+- Curso Onboarding simplificado para 2 módulos essenciais
+- Mantidos cursos existentes (cs004, cs003, operacoes) para compatibilidade
 
 ## v1.0.0 - Versão inicial
-- Estrutura base dos cursos implementada
-- Treinamentos essenciais configurados
+- Estrutura básica de cursos implementada
+- Curso Onboarding com 3 módulos
+- Sistema de seções e lições
+- Integração com Google Drive

@@ -1,34 +1,42 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
-## v1.5.0 - 2024-12-19
-- Atualizado link da aula "Conhecendo o CRM" nos dados de fallback
-- Duração da aula atualizada para 15 minutos
-- Sincronizado com atualizações do cursos.json
+## v1.4.1 - 2024-12-19
+- Alterada etiqueta do curso "Produtos Velotax" de "Atualização" para "Essencial"
+- Ambos os cursos principais (Onboarding e Produtos) agora são marcados como "Essencial"
+- Mantida estrutura e funcionalidade dos quizzes
 
 ## v1.4.0 - 2024-12-19
-- Ocultados temporariamente outros cursos além do onboarding
-- Mantida funcionalidade completa dos cursos ocultos
-- Apenas curso "Onboarding de Atendimento Velotax" visível na interface
+- Reformulação da estrutura do curso Produtos Velotax
+- Atualizados dados de fallback com nova organização em 2 módulos
+- Módulo 1: Produtos de Crédito com 4 subtítulos
+- Módulo 2: Produtos para Investidores com 3 subtítulos
+- Mantida compatibilidade com sistema de quizzes por subtítulos
+- Estrutura mais organizada e intuitiva
 
 ## v1.3.0 - 2024-12-19
-- Habilitado botão "Fazer Quiz" para seção "CRM e Tabulação de Chamados"
-- Adicionado suporte ao quiz de tabulação (ID: tabulacao)
-- Integração completa com sistema de quiz e certificação
+- Adicionado suporte ao novo curso "Produtos Velotax"
+- Atualizada função getCourseType para incluir etiqueta "Atualização" para produtos
+- Modificada lógica de exibição para mostrar cursos onboarding e produtos
+- Atualizados dados de fallback com nova estrutura de cursos
+- Mantida compatibilidade com sistema existente
+- Reorganização dos módulos conforme nova estrutura
 
 ## v1.2.0 - 2024-12-19
-- Reorganização dos módulos nos dados de fallback
-- Criado novo Módulo 2: "Atendimento Velotax" com CRM e Tabulação
-- Módulo 3: "Conhecendo os Produtos Velotax" (antigo módulo 2)
-- IDs das lições reorganizados para evitar conflitos
-- Sincronizado com atualizações do cursos.json
+- Sistema de autenticação integrado
+- Verificação de domínio autorizado (@velotax.com.br)
+- Gerenciamento de sessão com expiração
+- Integração com Google Sign-In
+- Sistema de progresso e conquistas
 
 ## v1.1.0 - 2024-12-19
-- Atualizado dados de fallback para treinamento de crédito do trabalhador
-- Sincronizado com atualizações do cursos.json
-- Adicionado material extra "Pontos de Atenção" nos dados de fallback
-- Novos links do Google Drive implementados
+- Sistema de cursos implementado
+- Integração com Google Drive
+- Sistema de módulos e lições
+- Interface responsiva
+- Sistema de busca e filtros
 
 ## v1.0.0 - Versão inicial
-- Sistema de fallback implementado
-- Estrutura base dos cursos configurada
+- Estrutura base do VeloAcademy
+- Sistema de navegação
+- Interface de usuário básica

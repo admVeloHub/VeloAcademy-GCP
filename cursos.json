@@ -9,7 +9,7 @@
                     {
                         "subtitle": "Seja Bem Vindo",
                         "lessons": [
-                            { "id": "l1-1", "title": "Bem vindo ao VeloAcademy", "type": "video", "duration": "5 min", "filePath": "https://drive.google.com/file/d/1598DtZ5O41nQofsIO7FKM2N2r0t2vP2I/view?usp=drive_link", "driveId": "1598DtZ5O41nQofsIO7FKM2N2r0t2vP2I" },
+                            { "id": "l1-1", "title": "Bem vindo ao VeloAcademy", "type": "video", "duration": "5 min", "filePath": "https://drive.google.com/file/d/1ZsiIxvii07xahTVTZURDENX4C3FVTEqf/view?usp=drive_link", "driveId": "1ZsiIxvii07xahTVTZURDENX4C3FVTEqf" },
                             { "id": "l1-2", "title": "Sobre o Velotax", "type": "video", "duration": "10 min", "filePath": "#", "driveId": null },
                             { "id": "l1-3", "title": "O Escritório", "type": "video", "duration": "8 min", "filePath": "#", "driveId": null }
                         ]
@@ -22,42 +22,71 @@
                     {
                         "subtitle": "CRM e Tabulação de Chamados",
                         "lessons": [
-                            { "id": "l2-1", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44/view?usp=drive_link", "driveId": "1Bvzi5GhcaU1eHDFxiaSRVKkZ4SzR0J44" },
-                            { "id": "l2-2", "title": "Ebook - Tabulação", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws/view?usp=drive_link", "driveId": "19SpaUoPXRF7Q50-lLRHLZXKYnyRkCCws" }
+                            { "id": "l2-1", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2/view?usp=drive_link", "driveId": "1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2" },
+                            { "id": "l2-2", "title": "Ebook - Tabulação", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja/view?usp=drive_link", "driveId": "1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja" }
                         ]
                     }
                 ]
-            },
+            }
+        ]
+    },
+    "produtos": {
+        "title": "Produtos Velotax",
+        "description": "Conheça todos os produtos e serviços oferecidos pela Velotax.",
+        "modules": [
             {
-                "title": "Módulo 3: Conhecendo os Produtos Velotax",
+                "title": "Módulo 1: Produtos de Crédito",
                 "sections": [
                     {
                         "subtitle": "Crédito do Trabalhador",
                         "lessons": [
-                            { "id": "l3-1", "title": "Aula - Crédito do Trabalhador", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1o6HvddPS-Dbybp-vG1-mhQG5-3KjtH_i/view?usp=drive_link", "driveId": "1o6HvddPS-Dbybp-vG1-mhQG5-3KjtH_i" },
-                            { "id": "l3-2", "title": "Possíveis ocorrências - Crédito do Trabalhador", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link", "driveId": "1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ" },
-                            { "id": "l3-3", "title": "Ebook Crédito do Trabalhador", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1zcpwmnyKHKtUFnUs3Nuu9YcQyvL577nj/view?usp=drive_link", "driveId": "1zcpwmnyKHKtUFnUs3Nuu9YcQyvL577nj" },
-                            { "id": "l3-4", "title": "Material Extra - Pontos de Atenção", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/16xbXdqwMJFoX-16KVlK_LqTkTg2CPDOE/view?usp=drive_link", "driveId": "16xbXdqwMJFoX-16KVlK_LqTkTg2CPDOE" }
-                        ]
-                    },
-                    {
-                        "subtitle": "Chaves PIX",
-                        "lessons": [
-                            { "id": "l3-5", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link", "driveId": "1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7" },
-                            { "id": "l3-6", "title": "Ebook Chaves PIX", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1XT5u5c5FlXEKqTggTg9uoDhDGae8BSGe/view?usp=drive_link", "driveId": "1XT5u5c5FlXEKqTggTg9uoDhDGae8BSGe" }
-                        ]
-                    },
-                    {
-                        "subtitle": "Antecipação da Restituição",
-                        "lessons": [
-                            { "id": "l3-7", "title": "Em breve - Conteúdo sobre Antecipação da Restituição", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                            { "id": "p1-1", "title": "Aula - Crédito do Trabalhador", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1oyCZhnat7UAK8xACBwFJtILAIGaQJZsC/view?usp=drive_link", "driveId": "1oyCZhnat7UAK8xACBwFJtILAIGaQJZsC" },
+                            { "id": "p1-2", "title": "Possíveis ocorrências - Crédito do Trabalhador", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link", "driveId": "1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ" },
+                            { "id": "p1-3", "title": "Ebook Crédito do Trabalhador", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1uH8XemtAyqWDMc98kwneLNMNo6MoUWum/view?usp=drive_link", "driveId": "1uH8XemtAyqWDMc98kwneLNMNo6MoUWum" },
+                            { "id": "p1-4", "title": "Ebook - Pontos de atenção", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1YHyhpyaks91L6pcxbA7eo5Tnya27-SRR/view?usp=drive_link", "driveId": "1YHyhpyaks91L6pcxbA7eo5Tnya27-SRR" }
                         ]
                     },
                     {
                         "subtitle": "Crédito Pessoal",
                         "lessons": [
-                            { "id": "l3-8", "title": "Aula - Crédito Pessoal", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link", "driveId": "1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0" },
-                            { "id": "l3-9", "title": "Ebook Crédito Pessoal", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1di7HGnHfPdu6YHZ2JGMY2JCN0PsNIa2F/view?usp=drive_link", "driveId": "1di7HGnHfPdu6YHZ2JGMY2JCN0PsNIa2F" }
+                            { "id": "p2-1", "title": "Aula - Crédito Pessoal", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link", "driveId": "1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0" },
+                            { "id": "p2-2", "title": "Ebook Crédito Pessoal", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1yjDZP8IoE5BM6gW1Ii4gvthdj9-4jCk0/view?usp=drive_link", "driveId": "1yjDZP8IoE5BM6gW1Ii4gvthdj9-4jCk0" }
+                        ]
+                    },
+                    {
+                        "subtitle": "Antecipação de Restituição",
+                        "lessons": [
+                            { "id": "p3-1", "title": "Em breve - Conteúdo sobre Antecipação da Restituição", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                        ]
+                    },
+                    {
+                        "subtitle": "Chaves PIX",
+                        "lessons": [
+                            { "id": "p4-1", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link", "driveId": "1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7" },
+                            { "id": "p4-2", "title": "Ebook Chave Pix", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B/view?usp=drive_link", "driveId": "1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B" }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Módulo 2: Produtos para Investidores",
+                "sections": [
+                    {
+                        "subtitle": "VeloPrime",
+                        "lessons": [
+                            { "id": "p5-1", "title": "Em breve - Conteúdo sobre VeloPrime", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                        ]
+                    },
+                    {
+                        "subtitle": "Concierge",
+                        "lessons": [
+                            { "id": "p6-1", "title": "Em breve - Conteúdo sobre Concierge", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                        ]
+                    },
+                    {
+                        "subtitle": "VeloPay",
+                        "lessons": [
+                            { "id": "p7-1", "title": "Em breve - Conteúdo sobre VeloPay", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
                         ]
                     }
                 ]

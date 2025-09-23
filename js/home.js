@@ -27,10 +27,8 @@ const homeApp = {
     initElements() {
         console.log('=== Inicializando elementos ===');
         this.loginModal = document.getElementById('login-modal');
-        this.errorMsg = document.getElementById('login-error');
         
         console.log('Modal encontrado:', !!this.loginModal);
-        console.log('Error message encontrado:', !!this.errorMsg);
         
         // Botão Explorar Cursos do Hero
         const heroExplorarCursosBtn = document.getElementById('hero-explorar-cursos-btn');
@@ -163,12 +161,21 @@ const homeApp = {
     showHeaderButtons() {
         // Mostrar botões do header após login
         console.log('=== Mostrando botões do header ===');
+        
+        // Mostrar itens de navegação
+        const hiddenNavItems = document.querySelectorAll('.hidden-nav-item');
+        console.log('Elementos hidden-nav-item encontrados:', hiddenNavItems.length);
+        hiddenNavItems.forEach(nav => {
+            nav.classList.remove('hidden-nav-item');
+            console.log('Removida classe hidden-nav-item de:', nav.textContent);
+        });
+        
+        // Mostrar container do usuário
         const hiddenNavs = document.querySelectorAll('.hidden-nav');
         console.log('Elementos hidden-nav encontrados:', hiddenNavs.length);
         hiddenNavs.forEach(nav => {
             nav.classList.remove('hidden-nav');
             console.log('Removida classe hidden-nav de:', nav.textContent);
-            console.log('Classes após remoção:', nav.className);
         });
     },
 
@@ -215,10 +222,7 @@ const homeApp = {
             console.log('Google Sign-In configurado com sucesso');
         }).catch(error => {
             console.error('Erro ao inicializar Google Sign-In:', error);
-            if (this.errorMsg) {
-            this.errorMsg.textContent = 'Erro ao carregar autenticação do Google. Verifique sua conexão ou tente novamente mais tarde.';
-            this.errorMsg.classList.remove('hidden');
-            }
+            this.showErrorMessage('Erro ao carregar autenticação do Google. Verifique sua conexão ou tente novamente mais tarde.');
         });
     },
 
@@ -259,6 +263,9 @@ const homeApp = {
                 
                 // Mostrar mensagem de sucesso
                 console.log('Login realizado com sucesso:', payload.name);
+                if (typeof showToast !== 'undefined' && showToast.success) {
+                    showToast.success('Login Concluído', `Bem-vindo, ${payload.name}!`);
+                }
                 
                 // Mostrar botões do header após login
                 this.showHeaderButtons();
@@ -283,10 +290,11 @@ const homeApp = {
     },
 
     showErrorMessage(message) {
-        const errorTextElement = document.getElementById('login-error-text');
-        if (errorTextElement && this.errorMsg) {
-            errorTextElement.textContent = message;
-            this.errorMsg.classList.remove('hidden');
+        // Usar sistema de toast notifications em vez de elemento fixo
+        if (typeof showToast !== 'undefined' && showToast.error) {
+            showToast.error('Erro de Login', message);
+        } else {
+            console.error('Sistema de toast não disponível:', message);
         }
     },
 

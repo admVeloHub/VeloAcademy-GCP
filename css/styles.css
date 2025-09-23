@@ -249,8 +249,8 @@ header {
 
 /* Navegação - Tema Escuro */
 .dark .nav-menu {
-    background-color: var(--blue-opaque);  /* Mesma cor do header */
-    border: 1px solid var(--gray);  /* Contorno cinza */
+    background-color: var(--white);  /* Cor branca no tema escuro */
+    border: 1px solid var(--cor-borda);  /* Contorno sutil */
 }
 
 /* User Info - Tema Escuro */
@@ -294,7 +294,7 @@ header {
     background-color: var(--cor-container);  /* Usa cor padrão dos containers */
     padding: 8px 16px;
     border-radius: var(--borda-raio);
-    border: 1px solid var(--blue-opaque);  /* Contorno azul opaco no modo claro */
+    border: 1px solid var(--cor-borda);  /* Contorno sutil */
 }
 
 .nav-link {
@@ -1301,6 +1301,173 @@ footer p {
 }
 
 /* ============================================= */
+/* == SISTEMA DE TOAST NOTIFICATIONS == */
+/* ============================================= */
+
+.toast-container {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    pointer-events: none;
+}
+
+.toast {
+    background: var(--cor-container);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    padding: 16px 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    min-width: 300px;
+    max-width: 400px;
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    pointer-events: auto;
+    position: relative;
+    overflow: hidden;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateX(0);
+}
+
+.toast.success {
+    border-left: 4px solid var(--green);
+    background: linear-gradient(135deg, rgba(21, 162, 55, 0.1), var(--cor-container));
+}
+
+.toast.error {
+    border-left: 4px solid #dc3545;
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.1), var(--cor-container));
+}
+
+.toast-icon {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    flex-shrink: 0;
+}
+
+.toast.success .toast-icon {
+    background: var(--green);
+    color: white;
+}
+
+.toast.error .toast-icon {
+    background: #dc3545;
+    color: white;
+}
+
+.toast-content {
+    flex: 1;
+}
+
+.toast-title {
+    font-weight: 600;
+    font-size: 14px;
+    margin: 0 0 4px 0;
+    color: var(--cor-texto-principal);
+}
+
+.toast-message {
+    font-size: 13px;
+    margin: 0;
+    color: var(--cor-texto-secundario);
+    line-height: 1.4;
+}
+
+.toast-close {
+    background: none;
+    border: none;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: all 0.2s ease;
+    font-size: 16px;
+    line-height: 1;
+}
+
+.toast-close:hover {
+    background: var(--cor-borda);
+    color: var(--cor-texto-principal);
+}
+
+/* Animação de progresso */
+.toast::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    height: 3px;
+    background: var(--cor-accent);
+    animation: toastProgress 5s linear forwards;
+}
+
+.toast.success::after {
+    background: var(--green);
+}
+
+.toast.error::after {
+    background: #dc3545;
+}
+
+@keyframes toastProgress {
+    from { width: 100%; }
+    to { width: 0%; }
+}
+
+/* Responsividade para toast */
+@media (max-width: 768px) {
+    .toast-container {
+        top: 10px;
+        right: 10px;
+        left: 10px;
+    }
+    
+    .toast {
+        min-width: auto;
+        max-width: none;
+    }
+}
+
+/* Tema escuro para toasts */
+.dark .toast {
+    background: var(--cor-container-escuro);
+    border-color: var(--borda-escura);
+    color: var(--texto-principal-escuro);
+}
+
+.dark .toast-title {
+    color: var(--texto-principal-escuro);
+}
+
+.dark .toast-message {
+    color: var(--texto-secundario-escuro);
+}
+
+.dark .toast-close {
+    color: var(--texto-secundario-escuro);
+}
+
+.dark .toast-close:hover {
+    background: var(--borda-escura);
+    color: var(--texto-principal-escuro);
+}
+
+/* ============================================= */
 /* == MODAL DE LOGIN - REMOVIDO == */
 /* ============================================= */
 /* Sistema de login substituído pelo chat interno v2 */
@@ -1638,6 +1805,13 @@ footer p {
     opacity: 0 !important;
 }
 
+/* Ocultar apenas os itens de navegação (mantém o container visível) */
+.hidden-nav-item {
+    display: none !important;
+    visibility: hidden !important;
+    opacity: 0 !important;
+}
+
 /* Modal de Login Elegante */
 .modal-overlay {
     position: fixed;
@@ -1699,17 +1873,6 @@ footer p {
     margin: 20px 0;
 }
 
-.login-error {
-    background-color: #fee;
-    color: #c33;
-    padding: 12px;
-    border-radius: 8px;
-    margin: 15px 0;
-    font-size: 14px;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-}
 
 .login-info {
     margin-top: 20px;

@@ -20,11 +20,11 @@
             
             <nav class="nav-menu">
                 <!-- Todos os botões ocultos até login -->
-                <a href="./index.html" class="nav-link active hidden-nav">Home</a>
-                <a href="./cursos.html" class="nav-link hidden-nav">Cursos</a>
-                <a href="./conquistas.html" class="nav-link hidden-nav">Conquistas</a>
-                <a href="#" class="nav-link hidden-nav disabled" style="opacity: 0.5; cursor: not-allowed;">IGP Agente</a>
-                <a href="https://velohub.vercel.app" class="nav-link hidden-nav" target="_blank">VeloHub</a>
+                <a href="./index.html" class="nav-link active hidden-nav-item">Home</a>
+                <a href="./cursos.html" class="nav-link hidden-nav-item">Cursos</a>
+                <a href="./conquistas.html" class="nav-link hidden-nav-item">Conquistas</a>
+                <a href="#" class="nav-link hidden-nav-item disabled" style="opacity: 0.5; cursor: not-allowed;">IGP Agente</a>
+                <a href="https://velohub.vercel.app" class="nav-link hidden-nav-item" target="_blank">VeloHub</a>
             </nav>
 
 
@@ -157,10 +157,6 @@
                      data-logo_alignment="left">
                 </div>
                 
-                <div id="login-error" class="login-error hidden">
-                    <i class="fas fa-exclamation-triangle"></i>
-                    <span id="login-error-text"></span>
-                </div>
                 
                 <div class="login-info">
                     <p><strong>Domínio autorizado:</strong> @velotax.com.br</p>
@@ -169,6 +165,10 @@
         </div>
     </div>
 
+    <!-- Toast Notifications -->
+    <div id="toast-container" class="toast-container"></div>
+
+    <script src="./js/toast.js"></script>
     <script src="./js/auth.js" defer></script>
     <script src="./js/home.js"></script>
     <script src="./js/theme-toggle.js"></script>

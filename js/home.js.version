@@ -1,15 +1,22 @@
 # Versionamento - home.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.2.0 - 2024-12-19
+- Integração com sistema de toast notifications
+- Removido elemento de erro fixo do modal de login
+- Adicionadas mensagens de sucesso e erro via toast
+- Melhorada experiência do usuário no processo de login
+- Mantida compatibilidade com sistema de autenticação existente
+
 ## v1.1.0 - 2024-12-19
-- Corrigido botão "Explorar Cursos" para verificar sessão antes de mostrar modal
-- Adicionada função handleExplorarCursosClick() para verificação de sessão
-- Removida mensagem de erro fixa do modal de login
-- Adicionada mensagem de "acesso negado" para emails não autorizados
-- Criada função showErrorMessage() para exibir mensagens dinâmicas
-- Melhorada experiência do usuário com verificação de sessão
+- Sistema de autenticação centralizado implementado
+- Integração com Google Sign-In
+- Verificação de domínio autorizado (@velotax.com.br)
+- Gerenciamento de sessão com expiração de 6 horas
+- Redirecionamento automático para cursos após login
 
 ## v1.0.0 - Versão inicial
-- Sistema de login com Google Sign-In implementado
-- Modal de login funcional
-- Integração com sistema de autenticação
+- Sistema de login básico implementado
+- Modal de login com Google Sign-In
+- Verificação de conectividade
+- Animações de entrada dos elementos

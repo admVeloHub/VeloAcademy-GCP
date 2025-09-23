@@ -1,4 +1,5 @@
 # 🎨 VeloHub - Guia de Layout e Design
+<!-- VERSION: v1.0.0 | DATE: 2024-12-19 | AUTHOR: VeloHub Development Team -->
 
 ## 🎯 **Paleta Oficial de Cores**
 
@@ -18,13 +19,13 @@
 --green: #15A237        /* Verde */
 ```
 
-### **CORES DE FUNDO E CONTAINERS (VeloAcademy)**
+### **CORES DE FUNDO E CONTAINERS para temas CLAROS**
 ```css
 --cor-fundo: #f0f4f8        /* Fundo principal da aplicação */
---cor-container: #f2f6fa     /* Container principal - Cinza 2% mais claro que o fundo */
---cor-card: #f2f6fa         /* Fundo dos cards - Cinza 2% mais claro que o fundo */
+--cor-container: #F3F7FC     /* Container principal - BRANCO PADRONIZADO */
+--cor-card: #F3F7FC         /* Fundo dos cards - BRANCO PADRONIZADO */
+--cor-header #F3F7FC     /*  BRANCO PADRONIZADO */
 ```
-
 ---
 
 ## 🔤 **Tipografia**
@@ -68,7 +69,7 @@ font-size: 0.875rem; /* 14px */
 ### **Container Principal (Destacado)**
 ```css
 .container-main {
-  background-color: var(--white);
+  background-color: var(: #F3F7FC);
   border-radius: 12px;           /* Quinas arredondadas */
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1); /* Sombreado para destacamento */
   padding: 24px;
@@ -86,18 +87,6 @@ font-size: 0.875rem; /* 14px */
   margin: 8px;
 }
 ```
-
----
-
-## 🎨 **Aplicação das Cores por Contexto**
-
-### **Backgrounds**
-```css
---bg-primary: var(--white);      /* Fundo principal */
---bg-secondary: var(--gray);     /* Fundo secundário */
---bg-accent: var(--blue-light);  /* Fundo de destaque */
-```
-
 ## 🌙 **TEMA ESCURO (NOTURNO) - IMPLEMENTADO E FUNCIONANDO**
 
 ### **🎨 ESQUEMA COMPLETO DE CORES DO TEMA ESCURO**
