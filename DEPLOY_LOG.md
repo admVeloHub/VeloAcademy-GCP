@@ -14,6 +14,15 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 18:45:00
+### Tipo: GitHub Push
+### Versão: v1.4.2 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Atualização da URL do Google Apps Script para novo deploy - Nova URL configurada para integração com quizzes, servidor VeloAcademy confirmado no ar
+### Commit Hash: 1b8a465
+
 ### Data/Hora: 2024-12-19 18:30:00
 ### Tipo: GitHub Push
 ### Versão: v2.1.0 (cursos.json), v1.4.1 (veloacademy.js), v1.3.0 (styles.css), v1.2.0 (index.html), v1.2.0 (home.js), v1.0.0 (toast.js)
