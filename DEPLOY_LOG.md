@@ -14,6 +14,15 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 19:45:00
+### Tipo: GitHub Push
+### Versão: v1.5.3 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Alteração da URL de envio para action=submitResult - Novos parâmetros: score, totalQuestions, finalGrade, approved. Removidos: answers, answerMappings. URL simplificada e otimizada
+### Commit Hash: d6372ac
+
 ### Data/Hora: 2024-12-19 19:30:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.2 (veloacademy.js)
