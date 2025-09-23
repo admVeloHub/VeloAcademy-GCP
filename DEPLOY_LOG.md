@@ -14,6 +14,15 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 19:30:00
+### Tipo: GitHub Push
+### Versão: v1.5.2 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Correção crítica - URL do certificado agora inclui answerMappings - Adicionado parâmetro answerMappings na função generateCertificate(), sistema de certificados agora funcional
+### Commit Hash: a54d2a6
+
 ### Data/Hora: 2024-12-19 19:15:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.1 (veloacademy.js)
