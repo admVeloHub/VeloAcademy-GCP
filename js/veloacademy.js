@@ -14,7 +14,7 @@ const veloAcademyApp = {
 
     // Configuração do Google Apps Script para Quiz
     appsScriptConfig: {
-        scriptUrl: 'https://script.google.com/macros/s/AKfycbw3LfkmU0HN2_nnWuaJoSyhIAZ_TZBg30Qb52UGf_vXA2PdnW7ccCS2SeYn_Fh5JEYv/exec'
+        scriptUrl: 'https://script.google.com/macros/s/AKfycbyLR1pyRoBjSivGP5xrDTD7DZeJCCpKF868qlSaKZC1u3srLIMJkwiQ5R8RZpD_tsCqCQ/exec'
     },
 
     // Dados do quiz atual

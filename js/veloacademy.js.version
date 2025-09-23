@@ -1,6 +1,11 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.4.2 - 2024-12-19
+- Atualizada URL do Google Apps Script para novo deploy
+- Nova URL: AKfycbyLR1pyRoBjSivGP5xrDTD7DZeJCCpKF868qlSaKZC1u3srLIMJkwiQ5R8RZpD_tsCqCQ
+- Servidor VeloAcademy confirmado no ar
+
 ## v1.4.1 - 2024-12-19
 - Alterada etiqueta do curso "Produtos Velotax" de "Atualização" para "Essencial"
 - Ambos os cursos principais (Onboarding e Produtos) agora são marcados como "Essencial"
