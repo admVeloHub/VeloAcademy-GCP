@@ -17,84 +17,118 @@ const veloAcademyApp = {
         scriptUrl: 'https://script.google.com/macros/s/AKfycbyLR1pyRoBjSivGP5xrDTD7DZeJCCpKF868qlSaKZC1u3srLIMJkwiQ5R8RZpD_tsCqCQ/exec'
     },
 
+    // Função para testar CORS via JSONP
+    testCORS() {
+        return new Promise((resolve, reject) => {
+            console.log('=== TESTANDO CORS VIA JSONP ===');
+            
+            const callbackName = 'corsTestCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            console.log('CORS test callback name:', callbackName);
+            
+            // Criar função de callback global
+            window[callbackName] = (data) => {
+                console.log('Resposta do teste CORS:', data);
+                
+                // Limpar callback e script
+                document.head.removeChild(script);
+                delete window[callbackName];
+                
+                if (data && data.status === 'success') {
+                    console.log('✅ CORS funcionando via JSONP!');
+                    resolve(data);
+                } else {
+                    console.error('❌ Erro no teste CORS:', data?.error);
+                    reject(new Error(data?.error || 'Erro no teste CORS'));
+                }
+            };
+            
+            // Criar script tag para JSONP
+            const script = document.createElement('script');
+            const url = `${this.appsScriptConfig.scriptUrl}?action=testCORS&callback=${callbackName}`;
+            console.log('URL teste CORS:', url);
+            
+            script.src = url;
+            script.onerror = () => {
+                console.error('❌ Erro ao carregar script de teste CORS');
+                document.head.removeChild(script);
+                delete window[callbackName];
+                reject(new Error('Erro ao testar CORS via JSONP'));
+            };
+            
+            document.head.appendChild(script);
+        });
+    },
+
     // Dados do quiz atual
     currentQuiz: null,
 
-    // Função para carregar quiz do Google Apps Script
-    async loadQuizFromAppsScript(courseId) {
-        try {
-            console.log('=== INICIANDO CARREGAMENTO DO QUIZ ===');
+    // Função para carregar quiz do Google Apps Script via JSONP
+    loadQuizFromAppsScript(courseId) {
+        return new Promise((resolve, reject) => {
+            console.log('=== INICIANDO CARREGAMENTO DO QUIZ VIA JSONP ===');
             console.log('Course ID:', courseId);
             console.log('Apps Script URL:', this.appsScriptConfig.scriptUrl);
             
-            const url = `${this.appsScriptConfig.scriptUrl}?action=getQuiz&courseId=${courseId}`;
-            console.log('URL completa:', url);
+            const callbackName = 'quizCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            console.log('Callback name:', callbackName);
             
-            console.log('Fazendo requisição para o Apps Script...');
-            const response = await fetch(url);
-            
-            console.log('Status da resposta:', response.status);
-            console.log('Headers da resposta:', response.headers);
-            
-            if (!response.ok) {
-                throw new Error(`Erro HTTP: ${response.status} - ${response.statusText}`);
-            }
-            
-            console.log('Convertendo resposta para JSON...');
-            const responseText = await response.text();
-            console.log('Resposta bruta:', responseText);
-            
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (parseError) {
-                console.error('Erro ao fazer parse do JSON:', parseError);
-                console.log('Resposta que falhou no parse:', responseText);
-                throw new Error('Resposta inválida do servidor');
-            }
-            
-            console.log('Dados recebidos:', data);
-            
-            if (data.status === 'success') {
-                console.log('Status de sucesso confirmado');
-                console.log('Perguntas recebidas:', data.questions);
-                console.log('Nota de aprovação:', data.passingScore);
+            // Criar função de callback global
+            window[callbackName] = (data) => {
+                console.log('Resposta recebida via JSONP:', data);
                 
-                // Verificar se as perguntas têm as respostas corretas
-                const hasAnswers = data.questions.every(q => q.answer !== undefined);
-                console.log('Perguntas têm respostas corretas:', hasAnswers);
+                // Limpar callback e script
+                document.head.removeChild(script);
+                delete window[callbackName];
                 
-                if (!hasAnswers) {
-                    console.error('Apps Script não retornou respostas corretas');
-                    alert('Erro: Quiz não configurado corretamente. Entre em contato com o suporte.');
-                    return false;
+                if (data && data.status === 'success') {
+                    console.log('Status de sucesso confirmado via JSONP');
+                    console.log('Perguntas recebidas:', data.questions);
+                    console.log('Nota de aprovação:', data.passingScore);
+                    
+                    // Verificar se as perguntas têm as respostas corretas
+                    const hasAnswers = data.questions.every(q => q.answer !== undefined);
+                    console.log('Perguntas têm respostas corretas:', hasAnswers);
+                    
+                    if (!hasAnswers) {
+                        console.error('Apps Script não retornou respostas corretas');
+                        alert('Erro: Quiz não configurado corretamente. Entre em contato com o suporte.');
+                        reject(new Error('Quiz não configurado corretamente'));
+                        return;
+                    }
+                    
+                    this.currentQuiz = {
+                        courseId: courseId,
+                        questions: data.questions,
+                        passingScore: data.passingScore || 6, // Fallback para nota mínima se não fornecida
+                        currentQuestion: 0,
+                        userAnswers: [],
+                        startTime: Date.now()
+                    };
+                    
+                    console.log('Quiz carregado com sucesso via JSONP:', this.currentQuiz);
+                    this.showQuizInterface();
+                    resolve(true);
+                } else {
+                    console.error('Status de erro recebido via JSONP:', data?.status);
+                    reject(new Error(data?.status || 'Erro desconhecido no servidor'));
                 }
-                
-                this.currentQuiz = {
-                    courseId: courseId,
-                    questions: data.questions,
-                    passingScore: data.passingScore || 6, // Fallback para nota mínima se não fornecida
-                    currentQuestion: 0,
-                    userAnswers: [],
-                    startTime: Date.now()
-                };
-                
-                console.log('Quiz carregado com sucesso:', this.currentQuiz);
-                this.showQuizInterface();
-                return true;
-            } else {
-                console.error('Status de erro recebido:', data.status);
-                throw new Error(`Erro do Apps Script: ${data.status}`);
-            }
-        } catch (error) {
-            console.error('=== ERRO AO CARREGAR QUIZ DO APPS SCRIPT ===');
-            console.error('Tipo de erro:', error.constructor.name);
-            console.error('Mensagem:', error.message);
-            console.error('Stack trace:', error.stack);
+            };
             
-            alert('Erro ao carregar o quiz. Verifique se os arquivos estão disponíveis.');
-            return false;
-        }
+            // Criar script tag para JSONP
+            const script = document.createElement('script');
+            const url = `${this.appsScriptConfig.scriptUrl}?action=getQuizJSONP&courseId=${courseId}&callback=${callbackName}`;
+            console.log('URL JSONP:', url);
+            
+            script.src = url;
+            script.onerror = () => {
+                console.error('Erro ao carregar script JSONP');
+                document.head.removeChild(script);
+                delete window[callbackName];
+                reject(new Error('Erro ao carregar quiz via JSONP'));
+            };
+            
+            document.head.appendChild(script);
+        });
     },
 
 
@@ -217,59 +251,109 @@ const veloAcademyApp = {
         }
 
         // Enviar respostas para o Apps Script
-        await this.submitQuizToAppsScript();
-    },
-
-    // Função para enviar quiz para o Apps Script
-    async submitQuizToAppsScript() {
         try {
-            // Obter dados completos do usuário autenticado
-            const userData = this.getAuthenticatedUserData();
-            const courseId = this.currentQuiz.courseId;
-            const answers = JSON.stringify(this.currentQuiz.userAnswers);
-
-            const url = `${this.appsScriptConfig.scriptUrl}?action=submitQuiz&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&answers=${encodeURIComponent(answers)}`;
-            
-            console.log('Enviando quiz para Apps Script:', url);
-            
-            // Tentar enviar para o Apps Script
-            try {
-                const response = await fetch(url);
-                if (response.ok) {
-                    // Se funcionou, abrir em nova aba para o certificado
-                    window.open(url, '_blank');
-                    // Mostrar resultado local também
-                    this.processQuizLocally();
-                } else {
-                    throw new Error('Apps Script não respondeu');
-                }
-            } catch (appsScriptError) {
-                console.log('Apps Script falhou, usando fallback local:', appsScriptError);
-                // Fallback: processar localmente
-                this.processQuizLocally();
-            }
-            
+            await this.submitQuizToAppsScript();
         } catch (error) {
-            console.error('Erro ao enviar quiz:', error);
-            
-            // Verificar se é erro de autenticação
-            if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
-                alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
-                // Limpar dados inválidos e redirecionar
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userPicture');
-                localStorage.removeItem('dadosAtendenteChatbot');
-                setTimeout(() => {
-                    window.location.href = './index.html';
-                }, 2000);
-                return;
-            }
-            
-            alert('Erro ao enviar o quiz. Tente novamente.');
-            // Em caso de erro, também mostrar resultado local
+            console.error('Erro ao enviar quiz via JSONP:', error);
+            // Fallback: processar localmente
             this.processQuizLocally();
         }
+    },
+
+    // Função para enviar quiz para o Apps Script via JSONP
+    submitQuizToAppsScript() {
+        return new Promise((resolve, reject) => {
+            try {
+                // Obter dados completos do usuário autenticado
+                const userData = this.getAuthenticatedUserData();
+                const courseId = this.currentQuiz.courseId;
+                const answers = JSON.stringify(this.currentQuiz.userAnswers);
+                
+                // Criar mapeamento de respostas para compatibilidade
+                const answerMappings = this.currentQuiz.userAnswers.map((answer, index) => ({
+                    questionIndex: index,
+                    selectedAnswer: answer,
+                    isCorrect: answer === this.currentQuiz.questions[index].answer
+                }));
+
+                const callbackName = 'submitCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                console.log('Submit callback name:', callbackName);
+                
+                // Criar função de callback global
+                window[callbackName] = (data) => {
+                    console.log('Resposta de envio recebida via JSONP:', data);
+                    
+                    // Limpar callback e script
+                    document.head.removeChild(script);
+                    delete window[callbackName];
+                    
+                    if (data && data.status === 'success') {
+                        console.log('Quiz enviado com sucesso via JSONP!');
+                        // Abrir certificado em nova aba
+                        if (data.certificateUrl) {
+                            window.open(data.certificateUrl, '_blank');
+                        }
+                        // Mostrar resultado local também
+                        this.processQuizLocally();
+                        resolve(data);
+                    } else {
+                        console.error('Erro ao enviar quiz via JSONP:', data?.error);
+                        // Fallback: processar localmente
+                        this.processQuizLocally();
+                        reject(new Error(data?.error || 'Erro ao enviar quiz'));
+                    }
+                };
+                
+                // Criar script tag para JSONP
+                const script = document.createElement('script');
+                const params = new URLSearchParams({
+                    action: 'submitQuizJSONP',
+                    name: userData.name,
+                    email: userData.email,
+                    courseId: courseId,
+                    answers: answers,
+                    answerMappings: JSON.stringify(answerMappings),
+                    callback: callbackName
+                });
+                
+                const url = `${this.appsScriptConfig.scriptUrl}?${params}`;
+                console.log('URL de envio JSONP:', url);
+                
+                script.src = url;
+                script.onerror = () => {
+                    console.error('Erro ao carregar script de envio JSONP');
+                    document.head.removeChild(script);
+                    delete window[callbackName];
+                    // Fallback: processar localmente
+                    this.processQuizLocally();
+                    reject(new Error('Erro ao enviar quiz via JSONP'));
+                };
+                
+                document.head.appendChild(script);
+                
+            } catch (error) {
+                console.error('Erro ao enviar quiz:', error);
+                
+                // Verificar se é erro de autenticação
+                if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
+                    alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
+                    // Limpar dados inválidos e redirecionar
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userPicture');
+                    localStorage.removeItem('dadosAtendenteChatbot');
+                    setTimeout(() => {
+                        window.location.href = './index.html';
+                    }, 2000);
+                    return;
+                }
+                
+                alert('Erro ao enviar o quiz. Tente novamente.');
+                // Em caso de erro, também mostrar resultado local
+                this.processQuizLocally();
+                reject(error);
+            }
+        });
     },
 
     // Função para processar quiz localmente (fallback)
