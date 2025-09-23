@@ -14,6 +14,15 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 19:00:00
+### Tipo: GitHub Push
+### Versão: v1.5.0 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Implementação completa do sistema JSONP para Google Apps Script - Substituição de fetch() por JSONP para contornar limitações de CORS, novas funções JSONP implementadas, sistema de callbacks dinâmicos, fallback local mantido
+### Commit Hash: 82dbb3c
+
 ### Data/Hora: 2024-12-19 18:45:00
 ### Tipo: GitHub Push
 ### Versão: v1.4.2 (veloacademy.js)
