@@ -1,6 +1,13 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.5 - 2024-12-19
+- Correção crítica: Função de callback JSONP para processar resposta correta
+- Alterado data.status para data.success na verificação de sucesso
+- Corrigido acesso aos dados: data.quiz.questions em vez de data.questions
+- Corrigido campo de resposta: question.correctAnswer em vez de question.answer
+- Sistema de quiz agora funcional com o novo formato de resposta do Apps Script
+
 ## v1.5.4 - 2024-12-19
 - Alteração da URL de envio para action=downloadCertificate
 - Removido parâmetro approved da URL (não mais necessário)

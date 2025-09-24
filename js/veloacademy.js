@@ -80,13 +80,14 @@ const veloAcademyApp = {
                 document.head.removeChild(script);
                 delete window[callbackName];
                 
-                if (data && data.status === 'success') {
+                if (data && data.success === true && data.quiz) {
                     console.log('Status de sucesso confirmado via JSONP');
-                    console.log('Perguntas recebidas:', data.questions);
-                    console.log('Nota de aprovação:', data.passingScore);
+                    console.log('Quiz recebido:', data.quiz);
+                    console.log('Perguntas recebidas:', data.quiz.questions);
+                    console.log('Nota de aprovação:', data.quiz.passingScore);
                     
                     // Verificar se as perguntas têm as respostas corretas
-                    const hasAnswers = data.questions.every(q => q.answer !== undefined);
+                    const hasAnswers = data.quiz.questions.every(q => q.correctAnswer !== undefined);
                     console.log('Perguntas têm respostas corretas:', hasAnswers);
                     
                     if (!hasAnswers) {
@@ -98,12 +99,12 @@ const veloAcademyApp = {
                     
                     this.currentQuiz = {
                         courseId: courseId,
-                        questions: data.questions,
-                        passingScore: data.passingScore || 6, // Fallback para nota mínima se não fornecida
+                        questions: data.quiz.questions,
+                        passingScore: data.quiz.passingScore || 6, // Fallback para nota mínima se não fornecida
                         currentQuestion: 0,
                         userAnswers: [],
                         startTime: Date.now(),
-                        optionMappings: data.optionMappings || {} // Mapeamento de opções randomizadas
+                        optionMappings: data.quiz.optionMappings || {} // Mapeamento de opções randomizadas
                     };
                     
                     console.log('Quiz carregado com sucesso via JSONP:', this.currentQuiz);
@@ -111,8 +112,8 @@ const veloAcademyApp = {
                     this.showQuizInterface();
                     resolve(true);
                 } else {
-                    console.error('Status de erro recebido via JSONP:', data?.status);
-                    reject(new Error(data?.status || 'Erro desconhecido no servidor'));
+                    console.error('Status de erro recebido via JSONP:', data?.success);
+                    reject(new Error(data?.error || 'Erro desconhecido no servidor'));
                 }
             };
             
@@ -165,7 +166,7 @@ const veloAcademyApp = {
         const totalQuestions = this.currentQuiz.questions.length;
 
         console.log(`Renderizando questão ${questionNumber}:`, question);
-        console.log(`Resposta correta da questão ${questionNumber}:`, question.answer);
+        console.log(`Resposta correta da questão ${questionNumber}:`, question.correctAnswer);
 
         quizView.innerHTML = `
             <div class="quiz-header">
@@ -370,7 +371,7 @@ const veloAcademyApp = {
         let score = 0;
         this.currentQuiz.questions.forEach((question, index) => {
             const userAnswer = this.currentQuiz.userAnswers[index];
-            const correctAnswer = question.answer;
+            const correctAnswer = question.correctAnswer;
             
             console.log(`Questão ${index + 1}:`);
             console.log(`  - Resposta do usuário: ${userAnswer}`);
@@ -505,7 +506,7 @@ const veloAcademyApp = {
             let score = 0;
             this.currentQuiz.questions.forEach((question, index) => {
                 const userAnswer = this.currentQuiz.userAnswers[index];
-                const correctAnswer = question.answer;
+                const correctAnswer = question.correctAnswer;
                 if (userAnswer === correctAnswer) {
                     score++;
                 }
