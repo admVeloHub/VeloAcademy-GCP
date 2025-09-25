@@ -1,6 +1,11 @@
 # Versionamento - index.html
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.2.1 - 2024-12-19
+- Atualizado link do botão VeloHub para https://app.velohub.velotax.com.br
+- Alterado link no menu de navegação e no card de acesso
+- Mantida funcionalidade de abertura em nova aba
+
 ## v1.2.0 - 2024-12-19
 - Removido elemento de erro fixo do modal de login
 - Adicionado sistema de toast notifications

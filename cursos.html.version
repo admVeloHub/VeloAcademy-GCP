@@ -1,0 +1,12 @@
+# Versionamento - cursos.html
+# Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
+
+## v1.0.1 - 2024-12-19
+- Atualizado link do botão VeloHub para https://app.velohub.velotax.com.br
+- Alterado link no menu de navegação
+- Mantida funcionalidade de abertura em nova aba
+
+## v1.0.0 - 2024-12-19
+- Versão inicial da página de cursos
+- Sistema de navegação implementado
+- Integração com VeloAcademy

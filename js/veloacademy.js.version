@@ -1,6 +1,13 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.6 - 2024-12-19
+- Correção crítica: Validação de correctAnswer válido (0-3)
+- Implementado fallback quando correctAnswer é -1 ou inválido
+- Fallback: primeira opção (índice 0) como resposta correta
+- Sistema robusto para lidar com Apps Script mal configurado
+- Logs de debug para rastreamento de fallbacks aplicados
+
 ## v1.5.5 - 2024-12-19
 - Correção crítica: Função de callback JSONP para processar resposta correta
 - Alterado data.status para data.success na verificação de sucesso

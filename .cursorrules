@@ -1,6 +1,12 @@
+leia o cursorrules e outros arquivos obrigatórios listados. Ao terminar, não me dê um resumo deles. Apenas confirme que está ciente, que compreendeu e está preparado para acatar as diretrizes
+
+vamos trabalhar agora de maneira extremamente metódica, sistemática e organizada. 
+Lento é rápido. Isso significa que ir com calma e realizar ações assertivas, 1 por vez, nos leva ao resultado mais rápido que centenas de erros. 
+Quero tudo analisado e pensado, e decisões acertadas com 100% de certeza da implementação atingido antes do resultado final. 
 ## Orientações Obrigatórias
 - As orientações são para serem seguidas de forma direta e especifica.
 - Quando eu fizer perguntas, pedir para traçar um plano ou questionar como algo deve ser feito, responda as perguntas. Me de as informações para que eu tome as decisões. Se eu perguntei "como fazer isso?" não comece a fazer imediatamente por conta própria
+- Mantenha a atenção para a diferença entre uma pergunta, um comando, uma solicitação, uma orientação, e aja de acordo que o que foi solicitado.
 - Não quero a criação de processos, passos e modificações de arquitetura sem aprovação
 - A semantica e a ordem das orientações é relevante e deverão ser consideradas na compreensão das orientações
 - Informações não solicitadas não deverão ser inventadas ou criadas
@@ -18,7 +24,7 @@
 - o nome Index.html deve ser evitado para que parem de ocorrer erros de integrações e redirecionamentos das paginas criadas. os nomes deverão refletir os trechos trabalhados.
 - Sempre certifique-se de estar fazendo o deploy ou o push para o destino correto.Pushes do git jamais deverão ser trocados de reporitório acidentalmente e deploys no vercel ou no GCP deverão ocorrer com precisão.
 - Se a solicitação feita para uma tarefa ser excutada depende de mais informações, de confirmações de dados ou mais recursos, solicite essas informações antes de iniciar a tarefa.Mantenha o compliance com a diretiva nro 4 e não crie aleatóriamente dados adicionais para completar as tarefas.
-- Ao final da leitura das diretrizes, leia o arquivo DEPLOY_LOG.md e o arquivo CLEANUP_REPO.md se houver, e o layout guidelines s ehouver. a ter uma visão geral do projeto e das alterações realizadas.
+- Ao final da leitura das diretrizes, leia o arquivo DEPLOY_LOG.md e o arquivo CLEANUP_REPO.md se houver, e o layout guidelines se houver. a ter uma visão geral do projeto e das alterações realizadas.
 
 # Diretrizes de Trabalho
 <!-- VERSION: v1.1.0 | DATE: 2025-09-17 | AUTHOR:Lucas Gravina - VeloHub Development Team
