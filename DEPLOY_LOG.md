@@ -14,6 +14,17 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 23:15:00
+### Tipo: GitHub Push
+### Versão: v1.5.10 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: CORREÇÃO URGENTE - Corrigir courseIds para camelCase - Alterado 'seguro-presta-ct' para 'seguroPrestaCt' e 'credito-pessoal' para 'creditoPessoal', atualizado mapeamento de títulos, corrigido quizCourseId na lógica de exibição, todos os courseIds agora seguem padrão camelCase, resolvido erro 'Curso não encontrado' no frontend
+### Commit Hash: d70f675
+
+---
+
 ### Data/Hora: 2024-12-19 22:45:00
 ### Tipo: GitHub Push
 ### Versão: v2.2.1 (cursos.json), v1.5.9 (veloacademy.js)
