@@ -278,7 +278,6 @@ const veloAcademyApp = {
                 // Obter dados completos do usuário autenticado
                 const userData = this.getAuthenticatedUserData();
                 const courseId = this.currentQuiz.courseId;
-                const answers = JSON.stringify(this.currentQuiz.userAnswers);
                 
                 // Calcular pontuação para determinar se é reprovação
                 let score = 0;
@@ -305,10 +304,6 @@ const veloAcademyApp = {
                 } else {
                     console.log('Aprovação detectada - Questões erradas não serão enviadas');
                 }
-                
-                // Criar mapeamento de opções randomizadas (formato correto para o backend)
-                const answerMappings = this.currentQuiz.optionMappings || {};
-                console.log('Enviando answerMappings (formato correto):', answerMappings);
 
                 const callbackName = 'submitCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
                 console.log('Submit callback name:', callbackName);
@@ -345,8 +340,7 @@ const veloAcademyApp = {
                     name: userData.name,
                     email: userData.email,
                     courseId: courseId,
-                    answers: answers,
-                    answerMappings: JSON.stringify(answerMappings),
+                    nota: finalGrade.toString(),
                     callback: callbackName
                 });
                 

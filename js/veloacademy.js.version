@@ -1,6 +1,15 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.11 - 2024-12-19
+- ADAPTAÇÃO: Frontend adaptado para novo formato de JSON do backend
+- Removidos parâmetros: answers, answerMappings (não mais necessários)
+- Adicionado parâmetro: nota (calculada pelo frontend)
+- Mantido parâmetro: wrongQuestions (apenas em reprovação)
+- Mantido parâmetro: callback (obrigatório para JSONP)
+- Formato final: {action, name, email, courseId, nota, wrongQuestions?, callback}
+- Backend agora recebe nota calculada pelo frontend
+
 ## v1.5.10 - 2024-12-19
 - CORREÇÃO URGENTE: Corrigido courseId do quiz Seguro Prestamista para camelCase
 - Alterado de "seguro-presta-ct" para "seguroPrestaCt" (camelCase)
