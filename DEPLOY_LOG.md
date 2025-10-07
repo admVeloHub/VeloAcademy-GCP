@@ -23,7 +23,7 @@
 - js/veloacademy.js
 - js/veloacademy.js.version
 ### Descrição: Implementação completa do log de reprovações e adição do Ebook Seguro Prestamista - Corrigidos links das aulas de Chaves PIX e Crédito Pessoal, adicionado novo subtítulo "Seguro Prestamista" com 4 aulas (3 vídeos + 1 ebook), implementado sistema de log de questões erradas apenas em caso de reprovação, otimizada performance do sistema de quizzes
-### Commit Hash: [Aguardando commit]
+### Commit Hash: f029b96
 
 ---
 

@@ -1,5 +1,5 @@
 # 🎨 VeloHub - Guia de Layout e Design
-<!-- VERSION: v1.0.0 | DATE: 2024-12-19 | AUTHOR: VeloHub Development Team -->
+<!-- VERSION: v1.1.0 | DATE: 2024-12-19 | AUTHOR: VeloHub Development Team -->
 
 ## 🎯 **Paleta Oficial de Cores**
 
@@ -1481,4 +1481,275 @@ export const useTheme = () => {
 
 ---
 
-*Este documento foi atualizado com as implementações realizadas na página de cursos do VeloAcademy.*
+## 👤 **SISTEMA DE USUÁRIO LOGADO - ESPECIFICAÇÕES**
+
+### **🎯 Botão de Usuário Logado**
+
+#### **📋 Estrutura HTML Obrigatória**
+```html
+<div class="user-info" id="user-info">
+    <img id="user-avatar" class="user-avatar" src="" alt="Avatar" style="display: none;">
+    <span id="user-name" class="user-name"></span>
+    <button id="logout-btn" class="logout-btn" title="Logout">
+        <i class="fas fa-sign-out-alt"></i>
+    </button>
+</div>
+```
+
+#### **🎨 Especificações Visuais**
+
+##### **Container Principal (.user-info)**
+```css
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 12px;
+    background-color: var(--cor-container);
+    border-radius: 8px;
+    border: 1px solid var(--cor-borda);
+    position: relative;
+    z-index: 10;
+    transition: all 0.3s ease;
+}
+
+.user-info:hover {
+    background-color: var(--cor-borda);
+}
+```
+
+##### **Avatar do Usuário (.user-avatar)**
+```css
+.user-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--cor-accent);
+}
+```
+
+##### **Nome do Usuário (.user-name)**
+```css
+.user-name {
+    color: var(--cor-texto);
+    font-weight: 500;
+    font-size: 0.9rem;
+    font-family: 'Poppins', sans-serif;
+    max-width: 150px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+```
+
+##### **Botão de Logout (.logout-btn)**
+```css
+.logout-btn {
+    background: none;
+    border: none;
+    color: var(--cor-texto-secundario);
+    cursor: pointer;
+    padding: 4px;
+    border-radius: 4px;
+    transition: color 0.3s ease;
+}
+
+.logout-btn:hover {
+    color: var(--cor-accent);
+    background-color: rgba(22, 52, 255, 0.1);
+}
+```
+
+#### **🌙 Tema Escuro**
+
+##### **Container no Tema Escuro**
+```css
+.dark .user-info {
+    background-color: var(--blue-opaque);
+    border: 1px solid var(--gray);
+}
+
+.dark .user-info:hover {
+    background-color: var(--blue-medium);
+}
+```
+
+##### **Texto no Tema Escuro**
+```css
+.dark .user-name {
+    color: var(--texto-principal-escuro);
+}
+
+.dark .logout-btn {
+    color: var(--texto-secundario-escuro);
+}
+
+.dark .logout-btn:hover {
+    color: var(--texto-destaque-escuro);
+    background-color: rgba(22, 100, 255, 0.2);
+}
+```
+
+#### **📱 Responsividade**
+
+##### **Tablet (768px)**
+```css
+@media (max-width: 768px) {
+    .user-info {
+        right: 50px;
+        padding: 6px 10px;
+        gap: 8px;
+    }
+    
+    .user-name {
+        font-size: 0.8rem;
+    }
+    
+    .user-avatar {
+        width: 28px;
+        height: 28px;
+    }
+}
+```
+
+##### **Mobile (480px)**
+```css
+@media (max-width: 480px) {
+    .user-info {
+        position: relative;
+        right: auto;
+        top: auto;
+        margin: 10px 0;
+    }
+    
+    .user-name {
+        display: none;
+    }
+    
+    .user-avatar {
+        width: 24px;
+        height: 24px;
+    }
+}
+```
+
+#### **🔧 Estados e Comportamentos**
+
+##### **Estado Inicial (Não Logado)**
+- **Visibilidade:** `display: none` ou `visibility: hidden`
+- **Aplicar via JavaScript:** `document.getElementById('user-info').style.display = 'none'`
+
+##### **Estado Logado**
+- **Visibilidade:** `display: flex`
+- **Avatar:** Carregar imagem do Google (se disponível)
+- **Nome:** Exibir nome completo do usuário
+- **Logout:** Funcional com confirmação
+
+##### **Estado Sem Avatar**
+```css
+.user-info.no-avatar .user-name {
+    margin-left: 0;
+}
+```
+
+#### **⚡ Funcionalidades JavaScript**
+
+##### **Inicialização**
+```javascript
+// Carregar dados do usuário
+function loadUserInfo() {
+    const sessionData = localStorage.getItem('veloacademy_user_session');
+    if (sessionData) {
+        const session = JSON.parse(sessionData);
+        const userInfo = document.getElementById('user-info');
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        
+        // Mostrar container
+        userInfo.style.display = 'flex';
+        
+        // Definir nome
+        userName.textContent = session.user.name;
+        
+        // Definir avatar (se disponível)
+        if (session.user.picture) {
+            userAvatar.src = session.user.picture;
+            userAvatar.style.display = 'block';
+        }
+    }
+}
+```
+
+##### **Logout**
+```javascript
+// Função de logout
+function handleLogout() {
+    if (confirm('Tem certeza que deseja sair?')) {
+        localStorage.removeItem('veloacademy_user_session');
+        location.reload();
+    }
+}
+
+// Event listener
+document.getElementById('logout-btn').addEventListener('click', handleLogout);
+```
+
+#### **🎯 Integração com Header**
+
+##### **Posicionamento no Header**
+```css
+.header-container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    position: relative;
+}
+
+.user-info {
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+```
+
+##### **Z-index e Overlay**
+```css
+.user-info {
+    z-index: 10;
+    background-color: var(--cor-container);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+```
+
+#### **✅ Checklist de Implementação**
+
+- [ ] **Estrutura HTML** com IDs corretos
+- [ ] **Estilos CSS** aplicados (.user-info, .user-avatar, .user-name, .logout-btn)
+- [ ] **Tema escuro** implementado
+- [ ] **Responsividade** para mobile/tablet
+- [ ] **JavaScript** para carregar dados do usuário
+- [ ] **Função de logout** funcional
+- [ ] **Estados visuais** (logado/não logado)
+- [ ] **Tratamento de avatar** (com/sem imagem)
+- [ ] **Posicionamento** correto no header
+- [ ] **Transições suaves** nos hovers
+
+#### **🎨 Variações de Design**
+
+##### **Versão Compacta (Mobile)**
+- Apenas avatar e botão logout
+- Nome oculto para economizar espaço
+
+##### **Versão Completa (Desktop)**
+- Avatar + Nome + Botão logout
+- Hover com informações adicionais
+
+##### **Versão Minimalista**
+- Apenas nome e botão logout
+- Sem avatar para design mais limpo
+
+---
+
+*Este documento foi atualizado com as implementações realizadas na página de cursos do VeloAcademy e especificações do sistema de usuário logado.*
