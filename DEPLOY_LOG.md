@@ -14,6 +14,32 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 22:45:00
+### Tipo: GitHub Push
+### Versão: v2.2.1 (cursos.json), v1.5.9 (veloacademy.js)
+### Arquivos Modificados:
+- cursos.json
+- cursos.json.version
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Implementação completa do log de reprovações e adição do Ebook Seguro Prestamista - Corrigidos links das aulas de Chaves PIX e Crédito Pessoal, adicionado novo subtítulo "Seguro Prestamista" com 4 aulas (3 vídeos + 1 ebook), implementado sistema de log de questões erradas apenas em caso de reprovação, otimizada performance do sistema de quizzes
+### Commit Hash: [Aguardando commit]
+
+---
+
+### Data/Hora: 2024-12-19 21:30:00
+### Tipo: GitHub Push
+### Versão: v1.2.1 (index.html), v1.0.1 (cursos.html), v1.0.1 (conquistas.html)
+### Arquivos Modificados:
+- index.html
+- cursos.html
+- conquistas.html
+- index.html.version
+- cursos.html.version (novo)
+- conquistas.html.version (novo)
+### Descrição: Atualização do link do VeloHub para novo domínio - Alterado de velohub.vercel.app para app.velohub.velotax.com.br em todos os arquivos HTML, atualizado versionamento e criados arquivos de versionamento para cursos.html e conquistas.html
+### Commit Hash: 987734d
+
 ### Data/Hora: 2024-12-19 20:15:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.5 (veloacademy.js)

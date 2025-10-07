@@ -49,7 +49,7 @@
                     {
                         "subtitle": "Crédito Pessoal",
                         "lessons": [
-                            { "id": "p2-1", "title": "Aula - Crédito Pessoal", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link", "driveId": "1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0" },
+                            { "id": "p2-1", "title": "Aula - Crédito Pessoal", "type": "video", "duration": "12 min", "filePath": "https://drive.google.com/file/d/10ZF5-8Bcp1n9xQEXRXKDOMkwp0TOtB-M/view?usp=drive_link", "driveId": "10ZF5-8Bcp1n9xQEXRXKDOMkwp0TOtB-M" },
                             { "id": "p2-2", "title": "Ebook Crédito Pessoal", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1yjDZP8IoE5BM6gW1Ii4gvthdj9-4jCk0/view?usp=drive_link", "driveId": "1yjDZP8IoE5BM6gW1Ii4gvthdj9-4jCk0" }
                         ]
                     },
@@ -62,8 +62,17 @@
                     {
                         "subtitle": "Chaves PIX",
                         "lessons": [
-                            { "id": "p4-1", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link", "driveId": "1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7" },
+                            { "id": "p4-1", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Nfv0U1iOJasfrldBh_p0mjxdj9UbiE3_/view?usp=drive_link", "driveId": "1Nfv0U1iOJasfrldBh_p0mjxdj9UbiE3_" },
                             { "id": "p4-2", "title": "Ebook Chave Pix", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B/view?usp=drive_link", "driveId": "1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B" }
+                        ]
+                    },
+                    {
+                        "subtitle": "Seguro Prestamista",
+                        "lessons": [
+                            { "id": "p8-1", "title": "Aula Seguro Prestamista", "type": "video", "duration": "20 min", "filePath": "https://drive.google.com/file/d/1WeoBuNHXCCltsmZcZ0yPaPj_38nhbZbB/view?usp=drive_link", "driveId": "1WeoBuNHXCCltsmZcZ0yPaPj_38nhbZbB" },
+                            { "id": "p8-2", "title": "Telas da contratação: Parte 1", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1T8wDdrap-Mg8mD4LcWiOvhAZPodP9pnk/view?usp=drive_link", "driveId": "1T8wDdrap-Mg8mD4LcWiOvhAZPodP9pnk" },
+                            { "id": "p8-3", "title": "Telas da contratação: Parte 2", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1r23AXm2xyAOccm-B-5-DG7WWKMou5wjt/view?usp=drive_link", "driveId": "1r23AXm2xyAOccm-B-5-DG7WWKMou5wjt" },
+                            { "id": "p8-4", "title": "Ebook - Seguro Prestamista", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1IiGzOwpTw1JzMaSdFdjaWW5yTeemXfnk/view?usp=drive_link", "driveId": "1IiGzOwpTw1JzMaSdFdjaWW5yTeemXfnk" }
                         ]
                     }
                 ]

@@ -280,6 +280,32 @@ const veloAcademyApp = {
                 const courseId = this.currentQuiz.courseId;
                 const answers = JSON.stringify(this.currentQuiz.userAnswers);
                 
+                // Calcular pontuação para determinar se é reprovação
+                let score = 0;
+                this.currentQuiz.questions.forEach((question, index) => {
+                    const userAnswer = this.currentQuiz.userAnswers[index];
+                    const correctAnswer = question.correctAnswer;
+                    if (userAnswer === correctAnswer) {
+                        score++;
+                    }
+                });
+                
+                const totalQuestions = this.currentQuiz.questions.length;
+                const finalGrade = (score / totalQuestions) * 10;
+                const passingScore = this.currentQuiz.passingScore || 6;
+                const isReproved = finalGrade < passingScore;
+                
+                console.log('Análise de aprovação:', { score, totalQuestions, finalGrade, passingScore, isReproved });
+                
+                // Calcular questões erradas APENAS em caso de reprovação
+                let wrongQuestions = [];
+                if (isReproved) {
+                    wrongQuestions = this.calculateWrongQuestions();
+                    console.log('Reprovação detectada - Questões erradas para envio:', wrongQuestions);
+                } else {
+                    console.log('Aprovação detectada - Questões erradas não serão enviadas');
+                }
+                
                 // Criar mapeamento de opções randomizadas (formato correto para o backend)
                 const answerMappings = this.currentQuiz.optionMappings || {};
                 console.log('Enviando answerMappings (formato correto):', answerMappings);
@@ -324,6 +350,12 @@ const veloAcademyApp = {
                     callback: callbackName
                 });
                 
+                // Adicionar questões erradas apenas em caso de reprovação
+                if (isReproved && wrongQuestions.length > 0) {
+                    params.append('wrongQuestions', JSON.stringify(wrongQuestions));
+                    console.log('Parâmetro wrongQuestions adicionado à URL:', wrongQuestions);
+                }
+                
                 const url = `${this.appsScriptConfig.scriptUrl}?${params}`;
                 console.log('URL de envio JSONP:', url);
                 
@@ -362,6 +394,29 @@ const veloAcademyApp = {
                 reject(error);
             }
         });
+    },
+
+    // Função auxiliar para calcular questões erradas
+    calculateWrongQuestions() {
+        console.log('=== CALCULANDO QUESTÕES ERRADAS ===');
+        if (!this.currentQuiz) {
+            console.error('Nenhum quiz carregado para calcular questões erradas');
+            return [];
+        }
+
+        const wrongQuestions = [];
+        this.currentQuiz.questions.forEach((question, index) => {
+            const userAnswer = this.currentQuiz.userAnswers[index];
+            const correctAnswer = question.correctAnswer;
+            
+            if (userAnswer !== correctAnswer) {
+                wrongQuestions.push(index + 1); // Adiciona o número da questão (1-indexed)
+                console.log(`Questão ${index + 1} errada: usuário respondeu ${userAnswer}, correto era ${correctAnswer}`);
+            }
+        });
+
+        console.log('Questões erradas identificadas:', wrongQuestions);
+        return wrongQuestions;
     },
 
     // Função para processar quiz localmente (fallback)
@@ -524,6 +579,15 @@ const veloAcademyApp = {
             const finalGrade = (score / totalQuestions) * 10;
             const passingScore = this.currentQuiz.passingScore || 6;
             const approved = finalGrade >= passingScore;
+            
+            // Calcular questões erradas APENAS em caso de reprovação
+            let wrongQuestions = [];
+            if (!approved) {
+                wrongQuestions = this.calculateWrongQuestions();
+                console.log('Reprovação detectada - Questões erradas para certificado:', wrongQuestions);
+            } else {
+                console.log('Aprovação detectada - Questões erradas não serão enviadas para certificado');
+            }
 
             console.log('Dados para certificado:', {
                 userName: userData.name,
@@ -532,10 +596,17 @@ const veloAcademyApp = {
                 score: score,
                 totalQuestions: totalQuestions,
                 finalGrade: finalGrade,
-                approved: approved
+                approved: approved,
+                wrongQuestions: wrongQuestions
             });
             
-            const url = `${this.appsScriptConfig.scriptUrl}?action=downloadCertificate&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}`;
+            let url = `${this.appsScriptConfig.scriptUrl}?action=downloadCertificate&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}`;
+            
+            // Adicionar questões erradas apenas em caso de reprovação
+            if (!approved && wrongQuestions.length > 0) {
+                url += `&wrongQuestions=${encodeURIComponent(JSON.stringify(wrongQuestions))}`;
+                console.log('Parâmetro wrongQuestions adicionado à URL do certificado:', wrongQuestions);
+            }
             
             console.log('URL do Apps Script para certificado:', url);
             console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);
@@ -604,7 +675,8 @@ const veloAcademyApp = {
         const quizTitles = {
             'pix': 'PIX: Normas e Segurança',
             'credito': 'Crédito do Trabalhador: Análise e Concessão',
-            'credito-pessoal': 'Crédito Pessoal'
+            'credito-pessoal': 'Crédito Pessoal',
+            'seguro-presta-ct': 'Seguro Prestamista'
         };
         
         // Se for um quiz, usar o mapeamento
@@ -1547,7 +1619,7 @@ const veloAcademyApp = {
                     });
                     
                     // Adicionar botão de quiz para seções específicas
-                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal' || section.subtitle === 'CRM e Tabulação de Chamados') {
+                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal' || section.subtitle === 'CRM e Tabulação de Chamados' || section.subtitle === 'Seguro Prestamista') {
                         let quizCourseId;
                         if (section.subtitle === 'Crédito do Trabalhador') {
                             quizCourseId = 'credito';
@@ -1557,6 +1629,8 @@ const veloAcademyApp = {
                             quizCourseId = 'credito-pessoal';
                         } else if (section.subtitle === 'CRM e Tabulação de Chamados') {
                             quizCourseId = 'tabulacao';
+                        } else if (section.subtitle === 'Seguro Prestamista') {
+                            quizCourseId = 'seguro-presta-ct';
                         }
                         
                         console.log(`Adicionando quiz para seção: ${section.subtitle} com ID: ${quizCourseId}`);

@@ -1,6 +1,31 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.9 - 2024-12-19
+- OTIMIZAÇÃO: Envio de questões erradas apenas em caso de reprovação
+- Modificada lógica de submitQuizToAppsScript() para calcular pontuação antes do envio
+- Parâmetro wrongQuestions adicionado condicionalmente apenas para reprovações
+- Modificada lógica de generateCertificate() para incluir questões erradas apenas se reprovado
+- Redução de tráfego de rede - dados desnecessários não são enviados em aprovações
+- Logs otimizados para distinguir entre aprovações e reprovações
+- Performance melhorada mantendo funcionalidade completa
+
+## v1.5.8 - 2024-12-19
+- Implementado log de reprovações no frontend
+- Adicionada função calculateWrongQuestions() para identificar questões erradas
+- Modificada função submitQuizToAppsScript() para incluir parâmetro wrongQuestions
+- Modificada função generateCertificate() para incluir questões erradas na URL
+- Array de questões erradas enviado como JSON string para o backend
+- Logs detalhados para rastreamento de questões incorretas
+- Compatibilidade mantida com sistema de correção existente
+
+## v1.5.7 - 2024-12-19
+- Adicionado suporte ao quiz do Seguro Prestamista (ID: seguro-presta-ct)
+- Incluído mapeamento de título para o novo quiz no getCourseTitle()
+- Atualizada lógica de exibição de botões de quiz para incluir Seguro Prestamista
+- Mantida compatibilidade com sistema de quizzes existente
+- Integração completa com Google Apps Script para novo quiz
+
 ## v1.5.6 - 2024-12-19
 - Correção crítica: Validação de correctAnswer válido (0-3)
 - Implementado fallback quando correctAnswer é -1 ou inválido
