@@ -14,6 +14,17 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 23:45:00
+### Tipo: GitHub Push
+### Versão: v1.5.11 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Frontend 100% compliant com novo formato de backend - Adaptado formato de envio para compliance obrigatório, removidos parâmetros answers e answerMappings, adicionado parâmetro nota calculada pelo frontend, mantido wrongQuestions apenas para reprovados, mantido callback obrigatório para JSONP, lógica de aprovação/reprovação implementada
+### Commit Hash: 752ac32
+
+---
+
 ### Data/Hora: 2024-12-19 23:15:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.10 (veloacademy.js)
