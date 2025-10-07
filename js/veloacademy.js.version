@@ -1,6 +1,16 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.10 - 2024-12-19
+- CORREÇÃO URGENTE: Corrigido courseId do quiz Seguro Prestamista para camelCase
+- Alterado de "seguro-presta-ct" para "seguroPrestaCt" (camelCase)
+- Corrigido "credito-pessoal" para "creditoPessoal" (camelCase)
+- Atualizado mapeamento de títulos no getCourseTitle()
+- Corrigido quizCourseId na lógica de exibição de botões de quiz
+- Todos os courseIds agora seguem padrão camelCase
+- Quiz do Seguro Prestamista agora carrega corretamente com backend
+- Resolvido erro "Curso não encontrado" no frontend
+
 ## v1.5.9 - 2024-12-19
 - OTIMIZAÇÃO: Envio de questões erradas apenas em caso de reprovação
 - Modificada lógica de submitQuizToAppsScript() para calcular pontuação antes do envio

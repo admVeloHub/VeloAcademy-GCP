@@ -675,8 +675,8 @@ const veloAcademyApp = {
         const quizTitles = {
             'pix': 'PIX: Normas e Segurança',
             'credito': 'Crédito do Trabalhador: Análise e Concessão',
-            'credito-pessoal': 'Crédito Pessoal',
-            'seguro-presta-ct': 'Seguro Prestamista'
+            'creditoPessoal': 'Crédito Pessoal',
+            'seguroPrestaCt': 'Seguro Prestamista'
         };
         
         // Se for um quiz, usar o mapeamento
@@ -1626,11 +1626,11 @@ const veloAcademyApp = {
                         } else if (section.subtitle === 'Chaves PIX') {
                             quizCourseId = 'pix';
                         } else if (section.subtitle === 'Crédito Pessoal') {
-                            quizCourseId = 'credito-pessoal';
+                            quizCourseId = 'creditoPessoal';
                         } else if (section.subtitle === 'CRM e Tabulação de Chamados') {
                             quizCourseId = 'tabulacao';
                         } else if (section.subtitle === 'Seguro Prestamista') {
-                            quizCourseId = 'seguro-presta-ct';
+                            quizCourseId = 'seguroPrestaCt';
                         }
                         
                         console.log(`Adicionando quiz para seção: ${section.subtitle} com ID: ${quizCourseId}`);
