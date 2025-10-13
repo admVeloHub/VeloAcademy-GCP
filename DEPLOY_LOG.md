@@ -14,6 +14,17 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 23:55:00
+### Tipo: GitHub Push
+### Versão: v2.2.2 (cursos.json)
+### Arquivos Modificados:
+- cursos.json
+- cursos.json.version
+### Descrição: Remoção da aula 'Possíveis ocorrências - Crédito do Trabalhador' (p1-2) do subtítulo 'Crédito do Trabalhador', estrutura do curso mantida íntegra, aulas restantes: Aula principal + 2 Ebooks
+### Commit Hash: 13da66a
+
+---
+
 ### Data/Hora: 2024-12-19 23:45:00
 ### Tipo: GitHub Push
 ### Versão: v1.5.11 (veloacademy.js)
