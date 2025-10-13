@@ -1,6 +1,12 @@
 # Versionamento - cursos.json
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v2.2.2 - 2024-12-19
+- REMOÇÃO: Removida aula "Possíveis ocorrências - Crédito do Trabalhador" (id: p1-2)
+- Aula removida do subtítulo "Crédito do Trabalhador" conforme solicitado
+- Estrutura mantida para compatibilidade com sistema de quizzes
+- Aulas restantes: Aula principal + 2 Ebooks
+
 ## v2.2.1 - 2024-12-19
 - Adicionado Ebook - Seguro Prestamista ao subtítulo Seguro Prestamista
 - Nova aula: p8-4 - Ebook - Seguro Prestamista (tipo: pdf, duração: Download)
