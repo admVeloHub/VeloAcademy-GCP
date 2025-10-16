@@ -1625,6 +1625,8 @@ const veloAcademyApp = {
                             quizCourseId = 'tabulacao';
                         } else if (section.subtitle === 'Seguro Prestamista') {
                             quizCourseId = 'seguroPrestaCt';
+                        } else if (section.subtitle === 'Comunicação que Conecta') {
+                            quizCourseId = 'exc-atendimento';
                         }
                         
                         console.log(`Adicionando quiz para seção: ${section.subtitle} com ID: ${quizCourseId}`);

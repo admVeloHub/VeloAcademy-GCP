@@ -1,6 +1,12 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.12 - 2024-12-19
+- ADIÇÃO: Mapeamento do quiz "exc-atendimento" para seção "Comunicação que Conecta"
+- Novo módulo "Atendimento ao Cliente" agora possui botão de quiz funcional
+- Quiz integrado com sistema existente usando mesmo padrão dos outros quizzes
+- ID do quiz: exc-atendimento (já configurado no Google Apps Script)
+
 ## v1.5.11 - 2024-12-19
 - ADAPTAÇÃO: Frontend adaptado para novo formato de JSON do backend
 - Removidos parâmetros: answers, answerMappings (não mais necessários)
