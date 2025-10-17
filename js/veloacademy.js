@@ -344,8 +344,8 @@ const veloAcademyApp = {
                     callback: callbackName
                 });
                 
-                // Adicionar questões erradas apenas em caso de reprovação
-                if (isReproved && wrongQuestions.length > 0) {
+                // Adicionar questões erradas sempre que houver
+                if (wrongQuestions.length > 0) {
                     params.append('wrongQuestions', JSON.stringify(wrongQuestions));
                     console.log('Parâmetro wrongQuestions adicionado à URL:', wrongQuestions);
                 }
@@ -1626,7 +1626,7 @@ const veloAcademyApp = {
                         } else if (section.subtitle === 'Seguro Prestamista') {
                             quizCourseId = 'seguroPrestaCt';
                         } else if (section.subtitle === 'Comunicação que Conecta') {
-                            quizCourseId = 'exc-atendimento';
+                            quizCourseId = 'Exc Atendimento';
                         }
                         
                         console.log(`Adicionando quiz para seção: ${section.subtitle} com ID: ${quizCourseId}`);

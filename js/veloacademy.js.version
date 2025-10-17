@@ -1,6 +1,19 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.15 - 2024-12-19
+- CORREÇÃO: ID do quiz "Comunicação que Conecta" corrigido
+- Alterado de "exc-atendimento" para "Exc Atendimento" (com espaço e maiúscula)
+- Quiz agora busca corretamente no Google Apps Script
+- Resolvido erro de "Curso não encontrado" para o quiz de atendimento
+
+## v1.5.14 - 2024-12-19
+- MELHORIA: Envio de wrongQuestions para aprovados e reprovados
+- Removida condição isReproved da lógica de envio de wrongQuestions
+- Agora envia questões erradas sempre que houver, independente da aprovação
+- Melhoria na análise de performance dos candidatos
+- Logs mantidos para rastreamento de questões incorretas
+
 ## v1.5.13 - 2024-12-19
 - CORREÇÃO: Adicionado "Comunicação que Conecta" à condição de exibição do botão de quiz
 - Botão "Fazer Quiz" agora aparece corretamente na seção "Comunicação que Conecta"
