@@ -264,6 +264,8 @@ const veloAcademyApp = {
         // Enviar respostas para o Apps Script
         try {
             await this.submitQuizToAppsScript();
+            // Após enviar com sucesso, mostrar resultado local
+            this.processQuizLocally();
         } catch (error) {
             console.error('Erro ao enviar quiz via JSONP:', error);
             // Fallback: processar localmente
@@ -335,7 +337,7 @@ const veloAcademyApp = {
                 
                 // Enviar dados via POST para o Apps Script
                 const formData = new FormData();
-                formData.append('action', 'submitQuiz');
+                formData.append('action', 'submitResult');
                 formData.append('name', userData.name);
                 formData.append('email', userData.email);
                 formData.append('courseId', courseId);
