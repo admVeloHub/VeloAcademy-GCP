@@ -447,11 +447,11 @@ const veloAcademyApp = {
         console.log('Pontuação calculada:', { score, totalQuestions, finalGrade, passingScore });
 
         // Mostrar resultado
-        this.showLocalQuizResult(finalGrade, passingScore, totalQuestions);
+        this.showLocalQuizResult(score, finalGrade, passingScore, totalQuestions);
     },
 
     // Função para mostrar resultado local
-    showLocalQuizResult(finalGrade, passingScore, totalQuestions) {
+    showLocalQuizResult(score, finalGrade, passingScore, totalQuestions) {
         console.log('=== MOSTRANDO RESULTADO LOCAL ===');
         const quizView = document.getElementById('quiz-view');
         if (!quizView) {

@@ -52,6 +52,12 @@
 - Quiz do Seguro Prestamista agora carrega corretamente com backend
 - Resolvido erro "Curso não encontrado" no frontend
 
+## v1.6.1 - 2024-12-19
+- CORREÇÃO CRÍTICA: Corrigido erro "score is not defined" na função showLocalQuizResult
+- Adicionado parâmetro score na chamada da função showLocalQuizResult
+- Função agora recebe: showLocalQuizResult(score, finalGrade, passingScore, totalQuestions)
+- Resolvido erro de referência que impedia exibição do resultado local
+
 ## v1.6.0 - 2024-12-19
 - ALTERAÇÃO CRÍTICA: Mudança do critério de aprovação de nota proporcional para número de acertos
 - ANTES: finalGrade >= passingScore (nota de 0-10)
