@@ -1,15 +1,14 @@
 # Versionamento - cursos.json
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
-## v2.3.0 - 2024-12-19
-- ADIÇÃO: Novo Módulo 3 "Atendimento ao Cliente" no curso Onboarding
-- Nova seção "Comunicação que Conecta" com 4 aulas:
-  - l3-1: Guia de Comunicação e Boas Práticas (video)
-  - l3-2: Estrutura de atendimento (video)
-  - l3-3: Ebook Treinamento Linguagem Simples (pdf)
-  - l3-4: Ebook: Atendimento por Tickets (pdf)
-- Todos os links do Google Drive configurados e funcionais
-- Estrutura preparada para integração com quiz "Exc Atendimento"
+## v2.3.1 - 2024-12-19
+- CORREÇÃO: Reestruturação do Módulo 2 "Atendimento Velotax"
+- Módulo 2 agora possui 2 subtítulos:
+  1. "Comunicação que Conecta" (com quiz exc-atendimento)
+  2. "CRM e Tabulação de Chamados" (com quiz tabulacao)
+- Removido módulo desnecessário "Atendimento ao Cliente"
+- Aulas reorganizadas com IDs corretos (l2-1 a l2-6)
+- Estrutura corrigida conforme especificação
 
 ## v2.2.2 - 2024-12-19
 - REMOÇÃO: Removida aula "Possíveis ocorrências - Crédito do Trabalhador" (id: p1-2)

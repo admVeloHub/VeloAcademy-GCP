@@ -20,24 +20,19 @@
                 "title": "Módulo 2: Atendimento Velotax",
                 "sections": [
                     {
-                        "subtitle": "CRM e Tabulação de Chamados",
-                        "lessons": [
-                            { "id": "l2-1", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2/view?usp=drive_link", "driveId": "1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2" },
-                            { "id": "l2-2", "title": "Ebook - Tabulação", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja/view?usp=drive_link", "driveId": "1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja" }
-                        ]
-                    }
-                ]
-            },
-            {
-                "title": "Módulo 3: Atendimento ao Cliente",
-                "sections": [
-                    {
                         "subtitle": "Comunicação que Conecta",
                         "lessons": [
-                            { "id": "l3-1", "title": "Guia de Comunicação e Boas Práticas", "type": "video", "duration": "Assistir", "filePath": "https://drive.google.com/file/d/13OrSGXE5lNBIRcVCGArWfIIefFGAtgHG/view?usp=drive_link", "driveId": "13OrSGXE5lNBIRcVCGArWfIIefFGAtgHG" },
-                            { "id": "l3-2", "title": "Estrutura de atendimento", "type": "video", "duration": "Assistir", "filePath": "https://drive.google.com/file/d/1dpa7JNDtXrzRhQP7Gd1cd6kzi3QiXG4m/view?usp=drive_link", "driveId": "1dpa7JNDtXrzRhQP7Gd1cd6kzi3QiXG4m" },
-                            { "id": "l3-3", "title": "Ebook Treinamento Linguagem Simples", "type": "pdf", "duration": "Baixar", "filePath": "https://drive.google.com/file/d/1FGs50V_n7UlpNA1D9NNFkYfxXpy0RXze/view?usp=drive_link", "driveId": "1FGs50V_n7UlpNA1D9NNFkYfxXpy0RXze" },
-                            { "id": "l3-4", "title": "Ebook: Atendimento por Tickets", "type": "pdf", "duration": "Baixar", "filePath": "https://drive.google.com/file/d/1XP0_UF5gijvVOwf3cTx6K5sKMMlq967D/view?usp=drive_link", "driveId": "1XP0_UF5gijvVOwf3cTx6K5sKMMlq967D" }
+                            { "id": "l2-1", "title": "Guia de Comunicação e Boas Práticas", "type": "video", "duration": "Assistir", "filePath": "https://drive.google.com/file/d/13OrSGXE5lNBIRcVCGArWfIIefFGAtgHG/view?usp=drive_link", "driveId": "13OrSGXE5lNBIRcVCGArWfIIefFGAtgHG" },
+                            { "id": "l2-2", "title": "Estrutura de atendimento", "type": "video", "duration": "Assistir", "filePath": "https://drive.google.com/file/d/1dpa7JNDtXrzRhQP7Gd1cd6kzi3QiXG4m/view?usp=drive_link", "driveId": "1dpa7JNDtXrzRhQP7Gd1cd6kzi3QiXG4m" },
+                            { "id": "l2-3", "title": "Ebook Treinamento Linguagem Simples", "type": "pdf", "duration": "Baixar", "filePath": "https://drive.google.com/file/d/1FGs50V_n7UlpNA1D9NNFkYfxXpy0RXze/view?usp=drive_link", "driveId": "1FGs50V_n7UlpNA1D9NNFkYfxXpy0RXze" },
+                            { "id": "l2-4", "title": "Ebook: Atendimento por Tickets", "type": "pdf", "duration": "Baixar", "filePath": "https://drive.google.com/file/d/1XP0_UF5gijvVOwf3cTx6K5sKMMlq967D/view?usp=drive_link", "driveId": "1XP0_UF5gijvVOwf3cTx6K5sKMMlq967D" }
+                        ]
+                    },
+                    {
+                        "subtitle": "CRM e Tabulação de Chamados",
+                        "lessons": [
+                            { "id": "l2-5", "title": "Aula - Conhecendo o CRM", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2/view?usp=drive_link", "driveId": "1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2" },
+                            { "id": "l2-6", "title": "Ebook - Tabulação", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja/view?usp=drive_link", "driveId": "1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja" }
                         ]
                     }
                 ]
