@@ -165,7 +165,7 @@ function handleSubmitQuiz(e) {
     const finalGrade = (score / totalQuestions) * 10;
     const passingScore = courseData.passingScore;
 
-    if (finalGrade >= passingScore) {
+    if (score >= passingScore) {
       // Aprovado: Gera o certificado em PDF
       const pdfUrl = generateCertificate(studentName, studentEmail, courseName);
       // Redireciona o usuário para o PDF gerado
@@ -173,7 +173,7 @@ function handleSubmitQuiz(e) {
       return HtmlService.createHtmlOutput(htmlOutput);
     } else {
       // Reprovado: Mostra uma página de feedback
-      const message = `<h1>Você não atingiu a nota mínima.</h1><p>Sua nota foi ${finalGrade.toFixed(1)} / 10.0. A nota mínima para aprovação é ${passingScore}.</p><p>Por favor, revise o material e tente novamente.</p>`;
+      const message = `<h1>Você não atingiu o número mínimo de acertos.</h1><p>Você acertou ${score} de ${totalQuestions} questões. É necessário acertar pelo menos ${passingScore} questões para aprovação.</p><p>Por favor, revise o material e tente novamente.</p>`;
       return createErrorPage(message, "Reprovado");
     }
   } catch (error) {

@@ -1,0 +1,17 @@
+{
+    "logo": {
+        "localPath": "./academy.png",
+        "fallbackIcon": "bx-book-bookmark",
+        "width": "200px",
+        "height": "55px"
+    },
+    "theme": {
+        "default": "dark",
+        "persistInLocalStorage": true
+    },
+    "app": {
+        "title": "VeloAcademy - Treinamento Corporativo",
+        "description": "Plataforma de Treinamento"
+    },
+
+}

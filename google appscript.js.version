@@ -1,6 +1,13 @@
 # Versionamento - google appscript.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.2.0 - 2024-12-19
+- ALTERAÇÃO CRÍTICA: Mudança do critério de aprovação de nota proporcional para número de acertos
+- ANTES: finalGrade >= passingScore (nota de 0-10)
+- DEPOIS: score >= passingScore (número de acertos)
+- Atualizada mensagem de reprovação para mostrar acertos/total
+- Fallback inteligente: 70% das questões quando passingScore não definido
+
 ## v1.1.0 - 2024-12-19
 - Adicionado quiz "Tabulação no Atendimento" (ID: tabulacao)
 - 8 perguntas sobre práticas de tabulação de chamados

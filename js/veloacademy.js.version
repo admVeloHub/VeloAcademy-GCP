@@ -52,6 +52,14 @@
 - Quiz do Seguro Prestamista agora carrega corretamente com backend
 - Resolvido erro "Curso não encontrado" no frontend
 
+## v1.6.0 - 2024-12-19
+- ALTERAÇÃO CRÍTICA: Mudança do critério de aprovação de nota proporcional para número de acertos
+- ANTES: finalGrade >= passingScore (nota de 0-10)
+- DEPOIS: score >= passingScore (número de acertos)
+- Atualizada mensagem de feedback para mostrar acertos/total
+- Fallback inteligente: 70% das questões quando passingScore não definido
+- Aplicado em todas as funções de verificação de aprovação (submitQuizToAppsScript, showLocalQuizResult, calculateQuizResult)
+
 ## v1.5.9 - 2024-12-19
 - OTIMIZAÇÃO: Envio de questões erradas apenas em caso de reprovação
 - Modificada lógica de submitQuizToAppsScript() para calcular pontuação antes do envio

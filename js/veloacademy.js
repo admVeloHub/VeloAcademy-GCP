@@ -108,7 +108,7 @@ const veloAcademyApp = {
                     this.currentQuiz = {
                         courseId: courseId,
                         questions: data.quiz.questions,
-                        passingScore: data.quiz.passingScore || 6, // Fallback para nota mínima se não fornecida
+                        passingScore: data.quiz.passingScore || Math.ceil(data.quiz.questions.length * 0.7), // Fallback: 70% das questões
                         currentQuestion: 0,
                         userAnswers: [],
                         startTime: Date.now(),
@@ -291,8 +291,8 @@ const veloAcademyApp = {
                 
                 const totalQuestions = this.currentQuiz.questions.length;
                 const finalGrade = (score / totalQuestions) * 10;
-                const passingScore = this.currentQuiz.passingScore || 6;
-                const isReproved = finalGrade < passingScore;
+                const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
+                const isReproved = score < passingScore;
                 
                 console.log('Análise de aprovação:', { score, totalQuestions, finalGrade, passingScore, isReproved });
                 
@@ -461,12 +461,12 @@ const veloAcademyApp = {
 
         console.log('Elemento quiz-view encontrado, atualizando conteúdo...');
 
-        const isPassed = finalGrade >= passingScore;
+        const isPassed = score >= passingScore;
         const resultClass = isPassed ? 'passed' : 'failed';
         const resultText = isPassed ? 'APROVADO' : 'REPROVADO';
         const resultMessage = isPassed 
             ? 'Parabéns! Você foi aprovado no quiz.' 
-            : `Você precisa de pelo menos ${passingScore} pontos para ser aprovado.`;
+            : `Você acertou ${score} de ${totalQuestions} questões. É necessário acertar pelo menos ${passingScore} questões para aprovação.`;
 
         const resultHTML = `
             <div class="quiz-results ${resultClass}">
@@ -571,8 +571,8 @@ const veloAcademyApp = {
             
             const totalQuestions = this.currentQuiz.questions.length;
             const finalGrade = (score / totalQuestions) * 10;
-            const passingScore = this.currentQuiz.passingScore || 6;
-            const approved = finalGrade >= passingScore;
+            const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
+            const approved = score >= passingScore;
             
             // Calcular questões erradas APENAS em caso de reprovação
             let wrongQuestions = [];
