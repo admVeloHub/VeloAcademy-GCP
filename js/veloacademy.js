@@ -298,11 +298,11 @@ const veloAcademyApp = {
                 
                 // Calcular questões erradas APENAS em caso de reprovação
                 let wrongQuestions = [];
-                if (isReproved) {
-                    wrongQuestions = this.calculateWrongQuestions();
-                    console.log('Reprovação detectada - Questões erradas para envio:', wrongQuestions);
+                wrongQuestions = this.calculateWrongQuestions();
+                if (wrongQuestions.length > 0) {
+                    console.log('Questões erradas identificadas para envio:', wrongQuestions);
                 } else {
-                    console.log('Aprovação detectada - Questões erradas não serão enviadas');
+                    console.log('Nenhuma questão errada - envio limpo');
                 }
 
                 const callbackName = 'submitCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
@@ -576,11 +576,11 @@ const veloAcademyApp = {
             
             // Calcular questões erradas APENAS em caso de reprovação
             let wrongQuestions = [];
-            if (!approved) {
-                wrongQuestions = this.calculateWrongQuestions();
-                console.log('Reprovação detectada - Questões erradas para certificado:', wrongQuestions);
+            wrongQuestions = this.calculateWrongQuestions();
+            if (wrongQuestions.length > 0) {
+                console.log('Questões erradas identificadas para certificado:', wrongQuestions);
             } else {
-                console.log('Aprovação detectada - Questões erradas não serão enviadas para certificado');
+                console.log('Nenhuma questão errada - certificado limpo');
             }
 
             console.log('Dados para certificado:', {

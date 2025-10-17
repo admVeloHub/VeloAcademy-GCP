@@ -1,6 +1,13 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.16 - 2024-12-19
+- CORREÇÃO: Lógica de envio de wrongQuestions para aprovados
+- Removida condição isReproved/approved das funções submitQuizToAppsScript e generateCertificate
+- Agora envia questões erradas sempre que houver, independente da aprovação
+- Logs atualizados para refletir nova lógica
+- Consistência total entre envio de quiz e geração de certificado
+
 ## v1.5.15 - 2024-12-19
 - CORREÇÃO: ID do quiz "Comunicação que Conecta" corrigido
 - Alterado de "exc-atendimento" para "Exc Atendimento" (com espaço e maiúscula)
