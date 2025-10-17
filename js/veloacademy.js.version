@@ -52,6 +52,13 @@
 - Quiz do Seguro Prestamista agora carrega corretamente com backend
 - Resolvido erro "Curso não encontrado" no frontend
 
+## v1.6.2 - 2024-12-19
+- CORREÇÃO CRÍTICA: Função returnToCourse() agora envia dados de reprovação para o Apps Script
+- Quando usuário reprova e clica "Voltar ao curso", dados são enviados antes de voltar
+- Calcula pontuação e questões erradas automaticamente
+- Chama submitQuizToAppsScript() para registrar reprovação no backend
+- Resolvido problema de dados de reprovação não serem enviados
+
 ## v1.6.1 - 2024-12-19
 - CORREÇÃO CRÍTICA: Corrigido erro "score is not defined" na função showLocalQuizResult
 - Adicionado parâmetro score na chamada da função showLocalQuizResult

@@ -337,10 +337,13 @@ const veloAcademyApp = {
                 const script = document.createElement('script');
                 const params = new URLSearchParams({
                     action: 'submitQuizJSONP',
-                    name: userData.name,
-                    email: userData.email,
+                    userName: userData.name,
+                    userEmail: userData.email,
                     courseId: courseId,
-                    nota: finalGrade.toString(),
+                    score: score.toString(),
+                    totalQuestions: totalQuestions.toString(),
+                    finalGrade: finalGrade.toString(),
+                    approved: (!isReproved).toString(),
                     callback: callbackName
                 });
                 
@@ -505,8 +508,54 @@ const veloAcademyApp = {
     // Função para voltar ao curso
     returnToCourse() {
         console.log('=== VOLTANDO AO CURSO ===');
-        this.currentQuiz = null;
-        this.switchView('course-view');
+        
+        // Se há um quiz em andamento e o usuário foi reprovado, enviar dados para o back
+        if (this.currentQuiz && this.currentQuiz.userAnswers && this.currentQuiz.userAnswers.length > 0) {
+            console.log('Enviando dados de reprovação para o Apps Script antes de voltar...');
+            
+            // Calcular pontuação
+            let score = 0;
+            this.currentQuiz.questions.forEach((question, index) => {
+                const userAnswer = this.currentQuiz.userAnswers[index];
+                const correctAnswer = question.correctAnswer;
+                if (userAnswer === correctAnswer) {
+                    score++;
+                }
+            });
+            
+            const totalQuestions = this.currentQuiz.questions.length;
+            const finalGrade = (score / totalQuestions) * 10;
+            const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
+            const isReproved = score < passingScore;
+            
+            // Calcular questões erradas
+            let wrongQuestions = [];
+            this.currentQuiz.questions.forEach((question, index) => {
+                const userAnswer = this.currentQuiz.userAnswers[index];
+                const correctAnswer = question.correctAnswer;
+                if (userAnswer !== correctAnswer) {
+                    wrongQuestions.push(index);
+                }
+            });
+            
+            // Enviar dados para o Apps Script
+            this.submitQuizToAppsScript()
+                .then(() => {
+                    console.log('Dados de reprovação enviados com sucesso');
+                    this.currentQuiz = null;
+                    this.switchView('course-view');
+                })
+                .catch((error) => {
+                    console.error('Erro ao enviar dados de reprovação:', error);
+                    // Mesmo com erro, voltar ao curso
+                    this.currentQuiz = null;
+                    this.switchView('course-view');
+                });
+        } else {
+            // Se não há quiz ou dados, apenas voltar
+            this.currentQuiz = null;
+            this.switchView('course-view');
+        }
     },
 
     // Função para obter dados completos do usuário logado
