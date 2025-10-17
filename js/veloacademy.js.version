@@ -1,6 +1,12 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.5.13 - 2024-12-19
+- CORREÇÃO: Adicionado "Comunicação que Conecta" à condição de exibição do botão de quiz
+- Botão "Fazer Quiz" agora aparece corretamente na seção "Comunicação que Conecta"
+- Quiz "exc-atendimento" funcional e integrado ao sistema
+- Correção na lógica de renderização dos botões de quiz
+
 ## v1.5.12 - 2024-12-19
 - ADIÇÃO: Mapeamento do quiz "exc-atendimento" para seção "Comunicação que Conecta"
 - Novo módulo "Atendimento ao Cliente" agora possui botão de quiz funcional

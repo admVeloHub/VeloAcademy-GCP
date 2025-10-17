@@ -1613,7 +1613,7 @@ const veloAcademyApp = {
                     });
                     
                     // Adicionar botão de quiz para seções específicas
-                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal' || section.subtitle === 'CRM e Tabulação de Chamados' || section.subtitle === 'Seguro Prestamista') {
+                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal' || section.subtitle === 'CRM e Tabulação de Chamados' || section.subtitle === 'Seguro Prestamista' || section.subtitle === 'Comunicação que Conecta') {
                         let quizCourseId;
                         if (section.subtitle === 'Crédito do Trabalhador') {
                             quizCourseId = 'credito';
