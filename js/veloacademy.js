@@ -333,40 +333,55 @@ const veloAcademyApp = {
                     }
                 };
                 
-                // Criar script tag para JSONP
-                const script = document.createElement('script');
-                const params = new URLSearchParams({
-                    action: 'submitQuizJSONP',
-                    userName: userData.name,
-                    userEmail: userData.email,
-                    courseId: courseId,
-                    score: score.toString(),
-                    totalQuestions: totalQuestions.toString(),
-                    finalGrade: finalGrade.toString(),
-                    approved: (!isReproved).toString(),
-                    callback: callbackName
-                });
+                // Enviar dados via POST para o Apps Script
+                const formData = new FormData();
+                formData.append('action', 'submitQuiz');
+                formData.append('name', userData.name);
+                formData.append('email', userData.email);
+                formData.append('courseId', courseId);
+                formData.append('answers', JSON.stringify(this.currentQuiz.userAnswers));
+                formData.append('score', score.toString());
+                formData.append('totalQuestions', totalQuestions.toString());
+                formData.append('finalGrade', finalGrade.toString());
+                formData.append('passingScore', passingScore.toString());
+                formData.append('approved', (!isReproved).toString());
                 
                 // Adicionar questões erradas sempre que houver
                 if (wrongQuestions.length > 0) {
-                    params.append('wrongQuestions', JSON.stringify(wrongQuestions));
-                    console.log('Parâmetro wrongQuestions adicionado à URL:', wrongQuestions);
+                    formData.append('wrongQuestions', JSON.stringify(wrongQuestions));
+                    console.log('Parâmetro wrongQuestions adicionado:', wrongQuestions);
                 }
                 
-                const url = `${this.appsScriptConfig.scriptUrl}?${params}`;
-                console.log('URL de envio JSONP:', url);
+                console.log('Enviando dados para Apps Script via POST...');
                 
-                script.src = url;
-                script.onerror = () => {
-                    console.error('Erro ao carregar script de envio JSONP');
-                    document.head.removeChild(script);
-                    delete window[callbackName];
+                fetch(this.appsScriptConfig.scriptUrl, {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.text())
+                .then(data => {
+                    console.log('Resposta do Apps Script:', data);
+                    // Se aprovado, redirecionar para certificado
+                    if (!isReproved) {
+                        // Extrair URL do certificado da resposta
+                        const match = data.match(/url=([^"'\s]+)/);
+                        if (match) {
+                            window.location.href = match[1];
+                        } else {
+                            console.log('Certificado gerado com sucesso');
+                            resolve(true);
+                        }
+                    } else {
+                        console.log('Reprovado - dados enviados para registro');
+                        resolve(true);
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao enviar para Apps Script:', error);
                     // Fallback: processar localmente
                     this.processQuizLocally();
-                    reject(new Error('Erro ao enviar quiz via JSONP'));
-                };
-                
-                document.head.appendChild(script);
+                    reject(error);
+                });
                 
             } catch (error) {
                 console.error('Erro ao enviar quiz:', error);
