@@ -12,6 +12,10 @@ const veloAcademyApp = {
 
     appConfig: {},
 
+    // Variáveis para armazenar resultado do quiz
+    quizResult: null,
+    certificateUrl: null,
+
     // Configuração do Google Apps Script para Quiz
     appsScriptConfig: {
         scriptUrl: 'https://script.google.com/macros/s/AKfycbyLR1pyRoBjSivGP5xrDTD7DZeJCCpKF868qlSaKZC1u3srLIMJkwiQ5R8RZpD_tsCqCQ/exec'
@@ -261,32 +265,29 @@ const veloAcademyApp = {
             }
         }
 
-        // Enviar respostas para o Apps Script
+        // Calcular resultado e enviar UMA VEZ para o backend
         try {
             await this.submitQuizToAppsScript();
-            // Após enviar com sucesso, mostrar resultado local
-            this.processQuizLocally();
+            // Mostrar resultado local após envio bem-sucedido
+            this.showQuizResult();
         } catch (error) {
-            console.error('Erro ao enviar quiz via JSONP:', error);
-            // Fallback: processar localmente
-            this.processQuizLocally();
+            console.error('Erro ao enviar quiz:', error);
+            // Em caso de erro, mostrar resultado local mesmo assim
+            this.showQuizResult();
         }
     },
 
-    // Função para enviar quiz para o Apps Script via JSONP
+    // Função para enviar quiz para o Apps Script
     submitQuizToAppsScript() {
         return new Promise((resolve, reject) => {
             try {
-                // Obter dados completos do usuário autenticado
                 const userData = this.getAuthenticatedUserData();
                 const courseId = this.currentQuiz.courseId;
                 
-                // Calcular pontuação para determinar se é reprovação
+                // Calcular pontuação
                 let score = 0;
                 this.currentQuiz.questions.forEach((question, index) => {
-                    const userAnswer = this.currentQuiz.userAnswers[index];
-                    const correctAnswer = question.correctAnswer;
-                    if (userAnswer === correctAnswer) {
+                    if (this.currentQuiz.userAnswers[index] === question.correctAnswer) {
                         score++;
                     }
                 });
@@ -296,97 +297,57 @@ const veloAcademyApp = {
                 const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
                 const isReproved = score < passingScore;
                 
-                console.log('Análise de aprovação:', { score, totalQuestions, finalGrade, passingScore, isReproved });
+                // Calcular questões erradas
+                const wrongQuestions = this.calculateWrongQuestions();
                 
-                // Calcular questões erradas APENAS em caso de reprovação
-                let wrongQuestions = [];
-                wrongQuestions = this.calculateWrongQuestions();
-                if (wrongQuestions.length > 0) {
-                    console.log('Questões erradas identificadas para envio:', wrongQuestions);
-                } else {
-                    console.log('Nenhuma questão errada - envio limpo');
-                }
-
-                const callbackName = 'submitCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-                console.log('Submit callback name:', callbackName);
-                
-                // Criar função de callback global
-                window[callbackName] = (data) => {
-                    console.log('Resposta de envio recebida via JSONP:', data);
-                    
-                    // Limpar callback e script
-                    document.head.removeChild(script);
-                    delete window[callbackName];
-                    
-                    if (data && data.status === 'success') {
-                        console.log('Quiz enviado com sucesso via JSONP!');
-                        // Abrir certificado em nova aba
-                        if (data.certificateUrl) {
-                            window.open(data.certificateUrl, '_blank');
-                        }
-                        // Mostrar resultado local também
-                        this.processQuizLocally();
-                        resolve(data);
-                    } else {
-                        console.error('Erro ao enviar quiz via JSONP:', data?.error);
-                        // Fallback: processar localmente
-                        this.processQuizLocally();
-                        reject(new Error(data?.error || 'Erro ao enviar quiz'));
-                    }
-                };
-                
-                // Enviar dados via POST para o Apps Script
+                // Preparar dados para envio (formato simplificado)
                 const formData = new FormData();
                 formData.append('action', 'submitResult');
                 formData.append('name', userData.name);
                 formData.append('email', userData.email);
                 formData.append('courseId', courseId);
-                formData.append('answers', JSON.stringify(this.currentQuiz.userAnswers));
-                formData.append('score', score.toString());
-                formData.append('totalQuestions', totalQuestions.toString());
-                formData.append('finalGrade', finalGrade.toString());
-                formData.append('passingScore', passingScore.toString());
                 formData.append('approved', (!isReproved).toString());
+                formData.append('finalGrade', finalGrade.toString());
                 
-                // Adicionar questões erradas sempre que houver
+                // Adicionar questões erradas se houver
                 if (wrongQuestions.length > 0) {
                     formData.append('wrongQuestions', JSON.stringify(wrongQuestions));
-                    console.log('Parâmetro wrongQuestions adicionado:', wrongQuestions);
                 }
                 
-                console.log('Enviando dados para Apps Script via POST...');
-                
+                // Enviar dados
                 fetch(this.appsScriptConfig.scriptUrl, {
                     method: 'POST',
                     body: formData
                 })
                 .then(response => response.text())
                 .then(data => {
-                    console.log('Resposta do Apps Script:', data);
-                    // Se aprovado, redirecionar para certificado
+                    // Armazenar resultado para uso posterior
+                    this.quizResult = {
+                        score,
+                        totalQuestions,
+                        finalGrade,
+                        passingScore,
+                        isReproved,
+                        wrongQuestions,
+                        response: data
+                    };
+                    
                     if (!isReproved) {
-                        // Extrair URL do certificado da resposta
+                        // Para aprovados, extrair URL do certificado
                         const match = data.match(/url=([^"'\s]+)/);
                         if (match) {
-                            window.location.href = match[1];
-                        } else {
-                            console.log('Certificado gerado com sucesso');
-                            resolve(true);
+                            this.certificateUrl = match[1];
                         }
-                    } else {
-                        console.log('Reprovado - dados enviados para registro');
-                        resolve(true);
                     }
+                    resolve(data);
                 })
                 .catch(error => {
-                    console.error('Erro ao enviar para Apps Script:', error);
-                    // Fallback: processar localmente
-                    this.processQuizLocally();
+                    console.error('Erro ao enviar quiz:', error);
                     reject(error);
                 });
                 
             } catch (error) {
-                console.error('Erro ao enviar quiz:', error);
+                console.error('Erro ao processar quiz:', error);
                 
                 // Verificar se é erro de autenticação
                 if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
@@ -402,9 +363,6 @@ const veloAcademyApp = {
                     return;
                 }
                 
-                alert('Erro ao enviar o quiz. Tente novamente.');
-                // Em caso de erro, também mostrar resultado local
-                this.processQuizLocally();
                 reject(error);
             }
         });
@@ -412,25 +370,94 @@ const veloAcademyApp = {
 
     // Função auxiliar para calcular questões erradas
     calculateWrongQuestions() {
-        console.log('=== CALCULANDO QUESTÕES ERRADAS ===');
-        if (!this.currentQuiz) {
-            console.error('Nenhum quiz carregado para calcular questões erradas');
-            return [];
-        }
-
+        if (!this.currentQuiz) return [];
+        
         const wrongQuestions = [];
         this.currentQuiz.questions.forEach((question, index) => {
-            const userAnswer = this.currentQuiz.userAnswers[index];
-            const correctAnswer = question.correctAnswer;
-            
-            if (userAnswer !== correctAnswer) {
-                wrongQuestions.push(index + 1); // Adiciona o número da questão (1-indexed)
-                console.log(`Questão ${index + 1} errada: usuário respondeu ${userAnswer}, correto era ${correctAnswer}`);
+            if (this.currentQuiz.userAnswers[index] !== question.correctAnswer) {
+                wrongQuestions.push(index + 1);
+            }
+        });
+        
+        return wrongQuestions;
+    },
+
+    // Função para mostrar resultado do quiz
+    showQuizResult() {
+        if (!this.quizResult) {
+            // Se não há resultado armazenado, calcular localmente
+            this.calculateAndShowResult();
+            return;
+        }
+        
+        const { score, totalQuestions, finalGrade, passingScore, isReproved } = this.quizResult;
+        const quizView = document.getElementById('quiz-view');
+        if (!quizView) return;
+
+        const resultClass = isReproved ? 'failed' : 'passed';
+        const resultText = isReproved ? 'REPROVADO' : 'APROVADO';
+        const resultMessage = isReproved 
+            ? `Você acertou ${score} de ${totalQuestions} questões. É necessário acertar pelo menos ${passingScore} questões para aprovação.` 
+            : 'Parabéns! Você foi aprovado no quiz.';
+
+        const resultHTML = `
+            <div class="quiz-results ${resultClass}">
+                <div class="result-header">
+                    <h2>Resultado</h2>
+                    <div class="result-image">
+                        <img src="./Public/${isReproved ? 'reprovado' : 'aprovado'}.png" alt="${resultText}" class="result-status-image">
+                        <div class="result-subtitle">
+                            <span class="status ${resultClass}">${resultText}</span>
+                        </div>
+                    </div>
+                    <div class="result-score">
+                        <div class="score-circle">
+                            <span class="score-number">${finalGrade.toFixed(1)}</span>
+                            <span class="score-max">/ 10</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="result-actions">
+                    ${isReproved ? 
+                        `<button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>` :
+                        `<button class="btn-primary" onclick="veloAcademyApp.generateCertificate()">Receber Certificado</button>`
+                    }
+                </div>
+            </div>
+        `;
+
+        quizView.innerHTML = resultHTML;
+        this.switchView('quiz-view');
+    },
+
+    // Função auxiliar para calcular resultado local (fallback)
+    calculateAndShowResult() {
+        if (!this.currentQuiz) return;
+
+        let score = 0;
+        this.currentQuiz.questions.forEach((question, index) => {
+            if (this.currentQuiz.userAnswers[index] === question.correctAnswer) {
+                score++;
             }
         });
 
-        console.log('Questões erradas identificadas:', wrongQuestions);
-        return wrongQuestions;
+        const totalQuestions = this.currentQuiz.questions.length;
+        const finalGrade = (score / totalQuestions) * 10;
+        const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
+        const isReproved = score < passingScore;
+
+        // Armazenar resultado
+        this.quizResult = {
+            score,
+            totalQuestions,
+            finalGrade,
+            passingScore,
+            isReproved,
+            wrongQuestions: this.calculateWrongQuestions()
+        };
+
+        // Mostrar resultado
+        this.showQuizResult();
     },
 
     // Função para processar quiz localmente (fallback)
@@ -524,55 +551,13 @@ const veloAcademyApp = {
 
     // Função para voltar ao curso
     returnToCourse() {
-        console.log('=== VOLTANDO AO CURSO ===');
+        // Limpar dados do quiz
+        this.currentQuiz = null;
+        this.quizResult = null;
+        this.certificateUrl = null;
         
-        // Se há um quiz em andamento e o usuário foi reprovado, enviar dados para o back
-        if (this.currentQuiz && this.currentQuiz.userAnswers && this.currentQuiz.userAnswers.length > 0) {
-            console.log('Enviando dados de reprovação para o Apps Script antes de voltar...');
-            
-            // Calcular pontuação
-            let score = 0;
-            this.currentQuiz.questions.forEach((question, index) => {
-                const userAnswer = this.currentQuiz.userAnswers[index];
-                const correctAnswer = question.correctAnswer;
-                if (userAnswer === correctAnswer) {
-                    score++;
-                }
-            });
-            
-            const totalQuestions = this.currentQuiz.questions.length;
-            const finalGrade = (score / totalQuestions) * 10;
-            const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
-            const isReproved = score < passingScore;
-            
-            // Calcular questões erradas
-            let wrongQuestions = [];
-            this.currentQuiz.questions.forEach((question, index) => {
-                const userAnswer = this.currentQuiz.userAnswers[index];
-                const correctAnswer = question.correctAnswer;
-                if (userAnswer !== correctAnswer) {
-                    wrongQuestions.push(index);
-                }
-            });
-            
-            // Enviar dados para o Apps Script
-            this.submitQuizToAppsScript()
-                .then(() => {
-                    console.log('Dados de reprovação enviados com sucesso');
-                    this.currentQuiz = null;
-                    this.switchView('course-view');
-                })
-                .catch((error) => {
-                    console.error('Erro ao enviar dados de reprovação:', error);
-                    // Mesmo com erro, voltar ao curso
-                    this.currentQuiz = null;
-                    this.switchView('course-view');
-                });
-        } else {
-            // Se não há quiz ou dados, apenas voltar
-            this.currentQuiz = null;
-            this.switchView('course-view');
-        }
+        // Voltar para a visualização do curso
+        this.switchView('course-view');
     },
 
     // Função para obter dados completos do usuário logado
@@ -619,112 +604,28 @@ const veloAcademyApp = {
 
     // Função para gerar certificado
     async generateCertificate() {
-        console.log('=== GERANDO CERTIFICADO ===');
-        try {
-            // Obter dados completos do usuário autenticado
-            const userData = this.getAuthenticatedUserData();
-            const courseId = this.currentQuiz.courseId;
-            
-            // Calcular pontuação para envio
-            let score = 0;
-            this.currentQuiz.questions.forEach((question, index) => {
-                const userAnswer = this.currentQuiz.userAnswers[index];
-                const correctAnswer = question.correctAnswer;
-                if (userAnswer === correctAnswer) {
-                    score++;
-                }
-            });
-            
-            const totalQuestions = this.currentQuiz.questions.length;
-            const finalGrade = (score / totalQuestions) * 10;
-            const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
-            const approved = score >= passingScore;
-            
-            // Calcular questões erradas APENAS em caso de reprovação
-            let wrongQuestions = [];
-            wrongQuestions = this.calculateWrongQuestions();
-            if (wrongQuestions.length > 0) {
-                console.log('Questões erradas identificadas para certificado:', wrongQuestions);
-            } else {
-                console.log('Nenhuma questão errada - certificado limpo');
-            }
-
-            console.log('Dados para certificado:', {
-                userName: userData.name,
-                userEmail: userData.email,
-                courseId: courseId,
-                score: score,
-                totalQuestions: totalQuestions,
-                finalGrade: finalGrade,
-                approved: approved,
-                wrongQuestions: wrongQuestions
-            });
-            
-            let url = `${this.appsScriptConfig.scriptUrl}?action=downloadCertificate&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}`;
-            
-            // Adicionar questões erradas apenas em caso de reprovação
-            if (!approved && wrongQuestions.length > 0) {
-                url += `&wrongQuestions=${encodeURIComponent(JSON.stringify(wrongQuestions))}`;
-                console.log('Parâmetro wrongQuestions adicionado à URL do certificado:', wrongQuestions);
-            }
-            
-            console.log('URL do Apps Script para certificado:', url);
-            console.log('Apps Script URL base:', this.appsScriptConfig.scriptUrl);
-            
-            // Verificar se a URL do Apps Script está configurada
-            if (!this.appsScriptConfig.scriptUrl || this.appsScriptConfig.scriptUrl.includes('1ABC123DEF456')) {
-                throw new Error('URL do Google Apps Script não configurada corretamente');
-            }
-            
-            // Tentar fazer uma requisição para verificar se o Apps Script está funcionando
+        if (this.certificateUrl) {
+            // Se já temos a URL do certificado, abrir diretamente
+            window.open(this.certificateUrl, '_blank');
+        } else {
+            // Se não temos, gerar nova URL
             try {
-                const testResponse = await fetch(this.appsScriptConfig.scriptUrl + '?action=test');
-                if (!testResponse.ok) {
-                    throw new Error(`Apps Script não respondeu: ${testResponse.status}`);
-                }
-            } catch (testError) {
-                console.error('Erro ao testar Apps Script:', testError);
-                throw new Error('Google Apps Script não está acessível. Verifique a URL.');
-            }
-            
-            // Abrir em nova aba para o certificado
-            const newWindow = window.open(url, '_blank');
-            
-            if (newWindow) {
-                console.log('Nova aba aberta com sucesso');
+                const userData = this.getAuthenticatedUserData();
+                const { score, totalQuestions, finalGrade } = this.quizResult;
                 
-                // Mostrar mensagem de instrução para o usuário
-                alert('Certificado sendo gerado...\n\nSe aparecer "You need access":\n1. Clique em "Open the document directly"\n2. O certificado será gerado com seu nome\n3. Aguarde alguns segundos para o processamento');
+                const url = `${this.appsScriptConfig.scriptUrl}?action=downloadCertificate&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${this.currentQuiz.courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}`;
                 
-                // Aguardar um pouco antes de voltar ao curso
-                setTimeout(() => {
-                    console.log('Retornando ao curso...');
-                    this.returnToCourse();
-                }, 5000); // Aumentei o tempo para 5 segundos
-            } else {
-                console.warn('Popup bloqueado pelo navegador');
-                alert('Popup bloqueado. Permita popups para este site e tente novamente.');
+                window.open(url, '_blank');
+            } catch (error) {
+                console.error('Erro ao gerar certificado:', error);
+                alert('Erro ao gerar certificado. Tente novamente.');
             }
-            
-        } catch (error) {
-            console.error('Erro ao gerar certificado:', error);
-            
-            // Verificar se é erro de autenticação
-            if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
-                alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
-                // Limpar dados inválidos e redirecionar
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userPicture');
-                localStorage.removeItem('dadosAtendenteChatbot');
-                setTimeout(() => {
-                    window.location.href = './index.html';
-                }, 2000);
-                return;
-            }
-            
-            alert(`Erro ao gerar o certificado: ${error.message}`);
         }
+        
+        // Voltar ao curso após gerar certificado
+        setTimeout(() => {
+            this.returnToCourse();
+        }, 2000);
     },
 
 

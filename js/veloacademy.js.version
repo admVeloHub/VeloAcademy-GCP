@@ -1,6 +1,25 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.6.1 - 2024-12-19
+- OTIMIZAÇÃO: Formato de envio simplificado para melhor performance
+- Removidos campos desnecessários: score, totalQuestions, passingScore
+- Formato final: action, name, email, courseId, approved, finalGrade, wrongQuestions
+- Redução significativa no tamanho dos dados enviados
+- Melhoria na velocidade de transmissão e processamento
+
+## v1.6.0 - 2024-12-19
+- CORREÇÃO CRÍTICA: Simplificação completa do sistema de envio de quiz
+- Removidos logs excessivos que poluíam o console
+- Corrigido envio duplicado - agora envia apenas uma vez ao finalizar
+- Criada função showQuizResult() para exibir resultado de forma limpa
+- Simplificada função returnToCourse() - removido envio duplicado
+- Simplificada função generateCertificate() - usa dados armazenados
+- Adicionadas variáveis quizResult e certificateUrl para armazenar estado
+- Fluxo otimizado: Finalizar → Enviar → Mostrar resultado → Ações
+- Resolvido problema de processamento triplicado no mesmo fluxo
+- Sistema mais eficiente e com menos logs desnecessários
+
 ## v1.5.16 - 2024-12-19
 - CORREÇÃO: Lógica de envio de wrongQuestions para aprovados
 - Removida condição isReproved/approved das funções submitQuizToAppsScript e generateCertificate
