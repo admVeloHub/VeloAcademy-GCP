@@ -1,6 +1,15 @@
 # Versionamento - styles.css
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.4.0 - 2024-12-19
+- FUNCIONALIDADE: Estilos para seção de questões erradas na tela de aprovação
+- Adicionada classe .wrong-questions-section com design consistente
+- Lista .wrong-questions-list com hover effects e transições suaves
+- Suporte completo ao tema escuro (.dark .wrong-questions-section)
+- Responsividade mobile para dispositivos pequenos
+- Integração com paleta de cores oficial VeloHub
+- Animações e efeitos visuais consistentes com o design system
+
 ## v1.3.0 - 2024-12-19
 - Sistema de toast notifications implementado
 - Removidos estilos do elemento de erro fixo do modal

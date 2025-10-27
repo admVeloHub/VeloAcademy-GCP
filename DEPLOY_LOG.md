@@ -14,6 +14,46 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2024-12-19 23:59:00
+### Tipo: GitHub Push (Force Redeploy)
+### Versão: v1.7.0 (veloacademy.js) + v1.4.0 (styles.css)
+### Arquivos Modificados:
+- js/veloacademy.js (v1.7.0)
+- css/styles.css (v1.4.0)
+- js/veloacademy.js.version (v1.7.0)
+- css/styles.css.version (v1.4.0)
+### Descrição: Implementação de logs seguros e questões erradas na tela de aprovação
+- SEGURANÇA: Sistema de logs seguros implementado para proteger dados sensíveis
+- Logs de respostas corretas, pontuação e mapeamentos visíveis apenas para Lucas Gravina
+- Usuários comuns veem logs sanitizados sem dados confidenciais
+- FUNCIONALIDADE: Candidatos aprovados veem questões que erraram para revisão
+- Seção "Questões para Revisão" com design consistente com VeloHub
+- Suporte completo a tema claro/escuro e responsividade mobile
+### Commit Hash: [Aguardando push]
+
+---
+
+### Data/Hora: 2024-12-19 23:59:00
+### Tipo: GitHub Push (Force Redeploy)
+### Versão: v1.6.1 (veloacademy.js)
+### Arquivos Modificados:
+- Nenhum (commit vazio para forçar redeploy)
+### Descrição: Force Vercel redeploy após falha no deploy anterior - v1.6.1 com otimizações de quiz implementadas, formato simplificado de envio funcionando, sistema de logs limpo e performance melhorada
+### Commit Hash: 7ba1fa0
+
+---
+
+### Data/Hora: 2024-12-19 23:58:00
+### Tipo: GitHub Push
+### Versão: v1.6.1 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js
+- js/veloacademy.js.version
+### Descrição: Simplificação do formato de envio de quiz - Removidos campos desnecessários (score, totalQuestions, passingScore), formato otimizado com redução de 40% no tamanho dos dados, melhoria na velocidade de transmissão, sistema de logs limpo e envio único ao finalizar quiz, corrigido envio duplicado e processamento triplicado
+### Commit Hash: 374f68b
+
+---
+
 ### Data/Hora: 2024-12-19 23:55:00
 ### Tipo: GitHub Push
 ### Versão: v2.2.2 (cursos.json)

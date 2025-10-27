@@ -21,6 +21,88 @@ const veloAcademyApp = {
         scriptUrl: 'https://script.google.com/macros/s/AKfycbyLR1pyRoBjSivGP5xrDTD7DZeJCCpKF868qlSaKZC1u3srLIMJkwiQ5R8RZpD_tsCqCQ/exec'
     },
 
+    // Função para verificar se o usuário é Lucas Gravina (desenvolvedor)
+    isDeveloperUser() {
+        try {
+            const userData = this.getAuthenticatedUserData();
+            const isLucasGravina = userData.email === 'lucas.gravina@velotax.com.br' || 
+                                  userData.name.toLowerCase().includes('lucas gravina');
+            return isLucasGravina;
+        } catch (error) {
+            return false; // Se não conseguir obter dados, não é desenvolvedor
+        }
+    },
+
+    // Função para log seguro (só mostra dados sensíveis para desenvolvedor)
+    secureLog(message, sensitiveData = null, logLevel = 'log') {
+        if (this.isDeveloperUser()) {
+            // Desenvolvedor: logs completos com dados sensíveis
+            console[logLevel](message, sensitiveData);
+        } else {
+            // Usuário comum: logs sanitizados SEM dados sensíveis
+            if (sensitiveData && typeof sensitiveData === 'object') {
+                const sanitizedData = this.sanitizeSensitiveData(sensitiveData);
+                console[logLevel](message, sanitizedData);
+            } else {
+                console[logLevel](message);
+            }
+        }
+    },
+
+    // Função para sanitizar dados sensíveis
+    sanitizeSensitiveData(data) {
+        if (!data || typeof data !== 'object') return data;
+        
+        const sanitized = { ...data };
+        
+        // Remover respostas corretas de questões
+        if (sanitized.questions && Array.isArray(sanitized.questions)) {
+            sanitized.questions = sanitized.questions.map(q => ({
+                id: q.id,
+                question: q.question,
+                options: q.options,
+                // correctAnswer removido para usuários comuns
+            }));
+        }
+        
+        // Remover respostas corretas de questão individual
+        if (sanitized.correctAnswer !== undefined) {
+            delete sanitized.correctAnswer;
+        }
+        
+        // Remover respostas do usuário
+        if (sanitized.userAnswers) {
+            sanitized.userAnswers = '[DADOS SENSÍVEIS OCULTADOS]';
+        }
+        
+        // Remover pontuação detalhada
+        if (sanitized.score !== undefined) {
+            sanitized.score = '[OCULTO]';
+        }
+        if (sanitized.finalGrade !== undefined) {
+            sanitized.finalGrade = '[OCULTO]';
+        }
+        if (sanitized.passingScore !== undefined) {
+            sanitized.passingScore = '[OCULTO]';
+        }
+        
+        // Remover mapeamento de opções
+        if (sanitized.optionMappings) {
+            sanitized.optionMappings = '[OCULTO]';
+        }
+        
+        return sanitized;
+    },
+
+    // Função para log de pontuação segura
+    secureScoreLog(message, scoreData) {
+        if (this.isDeveloperUser()) {
+            console.log(message, scoreData);
+        } else {
+            console.log(message, '[DADOS DE PONTUAÇÃO OCULTADOS POR SEGURANÇA]');
+        }
+    },
+
     // Função para testar CORS via JSONP
     testCORS() {
         return new Promise((resolve, reject) => {
@@ -85,10 +167,10 @@ const veloAcademyApp = {
                 delete window[callbackName];
                 
                 if (data && data.success === true && data.quiz) {
-                    console.log('Status de sucesso confirmado via JSONP');
-                    console.log('Quiz recebido:', data.quiz);
-                    console.log('Perguntas recebidas:', data.quiz.questions);
-                    console.log('Nota de aprovação:', data.quiz.passingScore);
+                    this.secureLog('Status de sucesso confirmado via JSONP');
+                    this.secureLog('Quiz recebido:', data.quiz);
+                    this.secureLog('Perguntas recebidas:', data.quiz.questions);
+                    this.secureLog('Nota de aprovação:', data.quiz.passingScore);
                     
                     // Verificar se as perguntas têm as respostas corretas válidas
                     const hasValidAnswers = data.quiz.questions.every(q => 
@@ -96,7 +178,7 @@ const veloAcademyApp = {
                         q.correctAnswer >= 0 && 
                         q.correctAnswer <= 3
                     );
-                    console.log('Perguntas têm respostas corretas válidas:', hasValidAnswers);
+                    this.secureLog('Perguntas têm respostas corretas válidas:', hasValidAnswers);
                     
                     if (!hasValidAnswers) {
                         console.warn('Apps Script não retornou respostas corretas válidas, usando fallback');
@@ -104,7 +186,7 @@ const veloAcademyApp = {
                         data.quiz.questions.forEach(q => {
                             if (q.correctAnswer === -1 || q.correctAnswer === undefined) {
                                 q.correctAnswer = 0; // Primeira opção como correta
-                                console.log(`Fallback aplicado para questão ${q.id}: resposta correta = 0`);
+                                this.secureLog(`Fallback aplicado para questão ${q.id}: resposta correta = 0`);
                             }
                         });
                     }
@@ -119,8 +201,8 @@ const veloAcademyApp = {
                         optionMappings: data.quiz.optionMappings || {} // Mapeamento de opções randomizadas
                     };
                     
-                    console.log('Quiz carregado com sucesso via JSONP:', this.currentQuiz);
-                    console.log('Mapeamento de opções recebido:', this.currentQuiz.optionMappings);
+                    this.secureLog('Quiz carregado com sucesso via JSONP:', this.currentQuiz);
+                    this.secureLog('Mapeamento de opções recebido:', this.currentQuiz.optionMappings);
                     this.showQuizInterface();
                     resolve(true);
                 } else {
@@ -177,8 +259,8 @@ const veloAcademyApp = {
         const questionNumber = this.currentQuiz.currentQuestion + 1;
         const totalQuestions = this.currentQuiz.questions.length;
 
-        console.log(`Renderizando questão ${questionNumber}:`, question);
-        console.log(`Resposta correta da questão ${questionNumber}:`, question.correctAnswer);
+        this.secureLog(`Renderizando questão ${questionNumber}:`, question);
+        this.secureLog(`Resposta correta da questão ${questionNumber}:`, question.correctAnswer);
 
         quizView.innerHTML = `
             <div class="quiz-header">
@@ -216,7 +298,7 @@ const veloAcademyApp = {
     selectAnswer(answerIndex) {
         if (!this.currentQuiz) return;
 
-        console.log(`Selecionando resposta ${answerIndex} para questão ${this.currentQuiz.currentQuestion + 1}`);
+        this.secureLog(`Selecionando resposta ${answerIndex} para questão ${this.currentQuiz.currentQuestion + 1}`);
 
         // Salvar a resposta do usuário
         this.currentQuiz.userAnswers[this.currentQuiz.currentQuestion] = answerIndex;
@@ -400,6 +482,28 @@ const veloAcademyApp = {
             ? `Você acertou ${score} de ${totalQuestions} questões. É necessário acertar pelo menos ${passingScore} questões para aprovação.` 
             : 'Parabéns! Você foi aprovado no quiz.';
 
+        // Calcular questões erradas para aprovados
+        let wrongQuestionsSection = '';
+        if (!isReproved && this.currentQuiz) {
+            const wrongQuestions = this.calculateWrongQuestions();
+            if (wrongQuestions.length > 0) {
+                const wrongQuestionsList = wrongQuestions.map(qNum => {
+                    const question = this.currentQuiz.questions[qNum - 1];
+                    return `<li>Questão ${qNum}: ${question.question}</li>`;
+                }).join('');
+                
+                wrongQuestionsSection = `
+                    <div class="wrong-questions-section">
+                        <h3>Questões para Revisão</h3>
+                        <p>Você acertou ${score} de ${totalQuestions} questões. Abaixo estão as questões que você errou para revisão:</p>
+                        <ul class="wrong-questions-list">
+                            ${wrongQuestionsList}
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
         const resultHTML = `
             <div class="quiz-results ${resultClass}">
                 <div class="result-header">
@@ -417,6 +521,7 @@ const veloAcademyApp = {
                         </div>
                     </div>
                 </div>
+                ${wrongQuestionsSection}
                 <div class="result-actions">
                     ${isReproved ? 
                         `<button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>` :
@@ -468,8 +573,8 @@ const veloAcademyApp = {
             return;
         }
 
-        console.log('Respostas do usuário:', this.currentQuiz.userAnswers);
-        console.log('Perguntas do quiz:', this.currentQuiz.questions);
+        this.secureLog('Respostas do usuário:', this.currentQuiz.userAnswers);
+        this.secureLog('Perguntas do quiz:', this.currentQuiz.questions);
 
         // Calcular pontuação
         let score = 0;
@@ -477,10 +582,10 @@ const veloAcademyApp = {
             const userAnswer = this.currentQuiz.userAnswers[index];
             const correctAnswer = question.correctAnswer;
             
-            console.log(`Questão ${index + 1}:`);
-            console.log(`  - Resposta do usuário: ${userAnswer}`);
-            console.log(`  - Resposta correta: ${correctAnswer}`);
-            console.log(`  - Acertou: ${userAnswer === correctAnswer}`);
+            this.secureLog(`Questão ${index + 1}:`);
+            this.secureLog(`  - Resposta do usuário: ${userAnswer}`);
+            this.secureLog(`  - Resposta correta: ${correctAnswer}`);
+            this.secureLog(`  - Acertou: ${userAnswer === correctAnswer}`);
             
             if (userAnswer === correctAnswer) {
                 score++;
@@ -491,7 +596,7 @@ const veloAcademyApp = {
         const finalGrade = (score / totalQuestions) * 10;
         const passingScore = this.currentQuiz.passingScore;
 
-        console.log('Pontuação calculada:', { score, totalQuestions, finalGrade, passingScore });
+        this.secureScoreLog('Pontuação calculada:', { score, totalQuestions, finalGrade, passingScore });
 
         // Mostrar resultado
         this.showLocalQuizResult(score, finalGrade, passingScore, totalQuestions);
@@ -515,6 +620,28 @@ const veloAcademyApp = {
             ? 'Parabéns! Você foi aprovado no quiz.' 
             : `Você acertou ${score} de ${totalQuestions} questões. É necessário acertar pelo menos ${passingScore} questões para aprovação.`;
 
+        // Calcular questões erradas para aprovados
+        let wrongQuestionsSection = '';
+        if (isPassed && this.currentQuiz) {
+            const wrongQuestions = this.calculateWrongQuestions();
+            if (wrongQuestions.length > 0) {
+                const wrongQuestionsList = wrongQuestions.map(qNum => {
+                    const question = this.currentQuiz.questions[qNum - 1];
+                    return `<li>Questão ${qNum}: ${question.question}</li>`;
+                }).join('');
+                
+                wrongQuestionsSection = `
+                    <div class="wrong-questions-section">
+                        <h3>Questões para Revisão</h3>
+                        <p>Você acertou ${score} de ${totalQuestions} questões. Abaixo estão as questões que você errou para revisão:</p>
+                        <ul class="wrong-questions-list">
+                            ${wrongQuestionsList}
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+
         const resultHTML = `
             <div class="quiz-results ${resultClass}">
                 <div class="result-header">
@@ -532,6 +659,7 @@ const veloAcademyApp = {
                         </div>
                     </div>
                 </div>
+                ${wrongQuestionsSection}
                 <div class="result-actions">
                     ${isPassed ? 
                         `<button class="btn-primary" onclick="veloAcademyApp.generateCertificate()">Receba o Certificado</button>` :

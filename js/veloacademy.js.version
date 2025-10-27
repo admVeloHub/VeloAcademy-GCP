@@ -1,6 +1,18 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.7.0 - 2024-12-19
+- SEGURANÇA: Sistema de logs seguros implementado
+- Adicionadas funções: isDeveloperUser(), secureLog(), sanitizeSensitiveData(), secureScoreLog()
+- Logs sensíveis (respostas corretas, pontuação, mapeamentos) visíveis apenas para Lucas Gravina
+- Usuários comuns veem logs sanitizados sem dados confidenciais
+- Substituídos console.log sensíveis por secureLog() em todas as funções críticas
+- FUNCIONALIDADE: Questões erradas exibidas na tela de aprovação
+- Candidatos aprovados veem lista de questões que erraram para revisão
+- Implementado em showQuizResult() e showLocalQuizResult()
+- Seção "Questões para Revisão" com design consistente com VeloHub
+- Suporte completo a tema claro/escuro e responsividade mobile
+
 ## v1.6.1 - 2024-12-19
 - OTIMIZAÇÃO: Formato de envio simplificado para melhor performance
 - Removidos campos desnecessários: score, totalQuestions, passingScore

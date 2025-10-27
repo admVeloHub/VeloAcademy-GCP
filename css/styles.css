@@ -2594,6 +2594,95 @@ footer {
     font-weight: 500;
 }
 
+/* Seção de questões erradas na tela de aprovação */
+.wrong-questions-section {
+    background: var(--cor-container);
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 2px 8px var(--cor-sombra);
+}
+
+.wrong-questions-section h3 {
+    color: var(--blue-dark);
+    font-size: 1.2rem;
+    margin-bottom: 15px;
+    font-family: 'Poppins', sans-serif;
+    font-weight: 600;
+}
+
+.wrong-questions-section p {
+    color: var(--gray);
+    margin-bottom: 15px;
+    line-height: 1.5;
+}
+
+.wrong-questions-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.wrong-questions-list li {
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 12px 15px;
+    margin-bottom: 8px;
+    color: var(--blue-dark);
+    font-size: 0.9rem;
+    line-height: 1.4;
+    transition: background-color 0.3s ease;
+}
+
+.wrong-questions-list li:hover {
+    background: rgba(22, 52, 255, 0.05);
+    border-color: var(--blue-medium);
+}
+
+/* Tema escuro para questões erradas */
+.dark .wrong-questions-section {
+    background: var(--cor-container-escuro);
+    border-color: var(--borda-escura);
+}
+
+.dark .wrong-questions-section h3 {
+    color: var(--texto-principal-escuro);
+}
+
+.dark .wrong-questions-section p {
+    color: var(--texto-secundario-escuro);
+}
+
+.dark .wrong-questions-list li {
+    background: var(--cor-fundo-escuro);
+    border-color: var(--borda-escura);
+    color: var(--texto-principal-escuro);
+}
+
+.dark .wrong-questions-list li:hover {
+    background: rgba(22, 148, 255, 0.1);
+    border-color: var(--blue-light);
+}
+
+/* Responsividade para questões erradas */
+@media (max-width: 768px) {
+    .wrong-questions-section {
+        padding: 15px;
+        margin: 15px 0;
+    }
+    
+    .wrong-questions-section h3 {
+        font-size: 1.1rem;
+    }
+    
+    .wrong-questions-list li {
+        padding: 10px 12px;
+        font-size: 0.85rem;
+    }
+}
+
 /* Responsividade para resultados */
 @media (max-width: 768px) {
     .quiz-results {
