@@ -1,6 +1,6 @@
 {
     "onboarding": {
-        "title": "Onboarding de Atendimento Velotax",
+        "title": "Onboarding B2C",
         "description": "Aprenda os processos essenciais para um atendimento de excelência.",
         "modules": [
             {
@@ -73,37 +73,32 @@
                             { "id": "p4-1", "title": "Aula - Portabilidade PIX", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1Nfv0U1iOJasfrldBh_p0mjxdj9UbiE3_/view?usp=drive_link", "driveId": "1Nfv0U1iOJasfrldBh_p0mjxdj9UbiE3_" },
                             { "id": "p4-2", "title": "Ebook Chave Pix", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/file/d/1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B/view?usp=drive_link", "driveId": "1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B" }
                         ]
-                    },
-                    {
-                        "subtitle": "Seguro Prestamista",
-                        "lessons": [
-                            { "id": "p8-1", "title": "Aula Seguro Prestamista", "type": "video", "duration": "20 min", "filePath": "https://drive.google.com/file/d/1WeoBuNHXCCltsmZcZ0yPaPj_38nhbZbB/view?usp=drive_link", "driveId": "1WeoBuNHXCCltsmZcZ0yPaPj_38nhbZbB" },
-                            { "id": "p8-2", "title": "Telas da contratação: Parte 1", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1T8wDdrap-Mg8mD4LcWiOvhAZPodP9pnk/view?usp=drive_link", "driveId": "1T8wDdrap-Mg8mD4LcWiOvhAZPodP9pnk" },
-                            { "id": "p8-3", "title": "Telas da contratação: Parte 2", "type": "video", "duration": "15 min", "filePath": "https://drive.google.com/file/d/1r23AXm2xyAOccm-B-5-DG7WWKMou5wjt/view?usp=drive_link", "driveId": "1r23AXm2xyAOccm-B-5-DG7WWKMou5wjt" },
-                            { "id": "p8-4", "title": "Ebook - Seguro Prestamista", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1IiGzOwpTw1JzMaSdFdjaWW5yTeemXfnk/view?usp=drive_link", "driveId": "1IiGzOwpTw1JzMaSdFdjaWW5yTeemXfnk" }
-                        ]
                     }
                 ]
             },
             {
-                "title": "Módulo 2: Produtos para Investidores",
+                "title": "Módulo 2: Produtos Diversificados",
                 "sections": [
                     {
-                        "subtitle": "VeloPrime",
+                        "subtitle": "Seguro Prestamista",
                         "lessons": [
-                            { "id": "p5-1", "title": "Em breve - Conteúdo sobre VeloPrime", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                            { "id": "p8-1", "title": "Vídeo 1 - Seguro Prestamista", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/Cst9koRr_ig", "driveId": null },
+                            { "id": "p8-2", "title": "Vídeo 2 - Seguro Prestamista", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/sRjmcLPuS_o", "driveId": null },
+                            { "id": "p8-3", "title": "Vídeo 3 - Seguro Prestamista", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/iNFaKu4MvuA", "driveId": null },
+                            { "id": "p8-4", "title": "Vídeo 4 - Seguro Prestamista", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/9-c_rUX7USU", "driveId": null },
+                            { "id": "p8-5", "title": "Vídeo 5 - Seguro Prestamista", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/T-rPE1qGp0w", "driveId": null },
+                            { "id": "p8-6", "title": "Vídeo 6 - Seguro Prestamista", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/A2h-_CQFMnQ", "driveId": null },
+                            { "id": "p8-7", "title": "Ebook - Seguro Prestamista", "type": "pdf", "duration": "Download", "filePath": "https://drive.google.com/file/d/1IiGzOwpTw1JzMaSdFdjaWW5yTeemXfnk/view?usp=drive_link", "driveId": "1IiGzOwpTw1JzMaSdFdjaWW5yTeemXfnk" }
                         ]
                     },
                     {
-                        "subtitle": "Concierge",
+                        "subtitle": "Seguro Celular",
                         "lessons": [
-                            { "id": "p6-1", "title": "Em breve - Conteúdo sobre Concierge", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
-                        ]
-                    },
-                    {
-                        "subtitle": "VeloPay",
-                        "lessons": [
-                            { "id": "p7-1", "title": "Em breve - Conteúdo sobre VeloPay", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                            { "id": "p9-1", "title": "Vídeo 1 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/kTRpjqmxIb8", "driveId": null },
+                            { "id": "p9-2", "title": "Vídeo 2 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/PlXdzuRA1go", "driveId": null },
+                            { "id": "p9-3", "title": "Vídeo 3 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/qYKm5RQofzE", "driveId": null },
+                            { "id": "p9-4", "title": "Vídeo 4 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/FduqEqxVH2c", "driveId": null },
+                            { "id": "p9-5", "title": "Vídeo 5 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/kTsFbCkYIJs", "driveId": null }
                         ]
                     }
                 ]
@@ -172,6 +167,53 @@
                     { "id": "l10-1", "title": "Stop Loss e Take Profit", "type": "video", "duration": "18 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
                     { "id": "l10-2", "title": "Diversificação de Carteira", "type": "audio", "duration": "25 min", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" },
                     { "id": "l10-3", "title": "Psicologia do Trading", "type": "pdf", "duration": "Leitura", "filePath": "https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE" }
+                ]
+            }
+        ]
+    },
+    "youtube-curso": {
+        "title": "Curso com Vídeos YouTube",
+        "description": "Curso de exemplo utilizando vídeos do YouTube com player embedded em modal.",
+        "modules": [
+            {
+                "title": "Módulo 1: Introdução ao YouTube",
+                "sections": [
+                    {
+                        "subtitle": "Vídeos Educacionais",
+                        "lessons": [
+                            { "id": "yt1-1", "title": "Aula 1 - Introdução ao YouTube", "type": "video", "duration": "10 min", "filePath": "https://www.youtube.com/watch?v=dQw4w9WgXcQ" },
+                            { "id": "yt1-2", "title": "Aula 2 - Formato Curto", "type": "video", "duration": "5 min", "filePath": "https://youtu.be/dQw4w9WgXcQ" },
+                            { "id": "yt1-3", "title": "Aula 3 - Formato Embed", "type": "video", "duration": "8 min", "filePath": "https://www.youtube.com/embed/dQw4w9WgXcQ" }
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    "novidades-modificacoes": {
+        "title": "Novidades e Modificações",
+        "description": "Fique por dentro das atualizações e melhorias da plataforma.",
+        "modules": [
+            {
+                "title": "Módulo 1: Interface do App",
+                "sections": [
+                    {
+                        "subtitle": "Score",
+                        "lessons": [
+                            { "id": "nm1-1", "title": "Aula - Score", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/dzavdKKKp_M", "driveId": null }
+                        ]
+                    }
+                ]
+            },
+            {
+                "title": "Módulo 2: Alterações de Serviços",
+                "sections": [
+                    {
+                        "subtitle": "Mudanças nos Serviços",
+                        "lessons": [
+                            { "id": "nm2-1", "title": "Em breve - Conteúdo sobre Alterações de Serviços", "type": "document", "duration": "Em desenvolvimento", "filePath": "#", "driveId": null }
+                        ]
+                    }
                 ]
             }
         ]

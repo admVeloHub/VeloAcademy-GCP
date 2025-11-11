@@ -1,6 +1,46 @@
 # Versionamento - cursos.json
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v2.7.1 - 2025-01-30
+- REMOÇÃO: Removida aula de slides "Apresentação - Seguro Prestamista" do Seguro Prestamista
+- Aula removida devido a erro de Content Security Policy ao tentar fazer embed
+- Mantidos apenas vídeos e ebook no Seguro Prestamista
+
+## v2.7.0 - 2025-01-30
+- CONTEÚDO: Adicionada aula completa de vídeo no Seguro Celular
+- Substituída aula placeholder "Em breve" por 5 vídeos do YouTube
+- Vídeos adicionados: Vídeo 1 a Vídeo 5 - Seguro Celular
+- Links YouTube formatados: https://youtu.be/[ID]
+- IDs dos vídeos: kTRpjqmxIb8, PlXdzuRA1go, qYKm5RQofzE, FduqEqxVH2c, kTsFbCkYIJs
+- Todos os vídeos configurados com tipo "video" e duração "Assistir"
+- Estrutura mantida para compatibilidade com sistema de quizzes
+
+## v2.6.0 - 2025-01-30
+- CONTEÚDO: Adicionada primeira aula real ao curso "Novidades e Modificações"
+- Módulo 1 "Interface do App" - Subtítulo alterado de "Atualizações de Interface" para "Score"
+- Nova aula: "Aula - Score" com link YouTube (https://youtu.be/dzavdKKKp_M)
+- Primeira utilização do modal YouTube implementado anteriormente
+- Link no formato youtu.be detectado e funcionando corretamente
+- Removida aula placeholder "Em breve"
+
+## v2.5.0 - 2025-01-30
+- RENOMEAÇÃO: Curso "onboarding" renomeado de "Onboarding de Atendimento Velotax" para "Onboarding B2C"
+- REORGANIZAÇÃO: Curso "produtos" - Módulo 2 renomeado de "Produtos para Investidores" para "Produtos Diversificados"
+- REMOÇÃO: Removidos subtítulos do Módulo 2 (VeloPrime, Concierge, VeloPay)
+- MOVIMENTAÇÃO: Seção "Seguro Prestamista" movida do Módulo 1 para o Módulo 2
+- ADIÇÃO: Novo subtítulo "Seguro Celular" adicionado no Módulo 2, após "Seguro Prestamista"
+- NOVO CURSO: Adicionado curso "novidades-modificacoes" com título "Novidades e Modificações"
+- NOVO CURSO: Badge "Atualização" para curso "novidades-modificacoes"
+- NOVO CURSO: Módulo 1 "Interface do App" e Módulo 2 "Alterações de Serviços"
+- Estrutura JSON mantida válida e compatível
+
+## v2.4.0 - 2025-01-30
+- ADIÇÃO: Novo curso "youtube-curso" com vídeos do YouTube
+- Curso utiliza modal com player YouTube embedded ao invés de abrir nova aba
+- Módulo 1: Introdução ao YouTube com 3 aulas de exemplo
+- Suporte para formatos: youtube.com/watch, youtu.be e youtube.com/embed
+- Estrutura mantida para compatibilidade com sistema existente
+
 ## v2.3.1 - 2024-12-19
 - CORREÇÃO: Reestruturação do Módulo 2 "Atendimento Velotax"
 - Módulo 2 agora possui 2 subtítulos:

@@ -1,6 +1,41 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.9.2 - 2025-01-30
+- ADIÇÃO: Quiz configurado para seção "Seguro Celular"
+- Adicionado "Seguro Celular" à lista de seções com quiz habilitado
+- Quiz ID configurado como "seguro_celular" conforme solicitado
+- Botão "Fazer Quiz" agora aparece na seção Seguro Celular após completar vídeos
+- Integração completa com sistema de quizzes existente
+
+## v1.9.1 - 2025-01-30
+- CORREÇÃO CRÍTICA: Corrigido erro "headerClass is not defined" na função openCourse()
+- Variável headerClass agora é definida corretamente antes de ser usada
+- CORREÇÃO: Função validateLink() atualizada para detectar links do YouTube corretamente
+- validateLink() agora também rejeita links "#" e strings vazias como inválidos
+- Cards de cursos agora funcionam corretamente ao serem clicados
+
+## v1.9.0 - 2025-01-30
+- FUNCIONALIDADE: Ocultar título e subtítulo no curso "produtos"
+- Modificada função openCourse() para detectar curso "produtos" e não renderizar course-title-section
+- Adicionada classe CSS "no-title" ao header quando não há título
+- ALTERAÇÃO: Texto do botão voltar alterado de "Voltar para Cursos" para apenas "Voltar"
+- ATUALIZAÇÃO: renderCourses() atualizado para incluir novo curso "novidades-modificacoes"
+- ATUALIZAÇÃO: getCourseType() atualizado para retornar "Atualização" para curso "novidades-modificacoes"
+- Mantida compatibilidade com cursos existentes
+
+## v1.8.0 - 2025-01-30
+- ADIÇÃO: Sistema de modal YouTube com player embedded
+- Funções adicionadas: isYouTubeLink(), extractYouTubeId(), openYouTubeModal(), closeYouTubeModal(), createYouTubeModal()
+- Detecção automática de links YouTube (formatos: youtube.com/watch, youtu.be, youtube.com/embed)
+- Botão "Assistir" detecta YouTube e abre modal ao invés de nova aba
+- Modal com overlay escuro, animações suaves e responsividade completa
+- Suporte a tema escuro seguindo LAYOUT_GUIDELINES.md
+- Event listeners para fechar modal (overlay, ESC, botão X)
+- Vídeo pausa automaticamente ao fechar modal
+- Compatibilidade 100% mantida com sistema Google Drive existente
+- Modificadas funções de renderização (seções com sections e estrutura antiga)
+
 ## v1.7.0 - 2024-12-19
 - SEGURANÇA: Sistema de logs seguros implementado
 - Adicionadas funções: isDeveloperUser(), secureLog(), sanitizeSensitiveData(), secureScoreLog()
