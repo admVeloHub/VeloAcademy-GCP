@@ -1,6 +1,10 @@
 # Versionamento - cursos.json
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v2.7.2 - 2025-01-30
+- CORREÇÃO: Renomeados títulos dos vídeos do Seguro Celular para "Aula - Seguro Celular"
+- Todos os 5 vídeos agora seguem o padrão de nomenclatura consistente
+
 ## v2.7.1 - 2025-01-30
 - REMOÇÃO: Removida aula de slides "Apresentação - Seguro Prestamista" do Seguro Prestamista
 - Aula removida devido a erro de Content Security Policy ao tentar fazer embed

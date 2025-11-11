@@ -94,11 +94,11 @@
                     {
                         "subtitle": "Seguro Celular",
                         "lessons": [
-                            { "id": "p9-1", "title": "Vídeo 1 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/kTRpjqmxIb8", "driveId": null },
-                            { "id": "p9-2", "title": "Vídeo 2 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/PlXdzuRA1go", "driveId": null },
-                            { "id": "p9-3", "title": "Vídeo 3 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/qYKm5RQofzE", "driveId": null },
-                            { "id": "p9-4", "title": "Vídeo 4 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/FduqEqxVH2c", "driveId": null },
-                            { "id": "p9-5", "title": "Vídeo 5 - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/kTsFbCkYIJs", "driveId": null }
+                            { "id": "p9-1", "title": "Aula - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/kTRpjqmxIb8", "driveId": null },
+                            { "id": "p9-2", "title": "Aula - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/PlXdzuRA1go", "driveId": null },
+                            { "id": "p9-3", "title": "Aula - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/qYKm5RQofzE", "driveId": null },
+                            { "id": "p9-4", "title": "Aula - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/FduqEqxVH2c", "driveId": null },
+                            { "id": "p9-5", "title": "Aula - Seguro Celular", "type": "video", "duration": "Assistir", "filePath": "https://youtu.be/kTsFbCkYIJs", "driveId": null }
                         ]
                     }
                 ]
