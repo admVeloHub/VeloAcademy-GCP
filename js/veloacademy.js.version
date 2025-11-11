@@ -1,6 +1,12 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.9.3 - 2025-01-30
+- CORREÇÃO: Título de vídeos agrupados agora mostra título único quando todos têm o mesmo título
+- Quando múltiplos vídeos têm o mesmo título (ex: "Aula - Seguro Celular"), exibe apenas o título único
+- Evita exibição de "5 vídeos: Aula - Seguro Celular, Aula - Seguro Celular, ..."
+- Melhora na apresentação visual dos botões de sequência de vídeos
+
 ## v1.9.2 - 2025-01-30
 - ADIÇÃO: Quiz configurado para seção "Seguro Celular"
 - Adicionado "Seguro Celular" à lista de seções com quiz habilitado
