@@ -1798,13 +1798,9 @@ const veloAcademyApp = {
                             videoId: this.extractYouTubeId(v.filePath)
                         }));
                         
-                        // Se todos os vídeos têm o mesmo título, usar apenas o título único
-                        const uniqueTitles = [...new Set(youtubeVideos.map(v => v.title))];
-                        const displayTitle = youtubeVideos.length === 1 
-                            ? youtubeVideos[0].title 
-                            : uniqueTitles.length === 1
-                            ? uniqueTitles[0]
-                            : `${youtubeVideos.length} vídeos: ${youtubeVideos.map(v => v.title).join(', ').substring(0, 60)}${youtubeVideos.map(v => v.title).join(', ').length > 60 ? '...' : ''}`;
+                        // Usar título da seção/subtítulo para criar título da aula
+                        // Formato: "Aula - [Nome da Seção]"
+                        const displayTitle = `Aula - ${section.subtitle}`;
                         
                         // Armazenar sequência em cache para acesso via event listener
                         const sequenceId = `video-seq-${courseId}-${moduleIndex}-${sectionIndex}`;
