@@ -1,6 +1,47 @@
 # Versionamento - styles.css
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.8.0 - 2025-01-30
+- REMOÇÃO: Removidos completamente ícones genéricos/placeholders dos cards de cursos
+- Adicionada regra CSS explícita para remover qualquer conteúdo de ::before e ::after nos títulos dos cards
+- Garantido que não há espaçamento ou placeholders reservados para ícones
+- Cards agora exibem apenas texto limpo nos títulos
+
+## v1.7.0 - 2025-01-30
+- AJUSTE: Posicionamento do botão voltar aproximado do header
+- Botão voltar agora posicionado em top: 20px ao invés de 40% (translateY)
+- Adicionada classe CSS .no-title para header sem título/subtítulo
+- Header sem título reduzido para height: 60px (de 80px)
+- Botão voltar em header sem título posicionado relativamente (left: 0, top: 0)
+- Ajustes aplicados também no media query para telas grandes (min-width: 1600px)
+- Mantida responsividade e compatibilidade
+
+## v1.6.0 - 2025-01-30
+- REDIMENSIONAMENTO: Normalização para zoom 100% (redução de 20% em todos os elementos)
+- Variáveis CSS: --borda-raio reduzido de 12px para 10px, --espaco de 16px para 13px
+- Header: altura máxima reduzida de 90px para 72px, padding de 12px para 10px
+- Logo: dimensões reduzidas de 200x55px para 160x44px, ícone de 2.8rem para 2.2rem
+- Navegação: gaps e paddings reduzidos proporcionalmente (20px→16px, 10px→8px)
+- Tipografia: h1 de 2.2rem para 1.8rem, hero-title de 3.5rem para 2.8rem
+- Cards: padding reduzido de 25px para 20px, border-radius ajustado
+- Botões: padding reduzido de 10px 20px para 8px 16px, font-size ajustado
+- Espaçamentos: todos os gaps, margins e paddings reduzidos em 20%
+- Ícones: dimensões reduzidas proporcionalmente (60px→48px, 80px→64px)
+- Modal YouTube: header padding reduzido, container max-width de 900px para 720px
+- Responsividade: todos os media queries atualizados com valores reduzidos em 20%
+- Mantidas proporções visuais e legibilidade em todos os elementos
+
+## v1.5.0 - 2025-01-30
+- ADIÇÃO: Estilos para modal YouTube com player embedded
+- Overlay escuro semi-transparente com backdrop-filter blur
+- Container centralizado com animações de abertura/fechamento
+- Header com título e botão de fechar estilizado
+- Body com aspect-ratio 16:9 para player YouTube
+- Suporte completo ao tema escuro seguindo LAYOUT_GUIDELINES.md
+- Responsividade para tablet (1024px) e mobile (768px, 480px)
+- Cores oficiais VeloHub aplicadas (azul médio, azul claro, etc.)
+- Transições suaves e efeitos hover no botão de fechar
+
 ## v1.4.0 - 2024-12-19
 - FUNCIONALIDADE: Estilos para seção de questões erradas na tela de aprovação
 - Adicionada classe .wrong-questions-section com design consistente

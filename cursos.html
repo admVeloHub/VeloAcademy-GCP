@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
     <link rel="icon" type="image/png" href="./academy.png">
+    <!-- PDF.js para visualização de PDFs -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
 </head>
 <body>
 
@@ -41,7 +43,8 @@
     <main>
         <div class="container main-container">
             <div id="dashboard-view" class="view active">
-                <h1>Cursos Disponíveis</h1>
+                <div id="course-filter-container"></div>
+                <div class="courses-divider"></div>
                 <div id="courses-grid"></div>
             </div>
             <div id="course-view" class="view">
@@ -58,6 +61,7 @@
     </footer>
 
     <script src="./js/auth.js" defer></script>
+    <script src="./js/progress-tracker.js"></script>
     <script src="./js/veloacademy.js"></script>
     <script src="./js/theme-toggle.js"></script>
 </body>

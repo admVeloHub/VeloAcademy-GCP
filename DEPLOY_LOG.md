@@ -14,6 +14,23 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2025-01-30 [HH:MM:SS]
+### Tipo: GitHub Push
+### Versão: v2.7.1 (cursos.json) + v1.9.2 (veloacademy.js)
+### Arquivos Modificados:
+- cursos.json (v2.7.1)
+- cursos.json.version (v2.7.1)
+- js/veloacademy.js (v1.9.2)
+- js/veloacademy.js.version (v1.9.2)
+### Descrição: Adicionar aula de vídeo Seguro Celular e remover slides do Seguro Prestamista
+- CONTEÚDO: Adicionados 5 vídeos YouTube no Seguro Celular (kTRpjqmxIb8, PlXdzuRA1go, qYKm5RQofzE, FduqEqxVH2c, kTsFbCkYIJs)
+- QUIZ: Configurado quiz "seguro_celular" para seção Seguro Celular
+- CORREÇÃO: Removida apresentação de slides do Seguro Prestamista devido a erro de Content Security Policy
+- Estrutura mantida para compatibilidade com sistema de quizzes e sequências de vídeo
+### Commit Hash: 8d0ad6c
+
+---
+
 ### Data/Hora: 2024-12-19 23:59:00
 ### Tipo: GitHub Push (Force Redeploy)
 ### Versão: v1.7.0 (veloacademy.js) + v1.4.0 (styles.css)
@@ -29,7 +46,7 @@
 - FUNCIONALIDADE: Candidatos aprovados veem questões que erraram para revisão
 - Seção "Questões para Revisão" com design consistente com VeloHub
 - Suporte completo a tema claro/escuro e responsividade mobile
-### Commit Hash: [Aguardando push]
+### Commit Hash: f316c2e
 
 ---
 

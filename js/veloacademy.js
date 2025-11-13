@@ -1,8 +1,30 @@
+// VERSION: v1.2.6 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// Sistema principal de gerenciamento de cursos VeloAcademy
+
 const veloAcademyApp = {
 
     courseDatabase: {},
 
     videoSequencesCache: {}, // Cache para sequências de vídeos por seção
+    
+    courseDatabaseCache: {
+        data: {},
+        timestamp: null,
+        ttl: 5 * 60 * 1000, // 5 minutos
+        source: null // "mongodb" ou "json"
+    },
+    
+    // Função para obter URL base da API
+    getApiBaseUrl() {
+        // Em produção, usar URL relativa ou variável de ambiente
+        // Em desenvolvimento, usar localhost
+        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            return 'http://localhost:3001/api';
+        }
+        // Em produção, assumir que a API está no mesmo domínio ou usar variável de ambiente
+        // Por enquanto, usar localhost como fallback
+        return 'http://localhost:3001/api';
+    },
 
     logoConfig: {
 
@@ -795,8 +817,14 @@ const veloAcademyApp = {
             console.log('User progress loaded');
         }
 
-        this.renderCourses();
-        console.log('Courses rendered');
+        // Renderizar cursos apenas se houver cursos carregados
+        // Se houver erro, showMongoDBError() já definiu o conteúdo
+        if (Object.keys(this.courseDatabase).length > 0) {
+            this.renderCourses();
+            console.log('Courses rendered');
+        } else {
+            console.log('No courses loaded - error message should be displayed');
+        }
 
         this.initTheme();
         console.log('Theme initialized');
@@ -874,23 +902,21 @@ const veloAcademyApp = {
                         </iframe>
                     </div>
                     <div class="youtube-modal-footer" id="youtube-modal-footer">
+                        <button class="btn btn-secondary youtube-btn-prev" id="youtube-btn-prev" onclick="veloAcademyApp.previousVideo()" disabled>
+                            <i class="fas fa-arrow-left"></i> Voltar
+                        </button>
                         <div class="youtube-modal-progress">
                             <div class="youtube-progress-bar">
                                 <div class="youtube-progress-fill" id="youtube-progress-fill"></div>
                             </div>
                             <span id="youtube-video-counter">1 / 1</span>
                         </div>
-                        <div class="youtube-modal-controls">
-                            <button class="btn btn-secondary" id="youtube-btn-prev" onclick="veloAcademyApp.previousVideo()" style="display: none;">
-                                <i class="fas fa-arrow-left"></i> Voltar
-                            </button>
-                            <button class="btn btn-primary" id="youtube-btn-next" onclick="veloAcademyApp.nextVideo()" disabled>
-                                Próximo <i class="fas fa-arrow-right"></i>
-                            </button>
-                            <button class="btn btn-success" id="youtube-btn-finish" onclick="veloAcademyApp.finishVideoSequence()" style="display: none;">
-                                Finalizar <i class="fas fa-check"></i>
-                            </button>
-                        </div>
+                        <button class="btn btn-primary youtube-btn-next" id="youtube-btn-next" onclick="veloAcademyApp.nextVideo()" disabled>
+                            Próximo <i class="fas fa-arrow-right"></i>
+                        </button>
+                        <button class="btn btn-success youtube-btn-finish" id="youtube-btn-finish" onclick="veloAcademyApp.finishVideoSequence()" style="display: none;" disabled>
+                            Finalizar <i class="fas fa-check"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -1158,329 +1184,170 @@ const veloAcademyApp = {
 
     },
 
+    // Função para transformar dados MongoDB para formato do courseDatabase
+    transformMongoDBToCourseDatabase(mongoCourses) {
+        const transformed = {};
+        
+        mongoCourses.forEach(course => {
+            // cursoNome é usado diretamente como título exibido
+            transformed[course.cursoNome] = {
+                title: course.cursoNome, // cursoNome é o título exibido
+                description: course.cursoDescription || "",    // Fallback se não existir
+                cursoClasse: course.cursoClasse || 'Curso', // Classe do curso (Essencial, Atualização, etc.)
+                modules: course.modules
+                    .filter(m => m.isActive)
+                    .sort((a, b) => (a.moduleOrder || 0) - (b.moduleOrder || 0))
+                    .map(module => ({
+                        title: module.moduleNome,
+                        sections: module.sections
+                            .filter(s => s.isActive)
+                            .sort((a, b) => (a.temaOrder || 0) - (b.temaOrder || 0))
+                            .map(section => ({
+                                subtitle: section.temaNome,
+                                hasQuiz: section.hasQuiz || false, // Preservar hasQuiz do MongoDB
+                                quizId: section.quizId || null, // Preservar quizId do MongoDB
+                                lessons: section.lessons
+                                    .filter(l => l.isActive)
+                                    .sort((a, b) => (a.lessonOrdem || 0) - (b.lessonOrdem || 0))
+                                    .map(lesson => {
+                                        // lessonContent é um ARRAY - processar todas as URLs
+                                        const contentUrls = lesson.lessonContent && lesson.lessonContent.length > 0 
+                                            ? lesson.lessonContent.map(c => c.url).filter(url => url && url !== '#')
+                                            : [];
+                                        
+                                        // Se houver múltiplas URLs, armazenar todas para sequência de vídeos
+                                        const filePath = contentUrls[0] || null; // Primeira URL para compatibilidade
+                                        const allUrls = contentUrls.length > 1 ? contentUrls : null; // Todas as URLs se houver múltiplas
+                                        
+                                        return {
+                                            id: lesson.lessonId,
+                                            title: lesson.lessonTitulo,
+                                            type: lesson.lessonTipo,
+                                            duration: lesson.duration || "",
+                                            filePath: filePath,
+                                            allUrls: allUrls, // Array com todas as URLs se houver múltiplas
+                                            driveId: lesson.driveId || null
+                                        };
+                                    })
+                            }))
+                    }))
+            };
+        });
+        
+        return transformed;
+    },
+
     async loadCourses() {
-
-        try {
-
-            console.log('Loading courses from cursos.json...');
-            const response = await fetch('./cursos.json');
-
-            if (!response.ok) {
-
-                throw new Error(`HTTP error! status: ${response.status}`);
-
-            }
-
-            const data = await response.json();
-            console.log('Courses loaded successfully:', data);
-            
-            // Verificar se os dados foram carregados corretamente
-            if (data && Object.keys(data).length > 0) {
-                this.courseDatabase = data;
-                console.log('Using cursos.json data');
-            } else {
-                throw new Error('Empty or invalid data from cursos.json');
-            }
-
-        } catch (error) {
-
-            console.error('Erro ao carregar cursos:', error);
-
-            console.log('Loading fallback courses...');
-            this.loadFallbackCourses();
-
+        // Verificar cache primeiro (apenas se for do MongoDB)
+        if (this.courseDatabaseCache && 
+            this.courseDatabaseCache.timestamp && 
+            Date.now() - this.courseDatabaseCache.timestamp < this.courseDatabaseCache.ttl &&
+            this.courseDatabaseCache.source === 'mongodb') {
+            this.courseDatabase = this.courseDatabaseCache.data;
+            console.log('📦 Usando cache de cursos (MongoDB)');
+            this.hideMongoDBError();
+            return;
         }
-
+        
+        // Tentar MongoDB (única fonte)
+        try {
+            const apiUrl = `${this.getApiBaseUrl()}/courses`;
+            const response = await fetch(apiUrl);
+            
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+            }
+            
+            const result = await response.json();
+            
+            if (result.success && result.courses && result.courses.length > 0) {
+                const transformed = this.transformMongoDBToCourseDatabase(result.courses);
+                this.courseDatabase = transformed;
+                
+                // Cachear resultado
+                this.courseDatabaseCache = {
+                    data: transformed,
+                    timestamp: Date.now(),
+                    ttl: 5 * 60 * 1000,
+                    source: 'mongodb'
+                };
+                
+                console.log('✅ Cursos carregados do MongoDB');
+                this.hideMongoDBError();
+                return;
+            } else {
+                throw new Error('Nenhum curso encontrado no MongoDB');
+            }
+        } catch (error) {
+            console.error('❌ Erro ao carregar cursos do MongoDB:', error);
+            // Não usar fallback - MongoDB é obrigatório
+            this.courseDatabase = {};
+            this.showMongoDBError(error);
+            // Não chamar renderCourses() - showMongoDBError() já define o conteúdo
+            return;
+        }
     },
 
-    loadFallbackCourses() {
-
-        // Dados de fallback caso o fetch falhe
-
-        this.courseDatabase = {
-
-            'cs004': {
-
-                title: 'Segurança da Informação para Colaboradores',
-
-                description: 'Aprenda a proteger os dados da empresa e dos clientes contra ameaças digitais.',
-
-                modules: [
-
-                    {
-
-                        title: 'Módulo 1: Conceitos Fundamentais',
-
-                        lessons: [
-
-                            { id: 'l7-1', title: 'O que é Segurança da Informação?', type: 'video', duration: '10 min', filePath: 'https://drive.google.com/file/d/1Svw_vrH7zKOKfZgxzJo8VUbdX-4P8yMq/view?usp=drive_link' },
-
-                            { id: 'l7-2', title: 'Tipos de Ameaças (Phishing, Malware)', type: 'audio', duration: '15 min', filePath: 'https://drive.google.com/file/d/1muXEPK8hd-HxrftBL2nBoAagHxJuXd_D/view?usp=sharing' },
-
-                            { id: 'l7-3', title: 'Política de Senhas Seguras', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1JaTpyGK4FA_J-xoAv7YJ3m5ux-aIGIaL/view?usp=drive_link' },
-
-                        ]
-
-                    },
-
-                    {
-
-                        title: 'Módulo 2: Boas Práticas no Dia a Dia',
-
-                        lessons: [
-
-                            { id: 'l8-1', title: 'Navegação Segura e E-mails Confiáveis', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                            { id: 'l8-2', title: 'Protegendo seu Ambiente de Trabalho', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                            { id: 'l8-3', title: 'O que fazer em caso de incidente?', type: 'audio', duration: '10 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                        ]
-
-                    }
-
-                ]
-
-            },
-
-            'cs003': {
-
-                title: 'Excelência no Atendimento ao Cliente',
-
-                description: 'Transforme cada interação em uma oportunidade de encantar e fidelizar clientes.',
-
-                modules: [
-
-                    {
-
-                        title: 'Módulo 1: A Mentalidade do Atendimento de Elite',
-
-                        lessons: [
-
-                            { id: 'l4-1', title: 'Comunicação Empática', type: 'audio', duration: '18 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                            { id: 'l4-2', title: 'Linguagem Positiva e Eficaz', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                            { id: 'l4-3', title: 'Guia Rápido de Tom de Voz', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                        ]
-
-                    },
-
-                    {
-
-                        title: 'Módulo 2: Lidando com Situações Desafiadoras',
-
-                        lessons: [
-
-                            { id: 'l5-1', title: 'Técnicas de Resolução de Conflitos', type: 'video', duration: '22 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                            { id: 'l5-2', title: 'Como Lidar com Clientes Irritados', type: 'audio', duration: '20 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                            { id: 'l5-3', title: 'Dizendo "Não" com Profissionalismo', type: 'video', duration: '10 min', filePath: 'https://drive.google.com/uc?export=view&id=YOUR_FILE_ID_HERE' },
-
-                        ]
-
-                    }
-
-                ]
-
-            },
-
-            'onboarding': {
-
-                title: 'Onboarding de Atendimento VeloTax',
-
-                description: 'Aprenda os processos essenciais para um atendimento de excelência.',
-
-                modules: [
-
-                    {
-
-                        title: 'Módulo 1: Treinamentos Essenciais',
-
-                        sections: [
-
-                            {
-
-                                subtitle: 'Seja Bem Vindo',
-
-                                lessons: [
-
-                                    { id: 'l1-1', title: 'Bem vindo ao VeloAcademy', type: 'video', duration: '5 min', filePath: 'https://drive.google.com/file/d/1ZsiIxvii07xahTVTZURDENX4C3FVTEqf/view?usp=drive_link' },
-
-                                    { id: 'l1-2', title: 'Sobre o Velotax', type: 'video', duration: '10 min', filePath: '#' },
-
-                                    { id: 'l1-3', title: 'O Escritório', type: 'video', duration: '8 min', filePath: '#' }
-
-                                ]
-
-                            }
-
-                        ]
-
-                    },
-
-                    {
-
-                        title: 'Módulo 2: Atendimento Velotax',
-
-                        sections: [
-
-                            {
-
-                                subtitle: 'CRM e Tabulação de Chamados',
-
-                                lessons: [
-
-                                    { id: 'l2-1', title: 'Aula - Conhecendo o CRM', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1etdywa9hD3pfZI9qH8QxMgmMCzO5IEG2/view?usp=drive_link' },
-
-                                    { id: 'l2-2', title: 'Ebook - Tabulação', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/1O4PCASfH6LmtjwCuLBZHMKdqGcsin7ja/view?usp=drive_link' }
-
-                                ]
-
-                            }
-
-                        ]
-
-                    }
-
-                ]
-
-            },
-
-            'produtos': {
-
-                title: 'Produtos Velotax',
-
-                description: 'Conheça todos os produtos e serviços oferecidos pela Velotax.',
-
-                modules: [
-
-                    {
-
-                        title: 'Módulo 1: Produtos de Crédito',
-
-                        sections: [
-
-                            {
-
-                                subtitle: 'Crédito do Trabalhador',
-
-                                lessons: [
-
-                                    { id: 'p1-1', title: 'Aula - Crédito do Trabalhador', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1oyCZhnat7UAK8xACBwFJtILAIGaQJZsC/view?usp=drive_link' },
-
-                                    { id: 'p1-2', title: 'Possíveis ocorrências - Crédito do Trabalhador', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1Rj-l_uSXo3GNMyLlb4Ypu35oZzCpIzRQ/view?usp=drive_link' },
-
-                                    { id: 'p1-3', title: 'Ebook Crédito do Trabalhador', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1uH8XemtAyqWDMc98kwneLNMNo6MoUWum/view?usp=drive_link' },
-
-                                    { id: 'p1-4', title: 'Ebook - Pontos de atenção', type: 'pdf', duration: 'Download', filePath: 'https://drive.google.com/file/d/1YHyhpyaks91L6pcxbA7eo5Tnya27-SRR/view?usp=drive_link' }
-
-                                ]
-
-                            },
-
-                            {
-
-                                subtitle: 'Crédito Pessoal',
-
-                                lessons: [
-
-                                    { id: 'p2-1', title: 'Aula - Crédito Pessoal', type: 'video', duration: '12 min', filePath: 'https://drive.google.com/file/d/1vqNbxQ6kVe-ZpXC2Q2qbPYuWwVtai5N0/view?usp=drive_link' },
-
-                                    { id: 'p2-2', title: 'Ebook Crédito Pessoal', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1yjDZP8IoE5BM6gW1Ii4gvthdj9-4jCk0/view?usp=drive_link' }
-
-                                ]
-
-                            },
-
-                            {
-
-                                subtitle: 'Antecipação de Restituição',
-
-                                lessons: [
-
-                                    { id: 'p3-1', title: 'Em breve - Conteúdo sobre Antecipação da Restituição', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
-
-                                ]
-
-                            },
-
-                            {
-
-                                subtitle: 'Chaves PIX',
-
-                                lessons: [
-
-                                    { id: 'p4-1', title: 'Aula - Portabilidade PIX', type: 'video', duration: '15 min', filePath: 'https://drive.google.com/file/d/1cPKTzmdMqZAV2HfuoaaNNzNVCZyKM0y7/view?usp=drive_link' },
-
-                                    { id: 'p4-2', title: 'Ebook Chave Pix', type: 'pdf', duration: 'Leitura', filePath: 'https://drive.google.com/file/d/1w_79ApBDP7Y_6gZjw3vQqeWhAbV9bV5B/view?usp=drive_link' }
-
-                                ]
-
-                            }
-
-                        ]
-
-                    },
-
-                    {
-
-                        title: 'Módulo 2: Produtos para Investidores',
-
-                        sections: [
-
-                            {
-
-                                subtitle: 'VeloPrime',
-
-                                lessons: [
-
-                                    { id: 'p5-1', title: 'Em breve - Conteúdo sobre VeloPrime', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
-
-                                ]
-
-                            },
-
-                            {
-
-                                subtitle: 'Concierge',
-
-                                lessons: [
-
-                                    { id: 'p6-1', title: 'Em breve - Conteúdo sobre Concierge', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
-
-                                ]
-
-                            },
-
-                            {
-
-                                subtitle: 'VeloPay',
-
-                                lessons: [
-
-                                    { id: 'p7-1', title: 'Em breve - Conteúdo sobre VeloPay', type: 'document', duration: 'Em desenvolvimento', filePath: '#' }
-
-                                ]
-
-                            }
-
-                        ]
-
-                    }
-
-                ]
-
-            },
-
+    // Função para exibir erro quando MongoDB não está disponível
+    showMongoDBError(error) {
+        // Mostrar mensagem de erro na interface
+        const coursesGrid = document.getElementById('courses-grid');
+        if (coursesGrid) {
+            const errorMessage = error.message || 'Erro desconhecido ao conectar ao banco de dados';
+            coursesGrid.innerHTML = `
+                <div class="error-message" style="grid-column: 1 / -1; text-align: center; padding: 2rem;">
+                    <div style="max-width: 500px; margin: 0 auto;">
+                        <i class="fas fa-exclamation-triangle" style="font-size: 3rem; color: var(--error-color, #e74c3c); margin-bottom: 1rem;"></i>
+                        <h3 style="margin-bottom: 1rem;">Erro ao carregar cursos</h3>
+                        <p style="margin-bottom: 0.5rem;">Não foi possível conectar ao banco de dados MongoDB.</p>
+                        <p style="margin-bottom: 1.5rem; color: var(--text-secondary, #666); font-size: 0.9rem;">
+                            <small>${errorMessage}</small>
+                        </p>
+                        <button onclick="veloAcademyApp.retryLoadCourses();" class="btn btn-primary">
+                            <i class="fas fa-redo"></i> Tentar Novamente
+                        </button>
+                    </div>
+                </div>
+            `;
+        }
+    },
+
+    // Função para ocultar mensagem de erro
+    hideMongoDBError() {
+        // Remover mensagem de erro se existir
+        const errorMsg = document.querySelector('.error-message');
+        if (errorMsg) {
+            errorMsg.remove();
+        }
+    },
+
+    // Função para tentar carregar cursos novamente (retry)
+    async retryLoadCourses() {
+        // Limpar cache para forçar recarregamento
+        this.courseDatabaseCache = {
+            data: {},
+            timestamp: null,
+            ttl: 5 * 60 * 1000,
+            source: null
         };
-
+        
+        // Tentar carregar novamente
+        await this.loadCourses();
+        
+        // Se carregou com sucesso, renderizar cursos
+        if (Object.keys(this.courseDatabase).length > 0) {
+            this.renderCourses();
+        }
     },
 
-    renderCourses() {
+    // Função de fallback removida - MongoDB é obrigatório
+    // loadFallbackCourses() foi removida pois MongoDB é a única fonte de dados
 
+    renderCourses(filterByClass = null) {
+
+        // Renderizar seletor de classe se ainda não existir
+        this.renderClassFilter();
+        
         const coursesGrid = document.getElementById('courses-grid');
         console.log('Courses grid element:', coursesGrid);
         console.log('Course database:', this.courseDatabase);
@@ -1495,13 +1362,12 @@ const veloAcademyApp = {
         let index = 0;
 
         for (const courseId in this.courseDatabase) {
-
-            // Mostrar apenas onboarding, produtos e novidades-modificacoes
-            if (courseId !== 'onboarding' && courseId !== 'produtos' && courseId !== 'novidades-modificacoes') {
+            const course = this.courseDatabase[courseId];
+            
+            // Aplicar filtro por classe se especificado
+            if (filterByClass && course.cursoClasse !== filterByClass) {
                 continue;
             }
-
-            const course = this.courseDatabase[courseId];
 
             const card = document.createElement('div');
 
@@ -1519,7 +1385,14 @@ const veloAcademyApp = {
 
             const totalLessons = this.countTotalLessons(course);
 
-            const courseType = this.getCourseType(courseId);
+            // Usar cursoClasse do MongoDB, ou fallback para getCourseType() se não existir
+            const courseType = course.cursoClasse || this.getCourseType(courseId);
+            
+            // Normalizar cursoClasse para classe CSS (remover acentos e espaços)
+            const cursoClasseNormalized = courseType.toLowerCase()
+                .normalize('NFD')
+                .replace(/[\u0300-\u036f]/g, '') // Remove acentos
+                .replace(/\s+/g, '-'); // Substitui espaços por hífens
 
             
 
@@ -1547,7 +1420,7 @@ const veloAcademyApp = {
 
                     </div>
 
-                    <div class="course-badge">${courseType}</div>
+                    <div class="course-badge badge-${cursoClasseNormalized}">${courseType}</div>
 
                 </div>
 
@@ -1567,6 +1440,91 @@ const veloAcademyApp = {
 
         }
 
+    },
+
+    // Renderizar seletor de classe (filtro)
+    renderClassFilter() {
+        const filterContainer = document.getElementById('course-filter-container');
+        if (!filterContainer) {
+            return;
+        }
+        
+        // Verificar se já foi renderizado
+        if (filterContainer.innerHTML.trim() !== '') {
+            return;
+        }
+        
+        const classes = [
+            { id: 'essencial', label: 'Essencial', color: 'essencial' },
+            { id: 'reciclagem', label: 'Reciclagem', color: 'reciclagem' },
+            { id: 'opcional', label: 'Opcional', color: 'opcional' },
+            { id: 'atualizacao', label: 'Atualização', color: 'atualizacao' }
+        ];
+        
+        let filterHtml = '<div class="course-class-filter">';
+        
+        classes.forEach((classe) => {
+            filterHtml += `
+                <button class="class-filter-btn" 
+                        data-class="${classe.id}" 
+                        data-color="${classe.color}"
+                        onclick="veloAcademyApp.filterCoursesByClass('${classe.id}')">
+                    ${classe.label}
+                </button>
+            `;
+        });
+        
+        filterHtml += '</div>';
+        filterContainer.innerHTML = filterHtml;
+    },
+
+    // Filtrar cursos por classe
+    filterCoursesByClass(selectedClass) {
+        // Verificar se o botão clicado já está ativo
+        const clickedButton = document.querySelector(`.class-filter-btn[data-class="${selectedClass}"]`);
+        const isCurrentlyActive = clickedButton && clickedButton.classList.contains('active');
+        
+        // Se estiver ativo, desativar e mostrar todos os cursos
+        if (isCurrentlyActive) {
+            const filterButtons = document.querySelectorAll('.class-filter-btn');
+            filterButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.classList.remove('filter-essencial', 'filter-reciclagem', 'filter-opcional', 'filter-atualizacao');
+            });
+            this.renderCourses(null); // Mostrar todos os cursos
+            return;
+        }
+        
+        // Caso contrário, aplicar o filtro normalmente
+        // Atualizar estado visual dos botões
+        const filterButtons = document.querySelectorAll('.class-filter-btn');
+        filterButtons.forEach(btn => {
+            const btnClass = btn.getAttribute('data-class');
+            const btnColor = btn.getAttribute('data-color');
+            
+            // Remover todas as classes de cor e active
+            btn.classList.remove('active');
+            btn.classList.remove('filter-essencial', 'filter-reciclagem', 'filter-opcional', 'filter-atualizacao');
+            
+            if (btnClass === selectedClass) {
+                // Botão selecionado
+                btn.classList.add('active');
+                if (btnColor) {
+                    // Aplicar cor apenas se não for "Todos"
+                    btn.classList.add(`filter-${btnColor}`);
+                }
+            }
+        });
+        
+        // Renderizar cursos filtrados
+        // Converter ID do filtro para valor do cursoClasse
+        const classMap = {
+            'essencial': 'Essencial',
+            'reciclagem': 'Reciclagem',
+            'opcional': 'Opcional',
+            'atualizacao': 'Atualização'
+        };
+        this.renderCourses(classMap[selectedClass]);
     },
 
     countTotalLessons(course) {
@@ -1791,12 +1749,30 @@ const veloAcademyApp = {
 
                     // Renderizar vídeos YouTube agrupados com botão único "Assistir"
                     if (youtubeVideos.length > 0) {
-                        const videoSequence = youtubeVideos.map(v => ({
-                            id: v.id,
-                            title: v.title,
-                            filePath: v.filePath,
-                            videoId: this.extractYouTubeId(v.filePath)
-                        }));
+                        // Processar sequências de vídeos: se uma aula tem múltiplas URLs, usar todas
+                        let videoSequence = [];
+                        
+                        youtubeVideos.forEach(v => {
+                            if (v.allUrls && v.allUrls.length > 1) {
+                                // Aula com múltiplas URLs - criar sequência de todas as URLs
+                                v.allUrls.forEach((url, index) => {
+                                    videoSequence.push({
+                                        id: `${v.id}-${index}`,
+                                        title: index === 0 ? v.title : `${v.title} (Parte ${index + 1})`,
+                                        filePath: url,
+                                        videoId: this.extractYouTubeId(url)
+                                    });
+                                });
+                            } else {
+                                // Aula com URL única
+                                videoSequence.push({
+                                    id: v.id,
+                                    title: v.title,
+                                    filePath: v.filePath,
+                                    videoId: this.extractYouTubeId(v.filePath)
+                                });
+                            }
+                        });
                         
                         // Usar título da seção/subtítulo para criar título da aula
                         // Formato: "Aula - [Nome da Seção]"
@@ -1995,24 +1971,9 @@ const veloAcademyApp = {
 
                     });
                     
-                    // Adicionar botão de quiz para seções específicas (com verificação de progresso)
-                    if (section.subtitle === 'Crédito do Trabalhador' || section.subtitle === 'Chaves PIX' || section.subtitle === 'Crédito Pessoal' || section.subtitle === 'CRM e Tabulação de Chamados' || section.subtitle === 'Seguro Prestamista' || section.subtitle === 'Comunicação que Conecta' || section.subtitle === 'Seguro Celular') {
-                        let quizCourseId;
-                        if (section.subtitle === 'Crédito do Trabalhador') {
-                            quizCourseId = 'credito';
-                        } else if (section.subtitle === 'Chaves PIX') {
-                            quizCourseId = 'pix';
-                        } else if (section.subtitle === 'Crédito Pessoal') {
-                            quizCourseId = 'creditoPessoal';
-                        } else if (section.subtitle === 'CRM e Tabulação de Chamados') {
-                            quizCourseId = 'tabulacao';
-                        } else if (section.subtitle === 'Seguro Prestamista') {
-                            quizCourseId = 'seguroPrestaCt';
-                        } else if (section.subtitle === 'Comunicação que Conecta') {
-                            quizCourseId = 'Exc Atendimento';
-                        } else if (section.subtitle === 'Seguro Celular') {
-                            quizCourseId = 'seguro_celular';
-                        }
+                    // Adicionar botão de quiz se hasQuiz for true (usando dados do MongoDB)
+                    if (section.hasQuiz && section.quizId) {
+                        const quizCourseId = section.quizId; // Usar quizId do MongoDB
                         
                         // Verificar se há vídeos nesta seção que precisam ser completados
                         const sectionVideos = section.lessons.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath));
@@ -2565,7 +2526,7 @@ const veloAcademyApp = {
         
         // Configurar controles de navegação
         if (prevBtn) {
-            prevBtn.style.display = 'none'; // Primeiro vídeo não tem "Voltar"
+            prevBtn.disabled = true; // Primeiro vídeo: botão visível mas desabilitado
         }
         
         if (nextBtn) {
@@ -2573,11 +2534,11 @@ const veloAcademyApp = {
             if (videos.length === 1) {
                 nextBtn.style.display = 'none';
                 if (finishBtn) {
-                    finishBtn.style.display = 'inline-block';
+                    finishBtn.style.display = 'inline-flex';
                     finishBtn.disabled = true;
                 }
             } else {
-                nextBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'inline-flex';
                 if (finishBtn) {
                     finishBtn.style.display = 'none';
                 }
@@ -2667,9 +2628,9 @@ const veloAcademyApp = {
         }
         this.updateYouTubeProgress();
         
-        // Configurar botão Voltar
+        // Configurar botão Voltar (sempre visível, habilitado apenas se não for o primeiro)
         if (prevBtn) {
-            prevBtn.style.display = index > 0 ? 'inline-block' : 'none';
+            prevBtn.disabled = index === 0;
         }
         
         // Configurar botões Próximo/Finalizar
@@ -2679,12 +2640,12 @@ const veloAcademyApp = {
                 nextBtn.style.display = 'none';
             }
             if (finishBtn) {
-                finishBtn.style.display = 'inline-block';
+                finishBtn.style.display = 'inline-flex';
                 finishBtn.disabled = true; // Desabilitado até vídeo terminar
             }
         } else {
             if (nextBtn) {
-                nextBtn.style.display = 'inline-block';
+                nextBtn.style.display = 'inline-flex';
                 nextBtn.disabled = true; // Desabilitado até vídeo terminar
             }
             if (finishBtn) {
@@ -2797,12 +2758,16 @@ const veloAcademyApp = {
         const nextBtn = document.getElementById('youtube-btn-next');
         const finishBtn = document.getElementById('youtube-btn-finish');
         
-        if (prevBtn) prevBtn.style.display = 'none';
+        if (prevBtn) {
+            prevBtn.disabled = true;
+        }
         if (nextBtn) {
-            nextBtn.style.display = 'inline-block';
+            nextBtn.style.display = 'inline-flex';
             nextBtn.disabled = true;
         }
-        if (finishBtn) finishBtn.style.display = 'none';
+        if (finishBtn) {
+            finishBtn.style.display = 'none';
+        }
         
         // Ocultar modal
         overlay.classList.remove('active');
@@ -2955,6 +2920,9 @@ const veloAcademyApp = {
             // Renderizar primeira página
             await this.renderPDFPage(1);
             
+            // Prevenir scroll do body quando modal estiver aberto
+            document.body.style.overflow = 'hidden';
+            
             // Mostrar modal
             overlay.classList.add('active');
             
@@ -3050,14 +3018,54 @@ const veloAcademyApp = {
             const context = canvas.getContext('2d');
             
             // Calcular escala para caber no container
-            const container = canvas.parentElement;
-            const containerWidth = container.clientWidth - 40; // padding
-            const viewport = page.getViewport({ scale: 1.5 });
-            const scale = Math.min(containerWidth / viewport.width, 1.5);
+            const container = canvas.parentElement; // .pdf-modal-body
+            const modalContainer = container.closest('.pdf-modal-container');
+            
+            // Aguardar múltiplos frames para garantir que as dimensões estejam totalmente atualizadas
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            await new Promise(resolve => requestAnimationFrame(resolve));
+            
+            // Obter dimensões reais usando getBoundingClientRect para valores precisos
+            const modalRect = modalContainer.getBoundingClientRect();
+            const headerElement = modalContainer.querySelector('.pdf-modal-header');
+            const footerElement = modalContainer.querySelector('.pdf-modal-footer');
+            const headerRect = headerElement.getBoundingClientRect();
+            const footerRect = footerElement.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+            
+            // Calcular espaço disponível real
+            // Usar viewport como referência máxima para garantir que não ultrapasse
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            
+            // Altura máxima do modal = viewport - padding do overlay (20px top + 20px bottom)
+            const maxModalHeight = viewportHeight - 40;
+            const actualModalHeight = Math.min(modalRect.height, maxModalHeight);
+            
+            const headerHeight = headerRect.height;
+            const footerHeight = footerRect.height;
+            const containerWidth = Math.min(containerRect.width - 32, viewportWidth - 40); // padding 16px de cada lado
+            
+            // Altura disponível = altura real do modal - header - footer - padding do body
+            const maxAvailableHeight = actualModalHeight - headerHeight - footerHeight - 32; // 32px = padding do body (16px top + 16px bottom)
+            const maxAvailableWidth = containerWidth;
+            
+            // Garantir valores válidos (mínimos razoáveis)
+            const safeHeight = Math.max(maxAvailableHeight, 150);
+            const safeWidth = Math.max(maxAvailableWidth, 250);
+            
+            const viewport = page.getViewport({ scale: 1.0 });
+            
+            // Calcular scale baseado no espaço disponível real
+            const scaleX = safeWidth / viewport.width;
+            const scaleY = safeHeight / viewport.height;
+            const scale = Math.min(scaleX, scaleY, 0.8); // Limitar a 0.8x para garantir margem
+            
             const scaledViewport = page.getViewport({ scale });
             
-            canvas.height = scaledViewport.height;
-            canvas.width = scaledViewport.width;
+            // Definir dimensões do canvas respeitando os limites calculados
+            canvas.width = Math.min(scaledViewport.width, safeWidth);
+            canvas.height = Math.min(scaledViewport.height, safeHeight);
             
             const renderContext = {
                 canvasContext: context,
@@ -3142,6 +3150,9 @@ const veloAcademyApp = {
         if (overlay) {
             overlay.classList.remove('active');
         }
+        
+        // Restaurar scroll do body
+        document.body.style.overflow = '';
         
         // Limpar PDF atual
         this.currentPDF = null;
@@ -3385,6 +3396,7 @@ const veloAcademyApp = {
             counterElement.textContent = `${currentVideo} / ${totalVideos}`;
         }
     },
+    
 
     switchView(viewId) {
 
@@ -3596,6 +3608,12 @@ document.addEventListener('DOMContentLoaded', () => {
         veloAcademyApp.init();
     }, 100);
 });
+
+
+
+
+
+
 
 
 

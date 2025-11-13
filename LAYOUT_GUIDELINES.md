@@ -1226,7 +1226,7 @@ export const useTheme = () => {
 
 ### **Tipos de Etiquetas e Cores**
 
-#### **ESSENCIAL** (Onboarding)
+#### **ESSENCIAL** 
 ```css
 .course-card[data-course="onboarding"] .course-badge {
     background: linear-gradient(135deg, var(--blue-medium) 0%, var(--blue-medium) 60%, var(--blue-light) 100%);
@@ -1235,7 +1235,7 @@ export const useTheme = () => {
 - **Gradiente:** Azul Médio (`#1634FF`) → Azul Claro (`#1694FF`)
 - **Uso:** Cursos fundamentais obrigatórios
 
-#### **RECICLAGEM** (Segurança)
+#### **RECICLAGEM** 
 ```css
 .course-card[data-course="cs004"] .course-badge {
     background: linear-gradient(135deg, var(--yellow) 0%, var(--yellow) 60%, var(--blue-medium) 100%);
@@ -1244,7 +1244,7 @@ export const useTheme = () => {
 - **Gradiente:** Amarelo (`#FCC200`) → Azul Médio (`#1634FF`)
 - **Uso:** Cursos de atualização de conhecimentos
 
-#### **OPCIONAL** (Excelência)
+#### **OPCIONAL** 
 ```css
 .course-card[data-course="cs003"] .course-badge {
     background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-dark) 60%, var(--blue-opaque) 100%);
@@ -1253,7 +1253,7 @@ export const useTheme = () => {
 - **Gradiente:** Azul Escuro (`#000058`) → Azul Opaco (`#006AB9`)
 - **Uso:** Cursos complementares não obrigatórios
 
-#### **ATUALIZAÇÃO** (Operações)
+#### **ATUALIZAÇÃO** 
 ```css
 .course-card[data-course="operacoes"] .course-badge {
     background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-dark) 60%, var(--yellow) 100%);
