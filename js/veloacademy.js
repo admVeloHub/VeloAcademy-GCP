@@ -1,4 +1,4 @@
-// VERSION: v1.2.6 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.2.7 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -16,14 +16,13 @@ const veloAcademyApp = {
     
     // Função para obter URL base da API
     getApiBaseUrl() {
-        // Em produção, usar URL relativa ou variável de ambiente
         // Em desenvolvimento, usar localhost
         if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
             return 'http://localhost:3001/api';
         }
-        // Em produção, assumir que a API está no mesmo domínio ou usar variável de ambiente
-        // Por enquanto, usar localhost como fallback
-        return 'http://localhost:3001/api';
+        // Em produção, usar URL relativa (API no mesmo domínio)
+        // Se a API estiver em outro domínio, ajustar aqui
+        return '/api';
     },
 
     logoConfig: {

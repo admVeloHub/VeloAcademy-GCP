@@ -1,9 +1,21 @@
-// VERSION: v1.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.1 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
 // Sistema de rastreamento de progresso de vídeos e desbloqueio de quizzes
 
 const ProgressTracker = {
-    // URL base da API (ajustar conforme necessário)
-    apiBaseUrl: 'http://localhost:3001/api',
+    // Função para obter URL base da API
+    getApiBaseUrl() {
+        // Em desenvolvimento, usar localhost
+        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+            return 'http://localhost:3001/api';
+        }
+        // Em produção, usar URL relativa (API no mesmo domínio)
+        return '/api';
+    },
+    
+    // Getter para compatibilidade com código existente
+    get apiBaseUrl() {
+        return this.getApiBaseUrl();
+    },
     
     // Cache local de progresso
     progressCache: {},

@@ -1,6 +1,12 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.2.7 - 2025-01-30
+- CORREÇÃO CRÍTICA: URL da API corrigida para produção
+- Em produção, agora usa URL relativa `/api` ao invés de `http://localhost:3001/api`
+- Resolvido erro ERR_CONNECTION_REFUSED em produção
+- API agora funciona corretamente quando hospedada no mesmo domínio
+
 ## v1.9.4 - 2025-01-30
 - CORREÇÃO CRÍTICA: Título da aula agora usa subtítulo da seção ao invés de títulos dos vídeos
 - Formato fixo: "Aula - [Nome da Seção]" (ex: "Aula - Seguro Celular")
