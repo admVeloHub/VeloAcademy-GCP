@@ -1,4 +1,4 @@
-// VERSION: v1.2.7 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.2.8 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -16,13 +16,8 @@ const veloAcademyApp = {
     
     // Função para obter URL base da API
     getApiBaseUrl() {
-        // Em desenvolvimento, usar localhost
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:3001/api';
-        }
-        // Em produção, usar URL relativa (API no mesmo domínio)
-        // Se a API estiver em outro domínio, ajustar aqui
-        return '/api';
+        // Usar servidor externo Vercel para todos os ambientes
+        return 'https://back-console.vercel.app/api/academy';
     },
 
     logoConfig: {
@@ -1248,9 +1243,10 @@ const veloAcademyApp = {
             return;
         }
         
-        // Tentar MongoDB (única fonte)
+        // Tentar MongoDB via servidor externo (única fonte)
         try {
-            const apiUrl = `${this.getApiBaseUrl()}/courses`;
+            const apiUrl = `${this.getApiBaseUrl()}/cursos-conteudo/active`;
+            console.log('🔗 Carregando cursos de:', apiUrl);
             const response = await fetch(apiUrl);
             
             if (!response.ok) {
@@ -1259,8 +1255,20 @@ const veloAcademyApp = {
             
             const result = await response.json();
             
-            if (result.success && result.courses && result.courses.length > 0) {
-                const transformed = this.transformMongoDBToCourseDatabase(result.courses);
+            // O endpoint pode retornar diretamente um array ou um objeto com propriedade courses/data
+            let courses = [];
+            if (Array.isArray(result)) {
+                courses = result;
+            } else if (result.courses && Array.isArray(result.courses)) {
+                courses = result.courses;
+            } else if (result.data && Array.isArray(result.data)) {
+                courses = result.data;
+            } else if (result.success && result.courses && Array.isArray(result.courses)) {
+                courses = result.courses;
+            }
+            
+            if (courses.length > 0) {
+                const transformed = this.transformMongoDBToCourseDatabase(courses);
                 this.courseDatabase = transformed;
                 
                 // Cachear resultado
@@ -1271,15 +1279,15 @@ const veloAcademyApp = {
                     source: 'mongodb'
                 };
                 
-                console.log('✅ Cursos carregados do MongoDB');
+                console.log('✅ Cursos carregados do servidor externo:', courses.length, 'cursos');
                 this.hideMongoDBError();
                 return;
             } else {
-                throw new Error('Nenhum curso encontrado no MongoDB');
+                throw new Error('Nenhum curso encontrado no servidor');
             }
         } catch (error) {
-            console.error('❌ Erro ao carregar cursos do MongoDB:', error);
-            // Não usar fallback - MongoDB é obrigatório
+            console.error('❌ Erro ao carregar cursos do servidor externo:', error);
+            // Não usar fallback - servidor externo é obrigatório
             this.courseDatabase = {};
             this.showMongoDBError(error);
             // Não chamar renderCourses() - showMongoDBError() já define o conteúdo
