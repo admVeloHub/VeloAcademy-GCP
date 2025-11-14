@@ -40,7 +40,7 @@
 - FIX: Quiz só é desbloqueado quando TODAS as aulas estão completas (validação correta no backend)
 - API: Migração de Express.js para Vercel serverless functions para resolver erros 404 em produção
 - STYLE: Estilos CSS completos para modal Google Drive (tema claro/escuro e responsivo)
-### Commit Hash: c355ac6
+### Commit Hash: e2334a3 (merge final)
 
 ---
 
