@@ -14,6 +14,36 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2025-01-30 21:30:00
+### Tipo: GitHub Push
+### Versão: v1.4.0 (veloacademy.js) + v1.0.0 (styles.css - modal Google Drive)
+### Arquivos Modificados:
+- js/veloacademy.js (v1.4.0)
+- css/styles.css (v1.0.0 - modal Google Drive)
+- api/progress/save.js (v1.0.0)
+- api/progress/[userEmail]/[subtitle].js (v1.0.0)
+- api/progress/unlock-quiz.js (v1.0.0)
+- api/progress/user/[userEmail].js (v1.0.0)
+- api/courses/index.js (v1.0.0)
+- api/courses/[cursoNome].js (v1.0.0)
+- api/health.js (v1.0.0)
+- lib/mongodb.js (v1.0.0)
+- vercel.json (v1.0.0)
+- package.json
+### Descrição: Implementação completa de modal para vídeos Google Drive e correção do sistema de progresso
+- FEATURE: Modal para vídeos Google Drive com botão "Finalizar" para registro de progresso
+- FEATURE: Conversão automática de URLs do Google Drive para formato preview
+- FIX: Correção do sistema de identificação de aulas concluídas (busca por videoId, filePath e título limpo)
+- FIX: Logs detalhados para debug do sistema de progresso
+- FIX: Atualização automática do botão do quiz sem recarregar página para vídeos Google Drive
+- FIX: Sistema de progresso agora salva títulos individuais de aulas ao invés de "Aula em vídeo"
+- FIX: Quiz só é desbloqueado quando TODAS as aulas estão completas (validação correta no backend)
+- API: Migração de Express.js para Vercel serverless functions para resolver erros 404 em produção
+- STYLE: Estilos CSS completos para modal Google Drive (tema claro/escuro e responsivo)
+### Commit Hash: c355ac6
+
+---
+
 ### Data/Hora: 2025-01-30 [HH:MM:SS]
 ### Tipo: GitHub Push
 ### Versão: v2.7.1 (cursos.json) + v1.9.2 (veloacademy.js)
