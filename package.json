@@ -7,7 +7,9 @@
     "start": "node server.js",
     "dev": "node server.js",
     "api": "node server-api.js",
-    "migrate-courses": "node scripts/migrate-courses-to-mongodb.js"
+    "migrate-courses": "node scripts/migrate-courses-to-mongodb.js",
+    "test:api": "bash scripts/test-api.sh",
+    "test:syntax": "node -c lib/mongodb.js && node -c api/progress/save.js && node -c api/progress/unlock-quiz.js && node -c api/health.js && echo '✅ Sintaxe válida!'"
   },
   "author": "VeloHub Development Team",
   "license": "MIT",

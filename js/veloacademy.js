@@ -1,4 +1,4 @@
-// VERSION: v1.2.7 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -873,6 +873,9 @@ const veloAcademyApp = {
     // Variáveis para controle de Aula (Slides/Imagens)
     currentAulaSlides: null,
     currentAulaMetadata: null, // { subtitle, lessonTitle, slidesUrl }
+    
+    // Variáveis para controle de vídeo Google Drive
+    googleDriveVideoMetadata: null, // { subtitle, lessonTitle, videoUrl, courseId, moduleId }
 
     // Função para criar estrutura HTML do modal YouTube dinamicamente
     createYouTubeModal() {
@@ -1206,7 +1209,12 @@ const veloAcademyApp = {
                                 hasQuiz: section.hasQuiz || false, // Preservar hasQuiz do MongoDB
                                 quizId: section.quizId || null, // Preservar quizId do MongoDB
                                 lessons: section.lessons
-                                    .filter(l => l.isActive)
+                                    .filter(l => {
+                                        if (!l.isActive) {
+                                            console.log(`⚠️ Aula filtrada (isActive=false): ${l.lessonTitulo} (ID: ${l.lessonId})`);
+                                        }
+                                        return l.isActive;
+                                    })
                                     .sort((a, b) => (a.lessonOrdem || 0) - (b.lessonOrdem || 0))
                                     .map(lesson => {
                                         // lessonContent é um ARRAY - processar todas as URLs
@@ -1217,6 +1225,16 @@ const veloAcademyApp = {
                                         // Se houver múltiplas URLs, armazenar todas para sequência de vídeos
                                         const filePath = contentUrls[0] || null; // Primeira URL para compatibilidade
                                         const allUrls = contentUrls.length > 1 ? contentUrls : null; // Todas as URLs se houver múltiplas
+                                        
+                                        // Log se não houver filePath mas houver lessonContent
+                                        if (!filePath && lesson.lessonContent && lesson.lessonContent.length > 0) {
+                                            console.warn(`⚠️ Aula sem filePath válido:`, {
+                                                lessonId: lesson.lessonId,
+                                                lessonTitulo: lesson.lessonTitulo,
+                                                lessonContent: lesson.lessonContent,
+                                                contentUrls: contentUrls
+                                            });
+                                        }
                                         
                                         return {
                                             id: lesson.lessonId,
@@ -1244,6 +1262,7 @@ const veloAcademyApp = {
             this.courseDatabaseCache.source === 'mongodb') {
             this.courseDatabase = this.courseDatabaseCache.data;
             console.log('📦 Usando cache de cursos (MongoDB)');
+            console.log('📦 Cache criado há:', Math.round((Date.now() - this.courseDatabaseCache.timestamp) / 1000), 'segundos');
             this.hideMongoDBError();
             return;
         }
@@ -1251,6 +1270,7 @@ const veloAcademyApp = {
         // Tentar MongoDB (única fonte)
         try {
             const apiUrl = `${this.getApiBaseUrl()}/courses`;
+            console.log('🔗 Carregando cursos de:', apiUrl);
             const response = await fetch(apiUrl);
             
             if (!response.ok) {
@@ -1260,6 +1280,18 @@ const veloAcademyApp = {
             const result = await response.json();
             
             if (result.success && result.courses && result.courses.length > 0) {
+                console.log('📚 Cursos recebidos do MongoDB:', result.courses.length);
+                
+                // Log detalhado de cada curso e suas aulas
+                result.courses.forEach(course => {
+                    const totalLessons = course.modules?.reduce((total, module) => {
+                        return total + (module.sections?.reduce((sectionTotal, section) => {
+                            return sectionTotal + (section.lessons?.length || 0);
+                        }, 0) || 0);
+                    }, 0) || 0;
+                    console.log(`   - ${course.cursoNome}: ${course.modules?.length || 0} módulos, ${totalLessons} aulas`);
+                });
+                
                 const transformed = this.transformMongoDBToCourseDatabase(result.courses);
                 this.courseDatabase = transformed;
                 
@@ -1272,6 +1304,7 @@ const veloAcademyApp = {
                 };
                 
                 console.log('✅ Cursos carregados do MongoDB');
+                console.log('✅ Cursos transformados:', Object.keys(this.courseDatabase));
                 this.hideMongoDBError();
                 return;
             } else {
@@ -1279,6 +1312,11 @@ const veloAcademyApp = {
             }
         } catch (error) {
             console.error('❌ Erro ao carregar cursos do MongoDB:', error);
+            console.error('❌ URL tentada:', `${this.getApiBaseUrl()}/courses`);
+            console.error('❌ Verifique se:');
+            console.error('   1. O servidor API está rodando (npm run api)');
+            console.error('   2. A conexão MongoDB está configurada no servidor');
+            console.error('   3. Há cursos ativos no banco de dados');
             // Não usar fallback - MongoDB é obrigatório
             this.courseDatabase = {};
             this.showMongoDBError(error);
@@ -1336,6 +1374,39 @@ const veloAcademyApp = {
         // Se carregou com sucesso, renderizar cursos
         if (Object.keys(this.courseDatabase).length > 0) {
             this.renderCourses();
+        }
+    },
+    
+    // Função para limpar cache e forçar recarregamento (útil para debug)
+    async forceReloadCourses() {
+        console.log('🔄 Forçando recarregamento de cursos...');
+        
+        // Limpar cache completamente
+        this.courseDatabaseCache = {
+            data: {},
+            timestamp: null,
+            ttl: 5 * 60 * 1000,
+            source: null
+        };
+        
+        // Limpar courseDatabase
+        this.courseDatabase = {};
+        
+        // Tentar carregar novamente
+        await this.loadCourses();
+        
+        // Log detalhado para debug
+        console.log('📊 Cursos carregados:', Object.keys(this.courseDatabase));
+        console.log('📊 Detalhes dos cursos:', this.courseDatabase);
+        
+        // Se carregou com sucesso, renderizar cursos
+        if (Object.keys(this.courseDatabase).length > 0) {
+            this.renderCourses();
+        } else {
+            console.warn('⚠️ Nenhum curso carregado. Verifique:');
+            console.warn('   1. Se o servidor API está rodando (npm run api)');
+            console.warn('   2. Se a conexão MongoDB está configurada');
+            console.warn('   3. Se há cursos ativos no banco de dados');
         }
     },
 
@@ -1686,6 +1757,14 @@ const veloAcademyApp = {
         console.log('Módulos encontrados:', course.modules.length);
 
         const courseView = document.getElementById('course-view');
+        
+        // Adicionar data attributes para acesso posterior pelos modais
+        if (courseView) {
+            courseView.dataset.courseId = courseId;
+            if (moduleIdToExpand !== null && moduleIdToExpand !== undefined) {
+                courseView.dataset.moduleId = moduleIdToExpand;
+            }
+        }
 
         let modulesHtml = '';
 
@@ -1717,6 +1796,18 @@ const veloAcademyApp = {
                     console.log(`Seção ${sectionIndex + 1}:`, section.subtitle);
 
                     console.log('Aulas encontradas:', section.lessons.length);
+                    
+                    // Log detalhado de cada aula
+                    section.lessons.forEach((lesson, idx) => {
+                        console.log(`  Aula ${idx + 1}:`, {
+                            id: lesson.id,
+                            title: lesson.title,
+                            type: lesson.type,
+                            filePath: lesson.filePath,
+                            isYouTube: lesson.type === 'video' && this.isYouTubeLink(lesson.filePath),
+                            hasFilePath: !!lesson.filePath
+                        });
+                    });
 
                     
 
@@ -1741,17 +1832,121 @@ const veloAcademyApp = {
                     moduleHtml += `<div class="accordion-content" id="${accordionId}">`;
 
                     // Separar vídeos YouTube de outros conteúdos
-                    const youtubeVideos = section.lessons.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath));
-                    const otherLessons = section.lessons.filter(l => !(l.type === 'video' && this.isYouTubeLink(l.filePath)));
+                    const youtubeVideos = section.lessons.filter(l => {
+                        const isVideo = l.type === 'video';
+                        const hasFilePath = !!l.filePath;
+                        const isYouTube = hasFilePath && this.isYouTubeLink(l.filePath);
+                        const matches = isVideo && isYouTube;
+                        
+                        if (!matches && l.type === 'video') {
+                            console.log(`⚠️ Vídeo não incluído em youtubeVideos:`, {
+                                title: l.title,
+                                id: l.id,
+                                type: l.type,
+                                filePath: l.filePath,
+                                hasFilePath,
+                                isYouTube: hasFilePath ? this.isYouTubeLink(l.filePath) : false
+                            });
+                        }
+                        
+                        return matches;
+                    });
+                    const otherLessons = section.lessons.filter(l => {
+                        const isVideo = l.type === 'video';
+                        const hasFilePath = !!l.filePath;
+                        const isYouTube = hasFilePath && this.isYouTubeLink(l.filePath);
+                        const matches = !(isVideo && isYouTube);
+                        
+                        return matches;
+                    });
+                    
+                    console.log(`📊 Separação de aulas para "${section.subtitle}":`);
+                    console.log(`   - Vídeos YouTube: ${youtubeVideos.length}`);
+                    console.log(`   - Outras aulas: ${otherLessons.length}`);
+                    console.log(`   - Total processado: ${youtubeVideos.length + otherLessons.length}`);
 
                     moduleHtml += '<ul class="modules-list">';
 
-                    // Renderizar vídeos YouTube agrupados com botão único "Assistir"
-                    if (youtubeVideos.length > 0) {
-                        // Processar sequências de vídeos: se uma aula tem múltiplas URLs, usar todas
+                    // Renderizar vídeos YouTube
+                    console.log(`🎥 Renderizando ${youtubeVideos.length} vídeos YouTube para "${section.subtitle}"`);
+                    
+                    // Se há apenas 1 aula de vídeo YouTube, agrupar todas as URLs dela
+                    // Se há múltiplas aulas, renderizar cada uma separadamente
+                    if (youtubeVideos.length === 1) {
+                        // Uma única aula - agrupar todas as URLs dela em uma sequência
+                        const v = youtubeVideos[0];
                         let videoSequence = [];
                         
-                        youtubeVideos.forEach(v => {
+                        console.log(`🎥 Processando vídeo YouTube único:`, {
+                            id: v.id,
+                            title: v.title,
+                            filePath: v.filePath,
+                            allUrls: v.allUrls,
+                            allUrlsCount: v.allUrls ? v.allUrls.length : 0
+                        });
+                        
+                        if (v.allUrls && v.allUrls.length > 1) {
+                            // Aula com múltiplas URLs - criar sequência de todas as URLs
+                            v.allUrls.forEach((url, index) => {
+                                videoSequence.push({
+                                    id: `${v.id}-${index}`,
+                                    title: index === 0 ? v.title : `${v.title} (Parte ${index + 1})`,
+                                    filePath: url,
+                                    videoId: this.extractYouTubeId(url)
+                                });
+                            });
+                        } else {
+                            // Aula com URL única
+                            videoSequence.push({
+                                id: v.id,
+                                title: v.title,
+                                filePath: v.filePath,
+                                videoId: this.extractYouTubeId(v.filePath)
+                            });
+                        }
+                        
+                        // Usar título da seção/subtítulo para criar título da aula
+                        const displayTitle = `Aula - ${section.subtitle}`;
+                        
+                        // Armazenar sequência em cache
+                        const sequenceId = `video-seq-${courseId}-${moduleIndex}-${sectionIndex}`;
+                        if (!this.videoSequencesCache) {
+                            this.videoSequencesCache = {};
+                        }
+                        this.videoSequencesCache[sequenceId] = {
+                            videos: videoSequence,
+                            courseId: courseId,
+                            moduleId: moduleIndex,
+                            subtitle: section.subtitle
+                        };
+                        
+                        moduleHtml += `
+                            <li>
+                                <div class="lesson-info">
+                                    <i class="fas fa-video"></i>
+                                    <div>
+                                        <p>${displayTitle}</p>
+                                        <span>${videoSequence.length} ${videoSequence.length === 1 ? 'vídeo' : 'vídeos'} • YouTube</span>
+                                    </div>
+                                </div>
+                                <button class="btn video-sequence-btn" data-sequence-id="${sequenceId}">
+                                    <i class="fas fa-play" style="margin-right: 5px;"></i>Assistir
+                                </button>
+                            </li>
+                        `;
+                    } else if (youtubeVideos.length > 1) {
+                        // Múltiplas aulas - renderizar cada uma separadamente
+                        youtubeVideos.forEach((v, videoIndex) => {
+                            let videoSequence = [];
+                            
+                            console.log(`🎥 Processando vídeo YouTube ${videoIndex + 1}/${youtubeVideos.length}:`, {
+                                id: v.id,
+                                title: v.title,
+                                filePath: v.filePath,
+                                allUrls: v.allUrls,
+                                allUrlsCount: v.allUrls ? v.allUrls.length : 0
+                            });
+                            
                             if (v.allUrls && v.allUrls.length > 1) {
                                 // Aula com múltiplas URLs - criar sequência de todas as URLs
                                 v.allUrls.forEach((url, index) => {
@@ -1771,42 +1966,48 @@ const veloAcademyApp = {
                                     videoId: this.extractYouTubeId(v.filePath)
                                 });
                             }
-                        });
-                        
-                        // Usar título da seção/subtítulo para criar título da aula
-                        // Formato: "Aula - [Nome da Seção]"
-                        const displayTitle = `Aula - ${section.subtitle}`;
-                        
-                        // Armazenar sequência em cache para acesso via event listener
-                        const sequenceId = `video-seq-${courseId}-${moduleIndex}-${sectionIndex}`;
-                        if (!this.videoSequencesCache) {
-                            this.videoSequencesCache = {};
-                        }
-                        this.videoSequencesCache[sequenceId] = {
-                            videos: videoSequence,
-                            courseId: courseId,
-                            moduleId: moduleIndex, // Usar índice do módulo para expansão automática
-                            subtitle: section.subtitle
-                        };
-                        
-                        moduleHtml += `
-                            <li>
-                                <div class="lesson-info">
-                                    <i class="fas fa-video"></i>
-                                    <div>
-                                        <p>${displayTitle}</p>
-                                        <span>${youtubeVideos.length} ${youtubeVideos.length === 1 ? 'vídeo' : 'vídeos'} • YouTube</span>
+                            
+                            // Usar título da aula individual
+                            const displayTitle = v.title;
+                            
+                            // Armazenar sequência em cache (uma por aula)
+                            const sequenceId = `video-seq-${courseId}-${moduleIndex}-${sectionIndex}-${videoIndex}`;
+                            if (!this.videoSequencesCache) {
+                                this.videoSequencesCache = {};
+                            }
+                            this.videoSequencesCache[sequenceId] = {
+                                videos: videoSequence,
+                                courseId: courseId,
+                                moduleId: moduleIndex,
+                                subtitle: section.subtitle
+                            };
+                            
+                            moduleHtml += `
+                                <li>
+                                    <div class="lesson-info">
+                                        <i class="fas fa-video"></i>
+                                        <div>
+                                            <p>${displayTitle}</p>
+                                            <span>${videoSequence.length} ${videoSequence.length === 1 ? 'vídeo' : 'vídeos'} • YouTube</span>
+                                        </div>
                                     </div>
-                                </div>
-                                <button class="btn video-sequence-btn" data-sequence-id="${sequenceId}">
-                                    <i class="fas fa-play" style="margin-right: 5px;"></i>Assistir
-                                </button>
-                            </li>
-                        `;
+                                    <button class="btn video-sequence-btn" data-sequence-id="${sequenceId}">
+                                        <i class="fas fa-play" style="margin-right: 5px;"></i>Assistir
+                                    </button>
+                                </li>
+                            `;
+                        });
                     }
 
                     // Renderizar outros conteúdos (PDFs, áudios, documentos, vídeos Google Drive)
+                    console.log(`📄 Renderizando ${otherLessons.length} outras aulas para "${section.subtitle}"`);
                     otherLessons.forEach((lesson, lessonIndex) => {
+                        console.log(`📄 Renderizando aula "otherLessons" ${lessonIndex + 1}/${otherLessons.length}:`, {
+                            title: lesson.title,
+                            type: lesson.type,
+                            filePath: lesson.filePath,
+                            id: lesson.id
+                        });
 
                         const isLinkValid = this.validateLink(lesson.filePath);
 
@@ -1847,14 +2048,19 @@ const veloAcademyApp = {
 
                         } else if (lesson.type === 'pdf') {
 
-                            // Para PDFs, criar dois botões: "Aula" (slides) e "PDF" (link direto)
+                            // Para PDFs, criar dois botões: "Aula" (slides) e "PDF" (modal)
                             // O botão "Aula" será renderizado separadamente antes do botão PDF
 
                             linkClass = 'btn';
 
                             linkText = 'PDF';
 
-                            linkAction = `href="${finalUrl}" target="_blank"`;
+                            // Abrir PDF no modal ao invés de nova aba
+                            const subtitleEscaped = section.subtitle.replace(/'/g, "\\'");
+                            const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
+                            const courseIdEscaped = courseId.replace(/'/g, "\\'");
+                            const moduleIndexEscaped = moduleIndex;
+                            linkAction = `href="#" onclick="veloAcademyApp.openPDFModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;"`;
                             
                             // Verificar se há link de slides disponível (pode estar em lesson.slidesUrl ou ser o mesmo link)
                             slidesUrl = lesson.slidesUrl || (this.isGoogleSlidesLink(finalUrl) ? finalUrl : null);
@@ -1869,7 +2075,9 @@ const veloAcademyApp = {
 
                             const subtitleEscaped = section.subtitle.replace(/'/g, "\\'");
                             const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
-                            linkAction = `href="#" onclick="veloAcademyApp.openAulaModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}'); return false;"`;
+                            const courseIdEscaped = courseId.replace(/'/g, "\\'");
+                            const moduleIndexEscaped = moduleIndex;
+                            linkAction = `href="#" onclick="veloAcademyApp.openAulaModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;"`;
 
                         } else if (lesson.type === 'audio') {
 
@@ -1890,16 +2098,20 @@ const veloAcademyApp = {
                             linkText = 'Assistir';
                             linkAction = `onclick="veloAcademyApp.openYouTubeModal('${videoId}', '${lesson.title.replace(/'/g, "\\'")}'); return false;"`;
 
-                        } else {
-
-                            // Para vídeos Google Drive e outros conteúdos, abrir em nova aba
-
+                        } else if (lesson.type === 'video' && isGoogleDrive) {
+                            // Para vídeos Google Drive, abrir em modal com botão finalizar
                             linkClass = 'btn';
-
                             linkText = 'Assistir';
-
+                            const subtitleEscaped = section.subtitle.replace(/'/g, "\\'");
+                            const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
+                            const courseIdEscaped = courseId.replace(/'/g, "\\'");
+                            const moduleIndexEscaped = moduleIndex;
+                            linkAction = `href="#" onclick="veloAcademyApp.openGoogleDriveVideoModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;"`;
+                        } else {
+                            // Para outros conteúdos, abrir em nova aba
+                            linkClass = 'btn';
+                            linkText = 'Assistir';
                             linkAction = `href="${finalUrl}" target="_blank"`;
-
                         }
 
                         
@@ -1932,8 +2144,10 @@ const veloAcademyApp = {
                             // Por enquanto, usar o mesmo link do PDF. Depois pode ser melhorado para detectar slides
                             const aulaUrl = slidesUrl || finalUrl;
                             
+                            const courseIdEscaped = courseId.replace(/'/g, "\\'");
+                            const moduleIndexEscaped = moduleIndex;
                             buttonsHtml += `
-                                <a href="#" onclick="veloAcademyApp.openAulaModal('${aulaUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}'); return false;" class="btn" style="margin-right: 8px;">
+                                <a href="#" onclick="veloAcademyApp.openAulaModal('${aulaUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;" class="btn" style="margin-right: 8px;">
                                     <i class="fas fa-chalkboard-teacher" style="margin-right: 5px;"></i>Aula
                                 </a>
                             `;
@@ -2000,14 +2214,15 @@ const veloAcademyApp = {
                                 // Identificar todas as aulas do subtítulo
                                 const allLessons = [];
                                 
-                                // Adicionar "Aula em vídeo" se houver vídeos YouTube
-                                if (sectionVideos.length > 0) {
-                                    allLessons.push("Aula em vídeo");
-                                }
+                                // SEMPRE adicionar cada título individualmente (nunca usar "Aula em vídeo")
+                                sectionVideos.forEach(video => {
+                                    allLessons.push(video.title);
+                                });
                                 
-                                // Adicionar outras aulas (PDFs, documentos, etc)
+                                // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, etc)
                                 section.lessons.forEach(lesson => {
-                                    if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio') {
+                                    if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
+                                        lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
                                         allLessons.push(lesson.title);
                                     }
                                 });
@@ -2394,9 +2609,10 @@ const veloAcademyApp = {
         
         // Verificar diferentes formatos de URL do YouTube
         const youtubePatterns = [
-            /youtube\.com\/watch\?v=/,
-            /youtu\.be\//,
-            /youtube\.com\/embed\//
+            /youtube\.com\/watch\?v=/,      // Formato padrão: youtube.com/watch?v=VIDEO_ID
+            /youtu\.be\//,                  // Formato curto: youtu.be/VIDEO_ID
+            /youtube\.com\/embed\//,        // Formato embed: youtube.com/embed/VIDEO_ID
+            /youtube\.com\/shorts\//        // Formato Shorts: youtube.com/shorts/VIDEO_ID
         ];
         
         return youtubePatterns.some(pattern => pattern.test(link));
@@ -2436,6 +2652,12 @@ const veloAcademyApp = {
         return null;
     },
     
+    // Função para verificar se é YouTube Shorts
+    isYouTubeShorts(filePath) {
+        if (!filePath) return false;
+        return /youtube\.com\/shorts\//.test(filePath);
+    },
+    
     // Função para extrair ID do vídeo do YouTube
     extractYouTubeId(filePath) {
         if (!this.isYouTubeLink(filePath)) {
@@ -2463,6 +2685,14 @@ const veloAcademyApp = {
             const embedMatch = filePath.match(/youtube\.com\/embed\/([a-zA-Z0-9_-]{11})/);
             if (embedMatch) {
                 videoId = embedMatch[1];
+            }
+        }
+        
+        // Formato: https://www.youtube.com/shorts/VIDEO_ID (YouTube Shorts)
+        if (!videoId) {
+            const shortsMatch = filePath.match(/youtube\.com\/shorts\/([a-zA-Z0-9_-]{11})/);
+            if (shortsMatch) {
+                videoId = shortsMatch[1];
             }
         }
         
@@ -2546,6 +2776,51 @@ const veloAcademyApp = {
         
         // Construir URL do embed do YouTube com eventos habilitados
         const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
+        
+        // Verificar se é Shorts e ajustar modal
+        const isShorts = this.isYouTubeShorts(firstVideo.filePath || '');
+        const modalBody = document.querySelector('.youtube-modal-body');
+        const modalContainer = document.querySelector('.youtube-modal-container');
+        
+        if (isShorts) {
+            // Adicionar classe para Shorts (formato vertical 9:16)
+            if (modalBody) {
+                modalBody.classList.add('youtube-shorts');
+            }
+            if (modalContainer) {
+                modalContainer.classList.add('youtube-shorts-container');
+            }
+            console.log('📱 Vídeo detectado como YouTube Shorts - aplicando formato vertical 9:16');
+            
+            // Ajustar altura do body após renderização para garantir que o footer fique visível
+            setTimeout(() => {
+                if (modalContainer && modalBody) {
+                    const containerHeight = modalContainer.offsetHeight;
+                    const header = document.querySelector('.youtube-modal-header');
+                    const footer = document.querySelector('.youtube-modal-footer');
+                    const headerHeight = header ? header.offsetHeight : 60;
+                    const footerHeight = footer ? footer.offsetHeight : 72;
+                    const maxBodyHeight = containerHeight - headerHeight - footerHeight;
+                    
+                    // Limitar altura do body para não ultrapassar o espaço disponível
+                    if (modalBody.offsetHeight > maxBodyHeight) {
+                        modalBody.style.maxHeight = `${maxBodyHeight}px`;
+                        modalBody.style.overflow = 'hidden';
+                        console.log(`📏 Altura do body limitada para ${maxBodyHeight}px para garantir footer visível`);
+                    }
+                }
+            }, 200);
+        } else {
+            // Remover classe de Shorts se existir
+            if (modalBody) {
+                modalBody.classList.remove('youtube-shorts');
+                modalBody.style.maxHeight = '';
+                modalBody.style.overflow = '';
+            }
+            if (modalContainer) {
+                modalContainer.classList.remove('youtube-shorts-container');
+            }
+        }
         
         // Definir src do iframe
         iframe.src = embedUrl;
@@ -2652,6 +2927,52 @@ const veloAcademyApp = {
             }
         }
         
+        // Verificar se é Shorts e ajustar modal
+        const currentVideo = this.currentVideoSequence[index];
+        const isShorts = currentVideo && this.isYouTubeShorts(currentVideo.filePath || '');
+        const modalBody = document.querySelector('.youtube-modal-body');
+        const modalContainer = document.querySelector('.youtube-modal-container');
+        
+        if (isShorts) {
+            // Adicionar classe para Shorts (formato vertical 9:16)
+            if (modalBody) {
+                modalBody.classList.add('youtube-shorts');
+            }
+            if (modalContainer) {
+                modalContainer.classList.add('youtube-shorts-container');
+            }
+            console.log('📱 Vídeo detectado como YouTube Shorts - aplicando formato vertical 9:16');
+            
+            // Ajustar altura do body após renderização para garantir que o footer fique visível
+            setTimeout(() => {
+                if (modalContainer && modalBody) {
+                    const containerHeight = modalContainer.offsetHeight;
+                    const header = document.querySelector('.youtube-modal-header');
+                    const footer = document.querySelector('.youtube-modal-footer');
+                    const headerHeight = header ? header.offsetHeight : 60;
+                    const footerHeight = footer ? footer.offsetHeight : 72;
+                    const maxBodyHeight = containerHeight - headerHeight - footerHeight;
+                    
+                    // Limitar altura do body para não ultrapassar o espaço disponível
+                    if (modalBody.offsetHeight > maxBodyHeight) {
+                        modalBody.style.maxHeight = `${maxBodyHeight}px`;
+                        modalBody.style.overflow = 'hidden';
+                        console.log(`📏 Altura do body limitada para ${maxBodyHeight}px para garantir footer visível`);
+                    }
+                }
+            }, 200);
+        } else {
+            // Remover classe de Shorts se existir
+            if (modalBody) {
+                modalBody.classList.remove('youtube-shorts');
+                modalBody.style.maxHeight = '';
+                modalBody.style.overflow = '';
+            }
+            if (modalContainer) {
+                modalContainer.classList.remove('youtube-shorts-container');
+            }
+        }
+        
         // Carregar vídeo no iframe
         const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
         if (iframe) {
@@ -2679,47 +3000,180 @@ const veloAcademyApp = {
         
         // Obter lista completa de aulas do subtítulo para validação
         let allLessonTitles = null;
+        let lessonTitleToSave = null;
+        
+        console.log('🔍 Buscando dados para salvar progresso:', { courseId, moduleId, subtitle });
+        
         if (courseId && subtitle) {
             const course = this.courseDatabase[courseId];
-            if (course) {
-                const module = course.modules?.find(m => m.id === moduleId || m.title === moduleId);
-                if (module) {
+            if (!course) {
+                console.error('❌ Curso não encontrado no database:', courseId);
+            } else {
+                // Se moduleId é um número, usar como índice
+                let module = null;
+                if (typeof moduleId === 'number') {
+                    module = course.modules?.[moduleId];
+                } else {
+                    module = course.modules?.find(m => m.id === moduleId || m.title === moduleId);
+                }
+                
+                if (!module) {
+                    console.error('❌ Módulo não encontrado:', moduleId, 'Módulos disponíveis:', course.modules?.map(m => ({ id: m.id, title: m.title })));
+                } else {
                     const section = module.sections?.find(s => s.subtitle === subtitle);
-                    if (section) {
+                    if (!section) {
+                        console.error('❌ Seção não encontrada:', subtitle, 'Seções disponíveis:', module.sections?.map(s => s.subtitle));
+                    } else {
+                        console.log('✅ Seção encontrada:', section.subtitle);
                         allLessonTitles = [];
-                        // Adicionar "Aula em vídeo" se houver vídeos YouTube
+                        // Obter todas as aulas de vídeo YouTube
                         const sectionVideos = section.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
-                        if (sectionVideos.length > 0) {
-                            allLessonTitles.push("Aula em vídeo");
+                        
+                        // SEMPRE adicionar cada título individualmente (nunca usar "Aula em vídeo")
+                        sectionVideos.forEach(video => {
+                            allLessonTitles.push(video.title);
+                        });
+                        
+                        // Determinar qual aula está sendo concluída agora
+                        // Identificar pela sequência atual qual aula foi concluída
+                        if (this.currentVideoSequence && this.currentVideoSequence.length > 0) {
+                            const firstVideoInSequence = this.currentVideoSequence[0];
+                            const firstVideoId = firstVideoInSequence.videoId || firstVideoInSequence.id;
+                            const firstVideoFilePath = firstVideoInSequence.filePath;
+                            
+                            // Tentar encontrar a aula correspondente na seção pelo videoId ou filePath
+                            let matchingVideo = null;
+                            
+                            // Buscar por videoId primeiro
+                            if (firstVideoId) {
+                                matchingVideo = sectionVideos.find(v => {
+                                    const vId = this.extractYouTubeId(v.filePath);
+                                    return vId === firstVideoId;
+                                });
+                            }
+                            
+                            // Se não encontrou, buscar por filePath
+                            if (!matchingVideo && firstVideoFilePath) {
+                                matchingVideo = sectionVideos.find(v => {
+                                    // Comparar URLs normalizadas (sem parâmetros extras)
+                                    const vId = this.extractYouTubeId(v.filePath);
+                                    const seqId = this.extractYouTubeId(firstVideoFilePath);
+                                    return vId === seqId;
+                                });
+                            }
+                            
+                            // Se ainda não encontrou, usar o título da sequência (removendo "Parte X" se houver)
+                            if (!matchingVideo && firstVideoInSequence.title) {
+                                const cleanTitle = firstVideoInSequence.title.replace(/\s*\(Parte\s+\d+\)\s*$/i, '');
+                                matchingVideo = sectionVideos.find(v => v.title === cleanTitle);
+                            }
+                            
+                            lessonTitleToSave = matchingVideo ? matchingVideo.title : (sectionVideos[0]?.title || null);
+                            
+                            console.log('🔍 Identificando aula concluída:', {
+                                firstVideoInSequence: firstVideoInSequence.title,
+                                firstVideoId,
+                                matchingVideo: matchingVideo?.title,
+                                lessonTitleToSave,
+                                sectionVideos: sectionVideos.map(v => ({ title: v.title, filePath: v.filePath }))
+                            });
+                        } else {
+                            lessonTitleToSave = sectionVideos[0]?.title || null;
+                            console.log('⚠️ Sequência vazia, usando primeira aula:', lessonTitleToSave);
                         }
-                        // Adicionar outras aulas (PDFs, documentos, etc)
+                        
+                        // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, etc)
                         section.lessons?.forEach(lesson => {
-                            if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio') {
+                            if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
+                                lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
                                 allLessonTitles.push(lesson.title);
                             }
                         });
+                        
+                        console.log('📋 Lista completa de aulas esperadas:', allLessonTitles);
                     }
                 }
             }
+        } else {
+            console.error('❌ Dados insuficientes para salvar progresso:', { courseId, subtitle });
         }
         
-        // Marcar "Aula em vídeo" como completa
-        if (subtitle) {
+        console.log('💾 Salvando progresso:', { subtitle, lessonTitleToSave, allLessonTitles });
+        
+        // Marcar aula como completa usando o título individual
+        if (subtitle && lessonTitleToSave) {
             await ProgressTracker.saveVideoProgress(
                 subtitle,
-                "Aula em vídeo",
+                lessonTitleToSave,
                 allLessonTitles
             );
+        } else {
+            console.error('❌ Não foi possível determinar o título da aula para salvar');
         }
         
         // Fechar modal
         this.closeYouTubeModal();
         
-        // Verificar se todas as aulas foram completadas para desbloquear quiz
-        // Isso será verificado na renderização do curso
-        if (courseId) {
-            // Recarregar curso para atualizar botão Quiz
-            this.openCourse(courseId, moduleId);
+        // Atualizar botão do quiz sem recarregar o curso
+        if (courseId && subtitle) {
+            console.log('🔄 Tentando atualizar botão do quiz:', { courseId, moduleId, subtitle });
+            const course = this.courseDatabase[courseId];
+            if (course) {
+                // Encontrar índices do módulo e seção
+                let moduleIndex = -1;
+                let sectionIndex = -1;
+                
+                // Se moduleId é um número (índice), usar diretamente
+                if (typeof moduleId === 'number') {
+                    moduleIndex = moduleId;
+                    const module = course.modules?.[moduleIndex];
+                    if (module) {
+                        module.sections?.forEach((sec, secIdx) => {
+                            if (sec.subtitle === subtitle) {
+                                sectionIndex = secIdx;
+                            }
+                        });
+                    }
+                } else {
+                    // Buscar pelo ID ou título
+                    course.modules.forEach((mod, modIdx) => {
+                        if (mod.id === moduleId || mod.title === moduleId) {
+                            moduleIndex = modIdx;
+                            mod.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    sectionIndex = secIdx;
+                                }
+                            });
+                        }
+                    });
+                }
+                
+                // Se não encontrou pelo moduleId, buscar em todos os módulos
+                if (moduleIndex === -1 || sectionIndex === -1) {
+                    console.log('🔍 Buscando em todos os módulos...');
+                    course.modules.forEach((mod, modIdx) => {
+                        mod.sections?.forEach((sec, secIdx) => {
+                            if (sec.subtitle === subtitle) {
+                                moduleIndex = modIdx;
+                                sectionIndex = secIdx;
+                                console.log(`✅ Encontrado: módulo ${moduleIndex}, seção ${sectionIndex}`);
+                            }
+                        });
+                    });
+                }
+                
+                console.log('📊 Índices encontrados:', { moduleIndex, sectionIndex });
+                
+                if (moduleIndex !== -1 && sectionIndex !== -1) {
+                    await this.updateQuizButton(subtitle, courseId, moduleIndex, sectionIndex);
+                } else {
+                    console.error('❌ Não foi possível encontrar índices do módulo/seção');
+                }
+            } else {
+                console.error('❌ Curso não encontrado:', courseId);
+            }
+        } else {
+            console.error('❌ Dados insuficientes para atualizar quiz:', { courseId, subtitle });
         }
     },
 
@@ -2735,10 +3189,110 @@ const veloAcademyApp = {
         }
     },
     
+    // Atualizar estado do botão do quiz sem recarregar o curso
+    async updateQuizButton(subtitle, courseId, moduleIndex, sectionIndex) {
+        console.log('🔧 updateQuizButton chamado:', { subtitle, courseId, moduleIndex, sectionIndex });
+        
+        if (!courseId || subtitle === null || subtitle === undefined) {
+            console.log('⚠️ Não é possível atualizar botão do quiz: dados insuficientes');
+            return;
+        }
+        
+        const quizButtonId = `quiz-btn-${courseId}-${moduleIndex}-${sectionIndex}`;
+        console.log('🔍 Procurando botão:', quizButtonId);
+        
+        const quizBtn = document.getElementById(quizButtonId);
+        
+        if (!quizBtn) {
+            console.log(`⚠️ Botão do quiz não encontrado: ${quizButtonId}`);
+            // Tentar encontrar todos os botões de quiz para debug
+            const allQuizButtons = document.querySelectorAll('[id^="quiz-btn-"]');
+            console.log('📋 Botões de quiz encontrados:', Array.from(allQuizButtons).map(btn => btn.id));
+            return;
+        }
+        
+        console.log('✅ Botão encontrado:', quizButtonId);
+        
+        // Obter lista completa de aulas do subtítulo
+        const course = this.courseDatabase[courseId];
+        if (!course) {
+            console.log(`⚠️ Curso não encontrado: ${courseId}`);
+            return;
+        }
+        
+        const module = course.modules?.[moduleIndex];
+        if (!module) {
+            console.log(`⚠️ Módulo não encontrado no índice: ${moduleIndex}`);
+            return;
+        }
+        
+        const section = module.sections?.[sectionIndex];
+        if (!section || section.subtitle !== subtitle) {
+            // Tentar encontrar por subtitle
+            const foundSection = module.sections?.find(s => s.subtitle === subtitle);
+            if (!foundSection) {
+                console.log(`⚠️ Seção não encontrada: ${subtitle}`);
+                return;
+            }
+        }
+        
+        const targetSection = section || module.sections?.find(s => s.subtitle === subtitle);
+        if (!targetSection) {
+            return;
+        }
+        
+        // Identificar todas as aulas do subtítulo
+        const allLessons = [];
+        
+        // Obter todas as aulas de vídeo YouTube
+        const sectionVideos = targetSection.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
+        
+        // SEMPRE adicionar cada título individualmente (nunca usar "Aula em vídeo")
+        sectionVideos.forEach(video => {
+            allLessons.push(video.title);
+        });
+        
+        // Adicionar outras aulas (PDFs, documentos, áudios, slides, vídeos Google Drive)
+        targetSection.lessons?.forEach(lesson => {
+            if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
+                lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
+                allLessons.push(lesson.title);
+            }
+        });
+        
+        // Verificar se todas as aulas foram completadas
+        console.log('📚 Lista de aulas para verificar:', allLessons);
+        
+        if (typeof ProgressTracker !== 'undefined' && allLessons.length > 0) {
+            const allCompleted = await ProgressTracker.checkAllLessonsCompleted(
+                subtitle,
+                allLessons
+            );
+            
+            console.log('✅ Todas as aulas completadas?', allCompleted);
+            
+            if (allCompleted) {
+                quizBtn.classList.remove('disabled');
+                quizBtn.disabled = false;
+                quizBtn.innerHTML = '<i class="fas fa-question-circle"></i> Fazer Quiz';
+                console.log('✅ Quiz desbloqueado para:', subtitle);
+            } else {
+                quizBtn.classList.add('disabled');
+                quizBtn.disabled = true;
+                quizBtn.innerHTML = '<i class="fas fa-question-circle"></i> Fazer Quiz <span class="quiz-lock-hint">(Complete todas as aulas para desbloquear)</span>';
+                console.log('🔒 Quiz ainda bloqueado para:', subtitle);
+            }
+        } else {
+            console.log('⚠️ ProgressTracker não disponível ou lista de aulas vazia');
+        }
+    },
+    
     // Função para fechar modal do YouTube
     closeYouTubeModal() {
         const overlay = document.getElementById('youtube-modal-overlay');
         const iframe = document.getElementById('youtube-player');
+        const modalBody = document.querySelector('.youtube-modal-body');
+        const modalContainer = document.querySelector('.youtube-modal-container');
         
         if (!overlay || !iframe) {
             return;
@@ -2746,6 +3300,14 @@ const veloAcademyApp = {
         
         // Pausar vídeo removendo src do iframe
         iframe.src = '';
+        
+        // Remover classes de Shorts ao fechar
+        if (modalBody) {
+            modalBody.classList.remove('youtube-shorts');
+        }
+        if (modalContainer) {
+            modalContainer.classList.remove('youtube-shorts-container');
+        }
         
         // Limpar sequência atual
         this.currentVideoSequence = null;
@@ -2837,7 +3399,7 @@ const veloAcademyApp = {
     },
     
     // Abrir modal PDF
-    async openPDFModal(pdfUrl, subtitle, lessonTitle) {
+    async openPDFModal(pdfUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
         const overlay = document.getElementById('pdf-modal-overlay');
         const titleElement = document.getElementById('pdf-modal-title');
         const canvas = document.getElementById('pdf-canvas');
@@ -2845,15 +3407,23 @@ const veloAcademyApp = {
         if (!overlay || !titleElement || !canvas) {
             this.createPDFModal();
             // Aguardar criação e tentar novamente
-            setTimeout(() => this.openPDFModal(pdfUrl, subtitle, lessonTitle), 100);
+            setTimeout(() => this.openPDFModal(pdfUrl, subtitle, lessonTitle, courseId, moduleId), 100);
             return;
         }
         
         // Converter URL do Google Drive para URL direta
         let directUrl = this.convertGoogleDriveToDirect(pdfUrl);
         
+        // Tentar obter courseId e moduleId do contexto atual se não fornecidos
+        if (!courseId) {
+            const courseView = document.getElementById('course-view');
+            if (courseView && courseView.dataset.courseId) {
+                courseId = courseView.dataset.courseId;
+            }
+        }
+        
         // Salvar metadata
-        this.pdfMetadata = { subtitle, lessonTitle, pdfUrl: directUrl };
+        this.pdfMetadata = { subtitle, lessonTitle, pdfUrl: directUrl, courseId, moduleId };
         
         // Configurar PDF.js
         if (typeof pdfjsLib !== 'undefined') {
@@ -3133,11 +3703,119 @@ const veloAcademyApp = {
     // Finalizar visualização do PDF (marca como completo apenas aqui)
     async finishPDFViewing() {
         if (this.pdfMetadata) {
+            // Obter lista completa de aulas do subtítulo para validação
+            let allLessonTitles = null;
+            const subtitle = this.pdfMetadata.subtitle;
+            
+            // Tentar obter courseId e moduleId do contexto atual
+            // Se não estiver disponível, buscar do curso aberto
+            let courseId = this.pdfMetadata.courseId;
+            let moduleId = this.pdfMetadata.moduleId;
+            
+            if (!courseId) {
+                // Tentar obter do curso atual aberto
+                const courseView = document.getElementById('course-view');
+                if (courseView && courseView.dataset.courseId) {
+                    courseId = courseView.dataset.courseId;
+                }
+            }
+            
+            if (courseId && subtitle) {
+                const course = this.courseDatabase[courseId];
+                if (course) {
+                    // Buscar em todos os módulos
+                    for (const module of course.modules || []) {
+                        const section = module.sections?.find(s => s.subtitle === subtitle);
+                        if (section) {
+                            allLessonTitles = [];
+                            // SEMPRE adicionar cada título individualmente (nunca usar "Aula em vídeo")
+                            const sectionVideos = section.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
+                            sectionVideos.forEach(video => {
+                                allLessonTitles.push(video.title);
+                            });
+                            // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, etc)
+                            section.lessons?.forEach(lesson => {
+                                if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
+                                    (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
+                                    allLessonTitles.push(lesson.title);
+                                }
+                            });
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            console.log('📚 Lista completa de aulas para validação:', allLessonTitles);
+            
             // Marcar aula como completa APENAS quando clicar em Finalizar
             await this.markLessonComplete(
-                this.pdfMetadata.subtitle,
-                this.pdfMetadata.lessonTitle
+                subtitle,
+                this.pdfMetadata.lessonTitle,
+                allLessonTitles
             );
+            
+            // Atualizar botão do quiz sem recarregar o curso
+            if (courseId && subtitle) {
+                console.log('🔄 Tentando atualizar botão do quiz (PDF):', { courseId, moduleId, subtitle });
+                const course = this.courseDatabase[courseId];
+                if (course) {
+                    // Encontrar índices do módulo e seção
+                    let moduleIndex = -1;
+                    let sectionIndex = -1;
+                    
+                    // Se moduleId é um número (índice), usar diretamente
+                    if (typeof moduleId === 'number') {
+                        moduleIndex = moduleId;
+                        const module = course.modules?.[moduleIndex];
+                        if (module) {
+                            module.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    sectionIndex = secIdx;
+                                }
+                            });
+                        }
+                    } else {
+                        // Buscar pelo ID ou título
+                        course.modules.forEach((mod, modIdx) => {
+                            if (mod.id === moduleId || mod.title === moduleId) {
+                                moduleIndex = modIdx;
+                                mod.sections?.forEach((sec, secIdx) => {
+                                    if (sec.subtitle === subtitle) {
+                                        sectionIndex = secIdx;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Se não encontrou pelo moduleId, buscar em todos os módulos
+                    if (moduleIndex === -1 || sectionIndex === -1) {
+                        console.log('🔍 Buscando em todos os módulos (PDF)...');
+                        course.modules.forEach((mod, modIdx) => {
+                            mod.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    moduleIndex = modIdx;
+                                    sectionIndex = secIdx;
+                                    console.log(`✅ Encontrado: módulo ${moduleIndex}, seção ${sectionIndex}`);
+                                }
+                            });
+                        });
+                    }
+                    
+                    console.log('📊 Índices encontrados (PDF):', { moduleIndex, sectionIndex });
+                    
+                    if (moduleIndex !== -1 && sectionIndex !== -1) {
+                        await this.updateQuizButton(subtitle, courseId, moduleIndex, sectionIndex);
+                    } else {
+                        console.error('❌ Não foi possível encontrar índices do módulo/seção (PDF)');
+                    }
+                } else {
+                    console.error('❌ Curso não encontrado (PDF):', courseId);
+                }
+            } else {
+                console.error('❌ Dados insuficientes para atualizar quiz (PDF):', { courseId, subtitle });
+            }
         }
         
         this.closePDFModal();
@@ -3168,8 +3846,8 @@ const veloAcademyApp = {
     },
     
     // Função para abrir PDF no modal (substitui downloadFile para PDFs)
-    openPDFInModal(pdfUrl, subtitle, lessonTitle) {
-        this.openPDFModal(pdfUrl, subtitle, lessonTitle);
+    openPDFInModal(pdfUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
+        this.openPDFModal(pdfUrl, subtitle, lessonTitle, courseId, moduleId);
     },
     
     // ==================== MODAL DE AULA (GOOGLE SLIDES) ====================
@@ -3241,7 +3919,7 @@ const veloAcademyApp = {
     },
     
     // Abrir modal de Aula com Google Slides
-    openAulaModal(slidesUrl, subtitle, lessonTitle) {
+    openAulaModal(slidesUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
         // Criar modal se não existir
         this.createAulaModal();
         
@@ -3250,12 +3928,21 @@ const veloAcademyApp = {
         const iframe = document.getElementById('aula-slides-iframe');
         
         if (!overlay || !titleElement || !iframe) {
-            setTimeout(() => this.openAulaModal(slidesUrl, subtitle, lessonTitle), 100);
+            setTimeout(() => this.openAulaModal(slidesUrl, subtitle, lessonTitle, courseId, moduleId), 100);
             return;
         }
         
+        // Tentar obter courseId e moduleId do contexto atual se não fornecidos
+        if (!courseId) {
+            const courseView = document.getElementById('course-view');
+            if (courseView && courseView.dataset.courseId) {
+                courseId = courseView.dataset.courseId;
+                moduleId = courseView.dataset.moduleId || moduleId;
+            }
+        }
+        
         // Salvar metadata
-        this.currentAulaMetadata = { subtitle, lessonTitle, slidesUrl };
+        this.currentAulaMetadata = { subtitle, lessonTitle, slidesUrl, courseId, moduleId };
         
         // Verificar se já é URL de embed otimizada (/pub ou /pubembed)
         let embedUrl = slidesUrl;
@@ -3333,25 +4020,345 @@ const veloAcademyApp = {
     async finishAulaViewing() {
         if (this.currentAulaMetadata) {
             // Obter lista completa de aulas do subtítulo para validação
-            // Nota: Por enquanto, não temos courseId e moduleId no metadata
-            // Isso será melhorado quando necessário
+            let allLessonTitles = null;
+            const subtitle = this.currentAulaMetadata.subtitle;
+            const courseId = this.currentAulaMetadata.courseId;
+            const moduleId = this.currentAulaMetadata.moduleId;
+            
+            if (courseId && subtitle) {
+                const course = this.courseDatabase[courseId];
+                if (course) {
+                    const module = course.modules?.find(m => m.id === moduleId || m.title === moduleId);
+                    if (module) {
+                        const section = module.sections?.find(s => s.subtitle === subtitle);
+                        if (section) {
+                            allLessonTitles = [];
+                            // SEMPRE adicionar cada título individualmente (nunca usar "Aula em vídeo")
+                            const sectionVideos = section.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
+                            sectionVideos.forEach(video => {
+                                allLessonTitles.push(video.title);
+                            });
+                            // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, slides, etc)
+                            section.lessons?.forEach(lesson => {
+                                if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
+                                    lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
+                                    allLessonTitles.push(lesson.title);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            
+            console.log('📚 Lista completa de aulas para validação:', allLessonTitles);
             
             // Marcar aula como completa
             await this.markLessonComplete(
-                this.currentAulaMetadata.subtitle,
+                subtitle,
                 this.currentAulaMetadata.lessonTitle,
-                null // TODO: Obter lista completa quando tivermos contexto completo
+                allLessonTitles
             );
             
-            // Recarregar curso para atualizar botão de quiz
-            const courseId = this.currentAulaMetadata.courseId;
-            const moduleId = this.currentAulaMetadata.moduleId;
-            if (courseId) {
-                this.openCourse(courseId, moduleId);
+            // Atualizar botão do quiz sem recarregar o curso
+            if (courseId && subtitle) {
+                console.log('🔄 Tentando atualizar botão do quiz (Aula):', { courseId, moduleId, subtitle });
+                const course = this.courseDatabase[courseId];
+                if (course) {
+                    // Encontrar índices do módulo e seção
+                    let moduleIndex = -1;
+                    let sectionIndex = -1;
+                    
+                    // Se moduleId é um número (índice), usar diretamente
+                    if (typeof moduleId === 'number') {
+                        moduleIndex = moduleId;
+                        const module = course.modules?.[moduleIndex];
+                        if (module) {
+                            module.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    sectionIndex = secIdx;
+                                }
+                            });
+                        }
+                    } else {
+                        // Buscar pelo ID ou título
+                        course.modules.forEach((mod, modIdx) => {
+                            if (mod.id === moduleId || mod.title === moduleId) {
+                                moduleIndex = modIdx;
+                                mod.sections?.forEach((sec, secIdx) => {
+                                    if (sec.subtitle === subtitle) {
+                                        sectionIndex = secIdx;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Se não encontrou pelo moduleId, buscar em todos os módulos
+                    if (moduleIndex === -1 || sectionIndex === -1) {
+                        console.log('🔍 Buscando em todos os módulos (Aula)...');
+                        course.modules.forEach((mod, modIdx) => {
+                            mod.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    moduleIndex = modIdx;
+                                    sectionIndex = secIdx;
+                                    console.log(`✅ Encontrado: módulo ${moduleIndex}, seção ${sectionIndex}`);
+                                }
+                            });
+                        });
+                    }
+                    
+                    console.log('📊 Índices encontrados (Aula):', { moduleIndex, sectionIndex });
+                    
+                    if (moduleIndex !== -1 && sectionIndex !== -1) {
+                        await this.updateQuizButton(subtitle, courseId, moduleIndex, sectionIndex);
+                    } else {
+                        console.error('❌ Não foi possível encontrar índices do módulo/seção (Aula)');
+                    }
+                } else {
+                    console.error('❌ Curso não encontrado (Aula):', courseId);
+                }
+            } else {
+                console.error('❌ Dados insuficientes para atualizar quiz (Aula):', { courseId, subtitle });
             }
         }
         
         this.closeAulaModal();
+    },
+    
+    // ==================== MODAL DE VÍDEO GOOGLE DRIVE ====================
+    
+    // Criar estrutura HTML do modal de vídeo Google Drive dinamicamente
+    createGoogleDriveVideoModal() {
+        // Verificar se o modal já existe
+        if (document.getElementById('googledrive-video-modal-overlay')) {
+            return;
+        }
+        
+        const modalHTML = `
+            <div class="googledrive-video-modal-overlay" id="googledrive-video-modal-overlay">
+                <div class="googledrive-video-modal-container">
+                    <div class="googledrive-video-modal-header">
+                        <h3 id="googledrive-video-modal-title">Vídeo</h3>
+                        <button class="googledrive-video-modal-close" onclick="veloAcademyApp.closeGoogleDriveVideoModal()" aria-label="Fechar modal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="googledrive-video-modal-body">
+                        <iframe 
+                            id="googledrive-video-iframe" 
+                            src="" 
+                            frameborder="0" 
+                            allowfullscreen>
+                        </iframe>
+                    </div>
+                    <div class="googledrive-video-modal-footer">
+                        <button class="btn btn-success" id="googledrive-video-btn-finish" onclick="veloAcademyApp.finishGoogleDriveVideoViewing()">
+                            Finalizar <i class="fas fa-check"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        // Adicionar ao body
+        document.body.insertAdjacentHTML('beforeend', modalHTML);
+        
+        // Event listeners para fechar modal
+        const overlay = document.getElementById('googledrive-video-modal-overlay');
+        overlay.addEventListener('click', (e) => {
+            if (e.target === overlay) {
+                this.closeGoogleDriveVideoModal();
+            }
+        });
+        
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && overlay.classList.contains('active')) {
+                this.closeGoogleDriveVideoModal();
+            }
+        });
+    },
+    
+    // Abrir modal de vídeo Google Drive
+    openGoogleDriveVideoModal(videoUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
+        // Criar modal se não existir
+        this.createGoogleDriveVideoModal();
+        
+        const overlay = document.getElementById('googledrive-video-modal-overlay');
+        const titleElement = document.getElementById('googledrive-video-modal-title');
+        const iframe = document.getElementById('googledrive-video-iframe');
+        
+        if (!overlay || !titleElement || !iframe) {
+            setTimeout(() => this.openGoogleDriveVideoModal(videoUrl, subtitle, lessonTitle, courseId, moduleId), 100);
+            return;
+        }
+        
+        // Tentar obter courseId e moduleId do contexto atual se não fornecidos
+        if (!courseId) {
+            const courseView = document.getElementById('course-view');
+            if (courseView && courseView.dataset.courseId) {
+                courseId = courseView.dataset.courseId;
+                moduleId = courseView.dataset.moduleId || moduleId;
+            }
+        }
+        
+        // Salvar metadata
+        this.googleDriveVideoMetadata = { subtitle, lessonTitle, videoUrl, courseId, moduleId };
+        
+        // Converter URL do Google Drive para URL de visualização/preview
+        let previewUrl = videoUrl;
+        if (this.isGoogleDriveLink(videoUrl)) {
+            // Tentar converter para URL de preview
+            const driveId = videoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/)?.[1];
+            if (driveId) {
+                previewUrl = `https://drive.google.com/file/d/${driveId}/preview`;
+            }
+        }
+        
+        // Configurar título e iframe
+        titleElement.textContent = lessonTitle;
+        iframe.src = previewUrl;
+        
+        // Mostrar modal
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+        
+        console.log('📹 Modal de vídeo Google Drive aberto:', { subtitle, lessonTitle, videoUrl: previewUrl });
+    },
+    
+    // Finalizar visualização do vídeo Google Drive
+    async finishGoogleDriveVideoViewing() {
+        if (this.googleDriveVideoMetadata) {
+            // Obter lista completa de aulas do subtítulo para validação
+            let allLessonTitles = null;
+            const subtitle = this.googleDriveVideoMetadata.subtitle;
+            const courseId = this.googleDriveVideoMetadata.courseId;
+            const moduleId = this.googleDriveVideoMetadata.moduleId;
+            
+            if (courseId && subtitle) {
+                const course = this.courseDatabase[courseId];
+                if (course) {
+                    // Encontrar módulo
+                    let module = null;
+                    if (typeof moduleId === 'number') {
+                        module = course.modules?.[moduleId];
+                    } else {
+                        module = course.modules?.find(m => m.id === moduleId || m.title === moduleId);
+                    }
+                    
+                    if (module) {
+                        const section = module.sections?.find(s => s.subtitle === subtitle);
+                        if (section) {
+                            allLessonTitles = [];
+                            // Adicionar aulas de vídeo YouTube
+                            const sectionVideos = section.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
+                            sectionVideos.forEach(video => {
+                                allLessonTitles.push(video.title);
+                            });
+                            // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, slides, etc)
+                            section.lessons?.forEach(lesson => {
+                                if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
+                                    lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
+                                    allLessonTitles.push(lesson.title);
+                                }
+                            });
+                        }
+                    }
+                }
+            }
+            
+            console.log('📚 Lista completa de aulas para validação:', allLessonTitles);
+            
+            // Marcar aula como completa
+            await this.markLessonComplete(
+                subtitle,
+                this.googleDriveVideoMetadata.lessonTitle,
+                allLessonTitles
+            );
+            
+            // Atualizar botão do quiz sem recarregar o curso
+            if (courseId && subtitle) {
+                console.log('🔄 Tentando atualizar botão do quiz (Google Drive Video):', { courseId, moduleId, subtitle });
+                const course = this.courseDatabase[courseId];
+                if (course) {
+                    // Encontrar índices do módulo e seção
+                    let moduleIndex = -1;
+                    let sectionIndex = -1;
+                    
+                    // Se moduleId é um número (índice), usar diretamente
+                    if (typeof moduleId === 'number') {
+                        moduleIndex = moduleId;
+                        const module = course.modules?.[moduleIndex];
+                        if (module) {
+                            module.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    sectionIndex = secIdx;
+                                }
+                            });
+                        }
+                    } else {
+                        // Buscar pelo ID ou título
+                        course.modules.forEach((mod, modIdx) => {
+                            if (mod.id === moduleId || mod.title === moduleId) {
+                                moduleIndex = modIdx;
+                                mod.sections?.forEach((sec, secIdx) => {
+                                    if (sec.subtitle === subtitle) {
+                                        sectionIndex = secIdx;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                    
+                    // Se não encontrou pelo moduleId, buscar em todos os módulos
+                    if (moduleIndex === -1 || sectionIndex === -1) {
+                        console.log('🔍 Buscando em todos os módulos (Google Drive Video)...');
+                        course.modules.forEach((mod, modIdx) => {
+                            mod.sections?.forEach((sec, secIdx) => {
+                                if (sec.subtitle === subtitle) {
+                                    moduleIndex = modIdx;
+                                    sectionIndex = secIdx;
+                                    console.log(`✅ Encontrado: módulo ${moduleIndex}, seção ${sectionIndex}`);
+                                }
+                            });
+                        });
+                    }
+                    
+                    console.log('📊 Índices encontrados (Google Drive Video):', { moduleIndex, sectionIndex });
+                    
+                    if (moduleIndex !== -1 && sectionIndex !== -1) {
+                        await this.updateQuizButton(subtitle, courseId, moduleIndex, sectionIndex);
+                    } else {
+                        console.error('❌ Não foi possível encontrar índices do módulo/seção (Google Drive Video)');
+                    }
+                } else {
+                    console.error('❌ Curso não encontrado (Google Drive Video):', courseId);
+                }
+            } else {
+                console.error('❌ Dados insuficientes para atualizar quiz (Google Drive Video):', { courseId, subtitle });
+            }
+        }
+        
+        this.closeGoogleDriveVideoModal();
+    },
+    
+    // Fechar modal de vídeo Google Drive
+    closeGoogleDriveVideoModal() {
+        const overlay = document.getElementById('googledrive-video-modal-overlay');
+        const iframe = document.getElementById('googledrive-video-iframe');
+        
+        if (overlay) {
+            overlay.classList.remove('active');
+        }
+        
+        if (iframe) {
+            iframe.src = '';
+        }
+        
+        // Limpar metadata
+        this.googleDriveVideoMetadata = null;
+        
+        // Restaurar scroll do body
+        document.body.style.overflow = '';
     },
     
     // Fechar modal de Aula
