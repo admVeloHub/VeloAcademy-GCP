@@ -14,6 +14,19 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2025-01-30 22:00:00
+### Tipo: GitHub Push
+### Versão: v1.4.2 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js (v1.4.2)
+### Descrição: Correção do endpoint da API para usar o endpoint correto do servidor externo
+- FIX: Alterado endpoint de `/courses` para `/cursos-conteudo/active` conforme documentação da API
+- FIX: Melhorado parsing da resposta para aceitar diferentes formatos (array direto, objeto com courses/data)
+- FIX: Atualizadas mensagens de log para refletir o endpoint correto
+### Commit Hash: 852f560
+
+---
+
 ### Data/Hora: 2025-01-30 21:30:00
 ### Tipo: GitHub Push
 ### Versão: v1.4.0 (veloacademy.js) + v1.0.0 (styles.css - modal Google Drive)
