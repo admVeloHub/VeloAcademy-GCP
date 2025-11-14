@@ -16,13 +16,8 @@ const veloAcademyApp = {
     
     // Função para obter URL base da API
     getApiBaseUrl() {
-        // Em desenvolvimento, usar localhost
-        if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-            return 'http://localhost:3001/api';
-        }
-        // Em produção, usar URL relativa (API no mesmo domínio)
-        // Se a API estiver em outro domínio, ajustar aqui
-        return '/api';
+        // Usar servidor externo Vercel para todos os ambientes
+        return 'https://back-console.vercel.app/api/academy';
     },
 
     logoConfig: {
@@ -1267,7 +1262,7 @@ const veloAcademyApp = {
             return;
         }
         
-        // Tentar MongoDB (única fonte)
+        // Tentar MongoDB via servidor externo (única fonte)
         try {
             const apiUrl = `${this.getApiBaseUrl()}/courses`;
             console.log('🔗 Carregando cursos de:', apiUrl);
@@ -1308,7 +1303,7 @@ const veloAcademyApp = {
                 this.hideMongoDBError();
                 return;
             } else {
-                throw new Error('Nenhum curso encontrado no MongoDB');
+                throw new Error('Nenhum curso encontrado no servidor');
             }
         } catch (error) {
             console.error('❌ Erro ao carregar cursos do MongoDB:', error);
