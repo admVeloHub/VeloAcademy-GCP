@@ -14,6 +14,32 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2025-01-30 23:00:00
+### Tipo: GitHub Push
+### Versão: v3.0.0 (schemas) + v2.0.0 (APIs courses) + v1.0.0 (scripts e documentação)
+### Arquivos Modificados:
+- listagem de schema de coleções do mongoD.rb (v3.0.0)
+- api/courses/index.js (v2.0.0)
+- api/courses/[cursoNome].js (v2.0.0)
+- api/progress/[userEmail]/[subtitle].js (v1.0.0 - correção)
+- api/progress/user/[userEmail].js (v1.0.0 - correção)
+- scripts/migrate-courses-to-mongodb.js (v2.0.0)
+- scripts/migrate-to-normalized-schema.js (v1.0.0 - novo)
+- scripts/validate-normalized-data.js (v1.0.0 - novo)
+- API_DOCUMENTATION.md (v1.0.0 - novo)
+### Descrição: Implementação completa de schema normalizado MongoDB para escalar além do limite de 16MB
+- FEATURE: Schema normalizado em 4 coleções separadas (cursos, modulos, secoes, aulas)
+- FEATURE: Script de migração migrate-to-normalized-schema.js para migrar dados da estrutura antiga
+- FEATURE: Script de validação validate-normalized-data.js para validar integridade referencial
+- FEATURE: APIs atualizadas para usar agregação MongoDB ($lookup) com fallback para estrutura antiga
+- FEATURE: Documentação completa API_DOCUMENTATION.md para back-console se adequar
+- FIX: Corrigidos status codes (503) e mensagens de erro nas APIs de progresso
+- FIX: Atualizado migrate-courses-to-mongodb.js com suporte --normalized
+- DOCS: Schema antigo marcado como DEPRECATED, mantido apenas para compatibilidade temporária
+### Commit Hash: f89d46d
+
+---
+
 ### Data/Hora: 2025-01-30 22:00:00
 ### Tipo: GitHub Push
 ### Versão: v1.4.2 (veloacademy.js)
