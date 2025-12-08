@@ -49,10 +49,10 @@ module.exports = async (req, res) => {
         const db = await getDatabase();
 
         if (!db) {
-            return res.status(200).json({
+            return res.status(503).json({
                 success: false,
-                progress: [],
-                message: 'MongoDB não disponível'
+                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.',
+                progress: []
             });
         }
 

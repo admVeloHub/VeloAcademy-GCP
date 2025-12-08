@@ -1,5 +1,5 @@
 listagem de schema de coleções do mongoDB
-  <!-- VERSION: v2.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team -->
+  <!-- VERSION: v3.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team -->
      
     🗄️ Database Principal: console_conteudo
   
@@ -351,51 +351,243 @@ updatedAt: Date,                // Data de atualização
   // Chave única (índice composto): userEmail + subtitle
   // Permite múltiplos registros por usuário (um por subtítulo)
 
-  Collection: academy_registros.cursos_conteudo
+  // ========================================
+  // ⚠️ SCHEMA DEPRECATED - ESTRUTURA ANTIGA
+  // ========================================
+  // Collection: academy_registros.cursos_conteudo
+  // STATUS: DEPRECATED - Usar estrutura normalizada abaixo
+  // MANTIDO APENAS PARA REFERÊNCIA E COMPATIBILIDADE TEMPORÁRIA
+  //
+  // Este schema será removido após migração completa para estrutura normalizada.
+  // Limitação: Documentos MongoDB têm limite de 16MB, estrutura aninhada pode ultrapassar.
+  //
+  {
+    _id: ObjectId,
+    cursoClasse: String,          // "Essencial", "Atualização", "Opcional", "Reciclagem"
+    cursoNome: String,            // "onboarding", "produtos", etc
+    courseOrder: Number,          // Ordem de exibição
+    isActive: Boolean,            // Ativar/desativar curso
+    modules: [
+      {
+        moduleId: String,        // "modulo-1", "modulo-2"
+        moduleNome: String,       // "Módulo 1: Treinamentos Essenciais"
+        isActive: Boolean,
+        sections: [              // Tema/Subtítulo
+          {
+            temaNome: String,     // "Seja Bem Vindo"
+            temaOrder: Number,
+            isActive: Boolean,
+            hasQuiz: Boolean,     // Se tem quiz associado
+            quizId: String,       // ID do quiz (se houver)
+            lessons: [
+              {
+                lessonId: String,      // "l1-1"
+                lessonTipo: String,    // "video", "pdf", "audio", "slide", "document"
+                lessonTitulo: String,  // "Bem vindo ao VeloAcademy"
+                lessonOrdem: Number,
+                isActive: Boolean,
+                lessonContent: [       // ARRAY de objetos com url
+                  {
+                    url: String        // YouTube, Google Drive PDF, Google Slides, Google Drive Audio, Outros documentos
+                  }
+                ],
+                driveId: String,       // ID do Google Drive (se aplicável)
+                youtubeId: String,     // ID do YouTube (se aplicável)
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    createdAt: Date,
+    updatedAt: Date,
+    createdBy: String,           // Email do criador
+    version: Number              // Controle de versão
+  }
 
-{
-  _id: ObjectId,
-  cursoClasse: String,          // "Essencial", "Atualização", "Opcional", "Reciclagem"
-  cursoNome: String,            // "onboarding", "produtos", etc
-  courseOrder: Number,          // Ordem de exibição
-  isActive: Boolean,            // Ativar/desativar curso
-  modules: [
-    {
-      moduleId: String,        // "modulo-1", "modulo-2"
-      moduleNome: String,       // "Módulo 1: Treinamentos Essenciais"
-      isActive: Boolean,
-      sections: [              // Tema/Subtítulo
-        {
-          temaNome: String,     // "Seja Bem Vindo"
-          temaOrder: Number,
-          isActive: Boolean,
-          hasQuiz: Boolean,     // Se tem quiz associado
-          quizId: String,       // ID do quiz (se houver)
-          lessons: [
-            {
-              lessonId: String,      // "l1-1"
-              lessonTipo: String,    // "video", "pdf", "audio", "slide", "document"
-              lessonTitulo: String,  // "Bem vindo ao VeloAcademy"
-              lessonOrdem: Number,
-              isActive: Boolean,
-              lessonContent: [       // ARRAY de objetos com url
-                {
-                  url: String        // YouTube, Google Drive PDF, Google Slides, Google Drive Audio, Outros documentos
-                }
-              ],
-              driveId: String,       // ID do Google Drive (se aplicável)
-              youtubeId: String,     // ID do YouTube (se aplicável)
-            }
-          ]
-        }
-      ]
-    }
-  ],
-  createdAt: Date,
-  updatedAt: Date,
-  createdBy: String,           // Email do criador
-  version: Number              // Controle de versão
-}
+  // ========================================
+  // ✅ SCHEMA NORMALIZADO - ESTRUTURA NOVA
+  // ========================================
+  // VERSION: v3.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+  // 
+  // Estrutura normalizada em 4 coleções separadas para escalar além do limite de 16MB
+  // e facilitar manutenção e consultas granulares.
+  //
+  // RELACIONAMENTOS:
+  // cursos (1) → (N) modulos → (N) secoes → (N) aulas
+  // 
+  // ÍNDICES RECOMENDADOS:
+  // - cursos: { cursoNome: 1 } (único), { isActive: 1, courseOrder: 1 }
+  // - modulos: { cursoId: 1 }, { cursoId: 1, isActive: 1, moduleOrder: 1 }
+  // - secoes: { moduloId: 1 }, { moduloId: 1, isActive: 1, temaOrder: 1 }
+  // - aulas: { secaoId: 1 }, { secaoId: 1, isActive: 1, lessonOrdem: 1 }
+
+  // Collection 1: academy_registros.cursos
+  // Armazena apenas metadados do curso (sem conteúdo aninhado)
+  {
+    _id: ObjectId,                // ID único gerado pelo MongoDB
+    cursoClasse: String,          // "Essencial", "Atualização", "Opcional", "Reciclagem"
+    cursoNome: String,            // "onboarding", "produtos", etc (único)
+    cursoDescription: String,     // Descrição do curso (opcional)
+    courseOrder: Number,          // Ordem de exibição (1, 2, 3...)
+    isActive: Boolean,            // Ativar/desativar curso
+    createdAt: Date,              // Data de criação
+    updatedAt: Date,              // Data de última atualização
+    createdBy: String,            // Email do criador
+    version: Number               // Controle de versão
+  }
+
+  // Exemplo Prático - Curso Produtos
+  {
+    "_id": ObjectId("507f1f77bcf86cd799439011"),
+    "cursoClasse": "Essencial",
+    "cursoNome": "produtos",
+    "cursoDescription": "Curso completo sobre produtos Velotax",
+    "courseOrder": 2,
+    "isActive": true,
+    "createdAt": ISODate("2025-01-30T10:00:00Z"),
+    "updatedAt": ISODate("2025-01-30T10:00:00Z"),
+    "createdBy": "criador@velotax.com.br",
+    "version": 1
+  }
+
+  // Collection 2: academy_registros.modulos
+  // Referência ao curso via cursoId (ObjectId)
+  {
+    _id: ObjectId,                // ID único gerado pelo MongoDB
+    cursoId: ObjectId,            // Referência a academy_registros.cursos._id
+    moduleId: String,             // "modulo-1", "modulo-2" (identificador único dentro do curso)
+    moduleNome: String,           // "Módulo 1: Treinamentos Essenciais"
+    moduleOrder: Number,          // Ordem de exibição dentro do curso (1, 2, 3...)
+    isActive: Boolean,            // Ativar/desativar módulo
+    createdAt: Date,              // Data de criação
+    updatedAt: Date               // Data de última atualização
+  }
+
+  // Exemplo Prático - Módulo do Curso Produtos
+  {
+    "_id": ObjectId("507f1f77bcf86cd799439012"),
+    "cursoId": ObjectId("507f1f77bcf86cd799439011"),  // Referência ao curso "produtos"
+    "moduleId": "modulo-2",
+    "moduleNome": "Módulo 2: Produtos Diversificados",
+    "moduleOrder": 2,
+    "isActive": true,
+    "createdAt": ISODate("2025-01-30T10:00:00Z"),
+    "updatedAt": ISODate("2025-01-30T10:00:00Z")
+  }
+
+  // Collection 3: academy_registros.secoes
+  // Referência ao módulo via moduloId (ObjectId)
+  // Seção = Tema/Subtítulo
+  {
+    _id: ObjectId,                // ID único gerado pelo MongoDB
+    moduloId: ObjectId,           // Referência a academy_registros.modulos._id
+    temaNome: String,             // "Seja Bem Vindo", "Digital", "Seguro Celular"
+    temaOrder: Number,            // Ordem de exibição dentro do módulo (1, 2, 3...)
+    isActive: Boolean,            // Ativar/desativar seção
+    hasQuiz: Boolean,            // Se tem quiz associado
+    quizId: String,               // ID do quiz (se houver, ex: "produtos-digital")
+    createdAt: Date,              // Data de criação
+    updatedAt: Date               // Data de última atualização
+  }
+
+  // Exemplo Prático - Seção do Módulo
+  {
+    "_id": ObjectId("507f1f77bcf86cd799439013"),
+    "moduloId": ObjectId("507f1f77bcf86cd799439012"),  // Referência ao módulo
+    "temaNome": "Digital",
+    "temaOrder": 1,
+    "isActive": true,
+    "hasQuiz": true,
+    "quizId": "produtos-digital",
+    "createdAt": ISODate("2025-01-30T10:00:00Z"),
+    "updatedAt": ISODate("2025-01-30T10:00:00Z")
+  }
+
+  // Collection 4: academy_registros.aulas
+  // Referência à seção via secaoId (ObjectId)
+  {
+    _id: ObjectId,                // ID único gerado pelo MongoDB
+    secaoId: ObjectId,            // Referência a academy_registros.secoes._id
+    lessonId: String,             // "l1-1", "p-digital-1" (identificador único dentro da seção)
+    lessonTipo: String,           // "video", "pdf", "audio", "slide", "document"
+    lessonTitulo: String,         // "Bem vindo ao VeloAcademy", "Aula - Produtos Digitais"
+    lessonOrdem: Number,          // Ordem de exibição dentro da seção (1, 2, 3...)
+    isActive: Boolean,            // Ativar/desativar aula
+    lessonContent: [              // ARRAY de objetos com url (permite múltiplas URLs para sequências)
+      {
+        url: String               // YouTube, Google Drive PDF, Google Slides, Google Drive Audio, Outros documentos
+      }
+    ],
+    driveId: String,              // ID do Google Drive (se aplicável, pode ser null)
+    youtubeId: String,            // ID do YouTube (se aplicável, pode ser null)
+    duration: String,             // Duração da aula (ex: "5 min", "Leitura", opcional)
+    createdAt: Date,              // Data de criação
+    updatedAt: Date               // Data de última atualização
+  }
+
+  // Exemplo Prático - Aula da Seção Digital
+  {
+    "_id": ObjectId("507f1f77bcf86cd799439014"),
+    "secaoId": ObjectId("507f1f77bcf86cd799439013"),  // Referência à seção "Digital"
+    "lessonId": "p-digital-1",
+    "lessonTipo": "video",
+    "lessonTitulo": "Aula - Produtos Digitais",
+    "lessonOrdem": 1,
+    "isActive": true,
+    "lessonContent": [
+      {
+        "url": "https://youtu.be/ABC123xyz"
+      }
+    ],
+    "driveId": null,
+    "youtubeId": "ABC123xyz",
+    "duration": "10 min",
+    "createdAt": ISODate("2025-01-30T10:00:00Z"),
+    "updatedAt": ISODate("2025-01-30T10:00:00Z")
+  }
+
+  // Exemplo Prático - Aula com múltiplas URLs (sequência de vídeos)
+  {
+    "_id": ObjectId("507f1f77bcf86cd799439015"),
+    "secaoId": ObjectId("507f1f77bcf86cd799439013"),
+    "lessonId": "p-digital-2",
+    "lessonTipo": "video",
+    "lessonTitulo": "Sequência de Vídeos - Produtos Digitais",
+    "lessonOrdem": 2,
+    "isActive": true,
+    "lessonContent": [
+      {
+        "url": "https://youtu.be/ABC123xyz"
+      },
+      {
+        "url": "https://youtu.be/DEF456uvw"
+      },
+      {
+        "url": "https://youtu.be/GHI789rst"
+      }
+    ],
+    "driveId": null,
+    "youtubeId": "ABC123xyz",  // Primeiro vídeo da sequência
+    "duration": "30 min",
+    "createdAt": ISODate("2025-01-30T10:00:00Z"),
+    "updatedAt": ISODate("2025-01-30T10:00:00Z")
+  }
+
+  // ========================================
+  // 📋 RELACIONAMENTOS E QUERIES
+  // ========================================
+  //
+  // Para obter um curso completo com todos os módulos, seções e aulas:
+  // Usar pipeline de agregação MongoDB com $lookup:
+  //
+  // 1. Buscar curso em academy_registros.cursos
+  // 2. $lookup modulos onde cursoId = curso._id
+  // 3. $lookup secoes onde moduloId = modulo._id
+  // 4. $lookup aulas onde secaoId = secao._id
+  // 5. Estruturar resultado no formato compatível com frontend
+  //
+  // Ver documentação em API_DOCUMENTATION.md para exemplos completos de queries
 Exemplo Prático - Curso Produtos, Módulo Diversos, Tema Digital
 {
   "_id": ObjectId("..."),
