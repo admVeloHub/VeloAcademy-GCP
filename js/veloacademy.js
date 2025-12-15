@@ -1,4 +1,4 @@
-// VERSION: v1.4.2 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.3 | DATE: 2025-12-15 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -16,8 +16,8 @@ const veloAcademyApp = {
     
     // Função para obter URL base da API
     getApiBaseUrl() {
-        // Usar servidor externo Vercel para todos os ambientes
-        return 'https://back-console.vercel.app/api/academy';
+        // Usar servidor externo GCP para todos os ambientes
+        return 'https://backend-gcp-278491073220.us-east1.run.app/api/academy';
     },
 
     logoConfig: {

@@ -14,6 +14,22 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2025-12-15 21:00:00
+### Tipo: GitHub Push
+### Versão: v1.4.3 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js (v1.4.3)
+- js/veloacademy.js.version (v1.4.3)
+- VERIFICACAO_CORS_GCP.md (v1.0.0 - novo)
+### Descrição: Atualização do endpoint da API para servidor GCP e verificação de CORS
+- FIX: Alterado endpoint de 'https://back-console.vercel.app/api/academy' para 'https://backend-gcp-278491073220.us-east1.run.app/api/academy'
+- FIX: Resolvido erro de CORS ao carregar cursos do servidor externo
+- DOCS: Criado VERIFICACAO_CORS_GCP.md com resultados dos testes de CORS
+- VERIFICACAO: Servidor GCP confirmado como configurado corretamente para aceitar requisições de qualquer origem
+### Commit Hash: f743440
+
+---
+
 ### Data/Hora: 2025-01-30 23:00:00
 ### Tipo: GitHub Push
 ### Versão: v3.0.0 (schemas) + v2.0.0 (APIs courses) + v1.0.0 (scripts e documentação)

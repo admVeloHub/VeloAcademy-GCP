@@ -1,6 +1,12 @@
 # Versionamento - veloacademy.js
 # Formato: vX.Y.Z onde X=versão maior, Y=versão menor, Z=versão de correção
 
+## v1.4.3 - 2025-12-15
+- CORREÇÃO CRÍTICA: Atualizado endpoint da API para novo servidor GCP
+- Alterado de 'https://back-console.vercel.app/api/academy' para 'https://backend-gcp-278491073220.us-east1.run.app/api/academy'
+- Resolvido erro de CORS e acesso ao endpoint de cursos
+- Endpoint agora aponta para servidor GCP em produção
+
 ## v1.2.7 - 2025-01-30
 - CORREÇÃO CRÍTICA: URL da API corrigida para produção
 - Em produção, agora usa URL relativa `/api` ao invés de `http://localhost:3001/api`
