@@ -410,6 +410,19 @@ header {
     box-shadow: 0 2px 8px rgba(22, 52, 255, 0.3);
 }
 
+.nav-link[disabled],
+.nav-link.disabled {
+    opacity: 0.5;
+    cursor: not-allowed !important;
+    pointer-events: none;
+}
+
+.nav-link[disabled]:hover,
+.nav-link.disabled:hover {
+    color: var(--blue-medium);
+    background-color: transparent;
+}
+
 /* Theme Toggle */
 .theme-switch-wrapper {
     cursor: pointer;
@@ -1616,10 +1629,12 @@ footer p {
     top: 50%;
     transform: translateY(-50%);
     z-index: 10;
+    cursor: pointer;
 }
 
 .user-info:hover {
     background-color: var(--cor-borda);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
 .user-avatar {

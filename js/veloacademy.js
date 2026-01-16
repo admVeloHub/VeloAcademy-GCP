@@ -43,9 +43,8 @@ const veloAcademyApp = {
     isDeveloperUser() {
         try {
             const userData = this.getAuthenticatedUserData();
-            const isLucasGravina = userData.email === 'lucas.gravina@velotax.com.br' || 
-                                  userData.name.toLowerCase().includes('lucas gravina');
-            return isLucasGravina;
+            // APENAS lucas.gravina@velotax.com.br tem acesso
+            return userData.email === 'lucas.gravina@velotax.com.br';
         } catch (error) {
             return false; // Se não conseguir obter dados, não é desenvolvedor
         }

@@ -14,6 +14,31 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2025-01-31 [HH:MM:SS]
+### Tipo: GitHub Push
+### Versão: v2.4.0 (auth.js) + ajustes em home.js e styles.css
+### Arquivos Modificados:
+- js/auth.js (v2.4.0)
+- js/home.js
+- css/styles.css
+- conquistas.html
+- cursos.html
+- index.html
+- js/veloacademy.js
+- package.json
+- package-lock.json
+- server-api.js
+### Descrição: Botões Conquistas e Feedback agora ficam visíveis mas inacessíveis para usuários não autorizados
+- FEATURE: Botões Conquistas e Feedback permanecem visíveis para todos os usuários
+- FEATURE: Usuários não autorizados veem os botões com opacidade reduzida (0.5) e cursor not-allowed
+- FEATURE: Clique bloqueado para usuários não autorizados através de pointer-events: none e preventDefault
+- FEATURE: Acesso direto à página conquistas.html continua bloqueado (redirecionamento automático)
+- STYLE: Adicionados estilos CSS para .nav-link[disabled] e .nav-link.disabled
+- FIX: Removida lógica de ocultação completa dos botões, mantendo apenas controle de acessibilidade
+### Commit Hash: [será preenchido após commit]
+
+---
+
 ### Data/Hora: 2025-12-15 21:00:00
 ### Tipo: GitHub Push
 ### Versão: v1.4.3 (veloacademy.js)

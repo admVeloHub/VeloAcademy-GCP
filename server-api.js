@@ -416,6 +416,395 @@ app.get('/api/courses/:cursoNome', async (req, res) => {
     }
 });
 
+// ==================== ENDPOINTS DE AUTENTICAÇÃO ====================
+
+// Importar módulos de autenticação
+const bcrypt = require('bcrypt');
+const { v4: uuidv4 } = require('uuid');
+
+// Função auxiliar para conectar ao banco console_analises
+async function getQualidadeDb() {
+    if (!client) {
+        await connectMongoDB();
+    }
+    if (client) {
+        return client.db('console_analises');
+    }
+    return null;
+}
+
+// Função auxiliar para conectar ao banco academy_registros
+async function getAcademyDb() {
+    if (!db) {
+        await connectMongoDB();
+    }
+    return db;
+}
+
+// POST /api/auth/login - Login por email/senha
+app.post('/api/auth/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+
+        if (!email || !password) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email e senha são obrigatórios'
+            });
+        }
+
+        const qualidadeDb = await getQualidadeDb();
+        if (!qualidadeDb) {
+            return res.status(503).json({
+                success: false,
+                error: 'Serviço temporariamente indisponível'
+            });
+        }
+
+        const funcionario = await qualidadeDb.collection('qualidade_funcionarios')
+            .findOne({ userMail: email.toLowerCase() });
+
+        if (!funcionario) {
+            return res.status(401).json({
+                success: false,
+                error: 'Email ou senha incorretos'
+            });
+        }
+
+        if (funcionario.desligado === true) {
+            return res.status(403).json({
+                success: false,
+                error: 'Usuário desligado'
+            });
+        }
+
+        if (funcionario.afastado === true) {
+            return res.status(403).json({
+                success: false,
+                error: 'Usuário afastado'
+            });
+        }
+
+        if (!funcionario.acessos || funcionario.acessos.Academy !== true) {
+            return res.status(403).json({
+                success: false,
+                error: 'Acesso ao Academy não autorizado'
+            });
+        }
+
+        let passwordValid = false;
+        
+        console.log('=== DEBUG LOGIN (server-api.js) ===');
+        console.log('Email recebido:', email);
+        console.log('Senha recebida (primeiros 3 chars):', password ? password.substring(0, 3) + '...' : 'null');
+        console.log('Senha armazenada (primeiros 3 chars):', funcionario.password ? funcionario.password.substring(0, 3) + '...' : 'null');
+        console.log('Tipo da senha armazenada:', typeof funcionario.password);
+        
+        if (funcionario.password) {
+            // Verificar se a senha armazenada é um hash bcrypt (começa com $2a$, $2b$ ou $2y$)
+            const isBcryptHash = typeof funcionario.password === 'string' && 
+                                 (funcionario.password.startsWith('$2a$') || 
+                                  funcionario.password.startsWith('$2b$') || 
+                                  funcionario.password.startsWith('$2y$'));
+            
+            console.log('É hash bcrypt?', isBcryptHash);
+            
+            if (isBcryptHash) {
+                // Senha está em hash bcrypt - comparar hash
+                passwordValid = await bcrypt.compare(password, funcionario.password);
+                console.log('Comparação bcrypt:', passwordValid);
+            } else {
+                // Senha está em texto plano - comparar diretamente
+                passwordValid = password === funcionario.password;
+                console.log('Comparação texto plano:', passwordValid);
+                console.log('Senha recebida:', password);
+                console.log('Senha armazenada:', funcionario.password);
+                console.log('São iguais?', password === funcionario.password);
+            }
+        }
+        
+        // Se ainda não validou, tentar senha padrão: nome.sobrenomeCPF
+        if (!passwordValid) {
+            const nomeCompleto = funcionario.colaboradorNome || '';
+            const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
+            
+            console.log('Tentando senha padrão...');
+            console.log('Nome completo:', nomeCompleto);
+            console.log('Partes do nome:', partesNome);
+            console.log('CPF:', funcionario.CPF);
+            
+            if (partesNome.length >= 2 && funcionario.CPF) {
+                const primeiroNome = partesNome[0];
+                const ultimoNome = partesNome[partesNome.length - 1];
+                const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
+                
+                console.log('Senha padrão calculada:', senhaPadrao);
+                console.log('Senha recebida:', password);
+                
+                passwordValid = password === senhaPadrao;
+                console.log('Comparação senha padrão:', passwordValid);
+            }
+        }
+        
+        console.log('Resultado final da validação:', passwordValid);
+        console.log('=== FIM DEBUG ===');
+
+        if (!passwordValid) {
+            return res.status(401).json({
+                success: false,
+                error: 'Email ou senha incorretos'
+            });
+        }
+
+        const academyDb = await getAcademyDb();
+        if (!academyDb) {
+            return res.status(503).json({
+                success: false,
+                error: 'Serviço temporariamente indisponível'
+            });
+        }
+
+        const sessionId = uuidv4();
+        const now = new Date();
+        
+        const sessionData = {
+            colaboradorNome: funcionario.colaboradorNome,
+            userEmail: funcionario.userMail,
+            sessionId: sessionId,
+            ipAddress: req.ip || req.connection.remoteAddress || null,
+            userAgent: req.headers['user-agent'] || null,
+            isActive: true,
+            loginTimestamp: now,
+            logoutTimestamp: null,
+            sessionDuration: null,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        await academyDb.collection('sessions').insertOne(sessionData);
+
+        const userData = {
+            name: funcionario.colaboradorNome,
+            email: funcionario.userMail,
+            picture: funcionario.profile_pic || null
+        };
+
+        return res.status(200).json({
+            success: true,
+            user: userData,
+            sessionId: sessionId
+        });
+
+    } catch (error) {
+        console.error('Erro no login:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Erro interno do servidor'
+        });
+    }
+});
+
+// POST /api/auth/validate-access - Validação de acesso para Google SSO
+app.post('/api/auth/validate-access', async (req, res) => {
+    try {
+        const { email, picture } = req.body;
+
+        if (!email) {
+            return res.status(400).json({
+                success: false,
+                error: 'Email é obrigatório'
+            });
+        }
+
+        const qualidadeDb = await getQualidadeDb();
+        if (!qualidadeDb) {
+            return res.status(503).json({
+                success: false,
+                error: 'Serviço temporariamente indisponível'
+            });
+        }
+
+        const funcionario = await qualidadeDb.collection('qualidade_funcionarios')
+            .findOne({ userMail: email.toLowerCase() });
+
+        if (!funcionario) {
+            return res.status(401).json({
+                success: false,
+                error: 'Usuário não encontrado'
+            });
+        }
+
+        if (funcionario.desligado === true) {
+            return res.status(403).json({
+                success: false,
+                error: 'Usuário desligado'
+            });
+        }
+
+        if (funcionario.afastado === true) {
+            return res.status(403).json({
+                success: false,
+                error: 'Usuário afastado'
+            });
+        }
+
+        if (!funcionario.acessos || funcionario.acessos.Velohub !== true) {
+            return res.status(403).json({
+                success: false,
+                error: 'Acesso ao VeloHub não autorizado'
+            });
+        }
+
+        let profilePicUpdated = false;
+        if (picture && (!funcionario.profile_pic || funcionario.profile_pic !== picture)) {
+            await qualidadeDb.collection('qualidade_funcionarios').updateOne(
+                { _id: funcionario._id },
+                { 
+                    $set: { 
+                        profile_pic: picture,
+                        updatedAt: new Date()
+                    } 
+                }
+            );
+            profilePicUpdated = true;
+        }
+
+        const userData = {
+            name: funcionario.colaboradorNome,
+            email: funcionario.userMail,
+            picture: funcionario.profile_pic || picture || null
+        };
+
+        return res.status(200).json({
+            success: true,
+            user: userData,
+            pictureUpdated: profilePicUpdated
+        });
+
+    } catch (error) {
+        console.error('Erro na validação de acesso:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Erro interno do servidor'
+        });
+    }
+});
+
+// POST /api/auth/session/login - Registro de login no sistema de sessões
+app.post('/api/auth/session/login', async (req, res) => {
+    try {
+        const { colaboradorNome, userEmail, ipAddress, userAgent } = req.body;
+
+        if (!colaboradorNome || !userEmail) {
+            return res.status(400).json({
+                success: false,
+                error: 'colaboradorNome e userEmail são obrigatórios'
+            });
+        }
+
+        const academyDb = await getAcademyDb();
+        if (!academyDb) {
+            return res.status(503).json({
+                success: false,
+                error: 'Serviço temporariamente indisponível'
+            });
+        }
+
+        const sessionId = uuidv4();
+        const now = new Date();
+
+        const sessionData = {
+            colaboradorNome: colaboradorNome,
+            userEmail: userEmail.toLowerCase(),
+            sessionId: sessionId,
+            ipAddress: ipAddress || req.ip || req.connection.remoteAddress || null,
+            userAgent: userAgent || req.headers['user-agent'] || null,
+            isActive: true,
+            loginTimestamp: now,
+            logoutTimestamp: null,
+            sessionDuration: null,
+            createdAt: now,
+            updatedAt: now
+        };
+
+        await academyDb.collection('sessions').insertOne(sessionData);
+
+        return res.status(200).json({
+            success: true,
+            sessionId: sessionId
+        });
+
+    } catch (error) {
+        console.error('Erro ao registrar login:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Erro interno do servidor'
+        });
+    }
+});
+
+// POST /api/auth/session/logout - Registro de logout no sistema de sessões
+app.post('/api/auth/session/logout', async (req, res) => {
+    try {
+        const { sessionId } = req.body;
+
+        if (!sessionId) {
+            return res.status(400).json({
+                success: false,
+                error: 'sessionId é obrigatório'
+            });
+        }
+
+        const academyDb = await getAcademyDb();
+        if (!academyDb) {
+            return res.status(503).json({
+                success: false,
+                error: 'Serviço temporariamente indisponível'
+            });
+        }
+
+        const session = await academyDb.collection('sessions').findOne({
+            sessionId: sessionId,
+            isActive: true
+        });
+
+        if (!session) {
+            return res.status(404).json({
+                success: false,
+                error: 'Sessão não encontrada ou já encerrada'
+            });
+        }
+
+        const now = new Date();
+        const sessionDuration = now.getTime() - session.loginTimestamp.getTime();
+
+        await academyDb.collection('sessions').updateOne(
+            { sessionId: sessionId },
+            {
+                $set: {
+                    isActive: false,
+                    logoutTimestamp: now,
+                    sessionDuration: sessionDuration,
+                    updatedAt: now
+                }
+            }
+        );
+
+        return res.status(200).json({
+            success: true,
+            sessionDuration: sessionDuration,
+            message: 'Logout registrado com sucesso'
+        });
+
+    } catch (error) {
+        console.error('Erro ao registrar logout:', error);
+        return res.status(500).json({
+            success: false,
+            error: 'Erro interno do servidor'
+        });
+    }
+});
+
 // Health check
 app.get('/api/health', (req, res) => {
     res.json({ 
@@ -436,6 +825,10 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   GET  /api/progress/user/:userEmail`);
     console.log(`   GET  /api/courses`);
     console.log(`   GET  /api/courses/:cursoNome`);
+    console.log(`   POST /api/auth/login`);
+    console.log(`   POST /api/auth/validate-access`);
+    console.log(`   POST /api/auth/session/login`);
+    console.log(`   POST /api/auth/session/logout`);
     console.log(`   GET  /api/health`);
     console.log(`\n🔧 Configuração MongoDB:`);
     console.log(`   URI configurada: ${!!MONGODB_URI && MONGODB_URI !== 'mongodb://localhost:27017' ? '✅ Sim' : '❌ Não'}`);

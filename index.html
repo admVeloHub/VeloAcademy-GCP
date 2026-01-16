@@ -12,7 +12,7 @@
 </head>
 <body>
 
-    <header>
+    <header id="main-header" style="display: none;">
         <div class="container header-container">
             <div class="logo" id="logo-container">
                 <img id="logo-image" class="logo-image" src="./academy.png" alt="VeloAcademy Logo">
@@ -22,8 +22,8 @@
                 <!-- Todos os botões ocultos até login -->
                 <a href="./index.html" class="nav-link active hidden-nav-item">Home</a>
                 <a href="./cursos.html" class="nav-link hidden-nav-item">Cursos</a>
-                <a href="./conquistas.html" class="nav-link hidden-nav-item">Conquistas</a>
-                <a href="#" class="nav-link hidden-nav-item disabled" style="opacity: 0.5; cursor: not-allowed;">IGP Agente</a>
+                <a href="./conquistas.html" id="nav-conquistas" class="nav-link hidden-nav-item">Conquistas</a>
+                <a href="#" id="nav-feedback" class="nav-link hidden-nav-item disabled" style="opacity: 0.5; cursor: not-allowed;">Feedback</a>
                 <a href="https://app.velohub.velotax.com.br" class="nav-link hidden-nav-item" target="_blank">VeloHub</a>
             </nav>
 
@@ -137,41 +137,116 @@
         </div>
     </main>
 
-    <!-- Modal de Login -->
-    <div id="login-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-body">
-                <img src="./academy.png" alt="VeloAcademy" class="modal-logo">
-                <p>Faça login para acessar os cursos</p>
-                <div id="g_id_onload"
-                     data-client_id="278491073220-eb4ogvn3aifu0ut9mq3rvu5r9r9l3137.apps.googleusercontent.com"
-                     data-callback="handleCredentialResponse"
-                     data-auto_prompt="false">
-                </div>
-                <div class="g_id_signin" 
-                     data-type="standard" 
-                     data-size="large" 
-                     data-theme="outline" 
-                     data-text="sign_in_with" 
-                     data-shape="rectangular" 
-                     data-logo_alignment="left">
-                </div>
-                
-                
-                <div class="login-info">
-                    <p><strong>Domínio autorizado:</strong> @velotax.com.br</p>
-                </div>
-            </div>
-        </div>
-    </div>
+    <!-- Container para Login Page -->
+    <div id="login-page-container"></div>
 
     <!-- Toast Notifications -->
     <div id="toast-container" class="toast-container"></div>
 
     <script src="./js/toast.js"></script>
+    <script src="./js/config/api-config.js"></script>
+    <script src="./js/config/google-config.js"></script>
+    <script src="./js/services/auth-service.js"></script>
     <script src="./js/auth.js" defer></script>
+    <script src="./js/login-page.js"></script>
     <script src="./js/home.js"></script>
     <script src="./js/theme-toggle.js"></script>
+    <script>
+        // Inicializar login page quando necessário
+        document.addEventListener('DOMContentLoaded', function() {
+            // Aguardar carregamento dos scripts de autenticação
+            setTimeout(function() {
+                // Verificar se usuário já está logado
+                const sessionValid = typeof isSessionValid === 'function' ? isSessionValid() : false;
+                
+                // Garantir que header está oculto inicialmente
+                const header = document.getElementById('main-header') || document.querySelector('header');
+                if (header) {
+                    header.style.display = 'none';
+                }
+                
+                if (sessionValid) {
+                    // Usuário já está logado, não mostrar login
+                    const loginContainer = document.getElementById('login-page-container');
+                    if (loginContainer) {
+                        loginContainer.style.display = 'none';
+                    }
+                    
+                    // Mostrar header e conteúdo principal
+                    if (header) {
+                        header.style.display = 'block';
+                    }
+                    
+                    const mainContent = document.querySelector('main');
+                    if (mainContent) {
+                        mainContent.style.display = 'block';
+                    }
+                    
+                    // Atualizar header se houver sessão
+                    const session = typeof getUserSession === 'function' ? getUserSession() : null;
+                    if (session && typeof showHeaderButtons === 'function') {
+                        showHeaderButtons(session.user);
+                    }
+                } else {
+                    // Usuário não está logado, inicializar login page
+                    const loginContainer = document.getElementById('login-page-container');
+                    if (loginContainer) {
+                        loginContainer.style.display = 'block';
+                    }
+                    
+                    // Esconder header e conteúdo principal até login (já está oculto, mas garantindo)
+                    if (header) {
+                        header.style.display = 'none';
+                    }
+                    
+                    const mainContent = document.querySelector('main');
+                    if (mainContent) {
+                        mainContent.style.display = 'none';
+                    }
+                    
+                    // Inicializar componente de login
+                    if (typeof initLoginPage === 'function') {
+                        initLoginPage('login-page-container', function(userData) {
+                            // Callback quando login é bem-sucedido
+                            console.log('Login bem-sucedido:', userData);
+                            
+                            // Esconder login page
+                            const loginContainer = document.getElementById('login-page-container');
+                            if (loginContainer) {
+                                loginContainer.style.display = 'none';
+                            }
+                            
+                            // Mostrar header e conteúdo principal
+                            const headerElement = document.getElementById('main-header') || document.querySelector('header');
+                            if (headerElement) {
+                                headerElement.style.display = 'block';
+                            }
+                            
+                            const mainContent = document.querySelector('main');
+                            if (mainContent) {
+                                mainContent.style.display = 'block';
+                            }
+                            
+                            // Atualizar header
+                            if (typeof showHeaderButtons === 'function') {
+                                showHeaderButtons(userData);
+                            }
+                            
+                            // Mostrar toast de sucesso se disponível
+                            if (typeof showToast !== 'undefined' && showToast.success) {
+                                showToast.success('Login Concluído', `Bem-vindo, ${userData.name}!`);
+                            }
+                            
+                            // Redirecionar para cursos após 1 segundo
+                            setTimeout(() => {
+                                window.location.href = './cursos.html';
+                            }, 1000);
+                        });
+                    }
+                }
+            }, 100);
+        });
+    </script>
 </body>
 </html>
 

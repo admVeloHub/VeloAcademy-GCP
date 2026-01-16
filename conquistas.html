@@ -4,6 +4,32 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Conquistas - VeloAcademy</title>
+    <script>
+        // Bloquear acesso imediatamente se não for Lucas Gravina
+        (function() {
+            try {
+                const sessionData = localStorage.getItem('veloacademy_user_session');
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    if (session && session.user) {
+                        const userData = session.user;
+                        // APENAS lucas.gravina@velotax.com.br tem acesso
+                        const isLucasGravina = userData.email === 'lucas.gravina@velotax.com.br';
+                        if (!isLucasGravina) {
+                            window.location.href = './index.html';
+                        }
+                    } else {
+                        window.location.href = './index.html';
+                    }
+                } else {
+                    window.location.href = './index.html';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar acesso:', error);
+                window.location.href = './index.html';
+            }
+        })();
+    </script>
     <link rel="stylesheet" href="./css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
@@ -21,8 +47,8 @@
             <nav class="nav-menu">
                 <a href="./index.html" class="nav-link">Home</a>
                 <a href="./cursos.html" class="nav-link">Cursos</a>
-                <a href="./conquistas.html" class="nav-link active">Conquistas</a>
-                <a href="#" class="nav-link disabled" style="opacity: 0.5; cursor: not-allowed;">IGP Agente</a>
+                <a href="./conquistas.html" id="nav-conquistas" class="nav-link active">Conquistas</a>
+                <a href="#" id="nav-feedback" class="nav-link disabled" style="opacity: 0.5; cursor: not-allowed;">Feedback</a>
                 <a href="https://app.velohub.velotax.com.br" class="nav-link" target="_blank">VeloHub</a>
             </nav>
 
@@ -219,5 +245,30 @@
     <script src="./js/auth.js" defer></script>
     <script src="./js/veloacademy.js"></script>
     <script src="./js/theme-toggle.js"></script>
+    <script>
+        // Verificar acesso à página de conquistas imediatamente
+        (function() {
+            function verifyAccess() {
+                // Aguardar auth.js carregar
+                if (typeof window.isLucasGravinaUser === 'function') {
+                    const isLucasGravina = window.isLucasGravinaUser();
+                    if (!isLucasGravina) {
+                        console.log('Acesso negado à página de Conquistas. Redirecionando...');
+                        window.location.href = './index.html';
+                    }
+                } else {
+                    // Tentar novamente após um pequeno delay
+                    setTimeout(verifyAccess, 100);
+                }
+            }
+            
+            // Executar verificação quando DOM estiver pronto
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', verifyAccess);
+            } else {
+                verifyAccess();
+            }
+        })();
+    </script>
 </body>
 </html>

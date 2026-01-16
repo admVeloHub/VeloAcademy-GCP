@@ -162,12 +162,48 @@ const homeApp = {
         // Mostrar botões do header após login
         console.log('=== Mostrando botões do header ===');
         
-        // Mostrar itens de navegação
+        // Obter dados do usuário para verificar se é Lucas Gravina
+        let isLucasGravina = false;
+        try {
+            const getUserSessionFunc = typeof window !== 'undefined' && window.getUserSession ? window.getUserSession : getUserSession;
+            const session = getUserSessionFunc();
+            if (session && session.user) {
+                const userData = session.user;
+                // APENAS lucas.gravina@velotax.com.br tem acesso
+                isLucasGravina = userData.email === 'lucas.gravina@velotax.com.br';
+            }
+        } catch (error) {
+            console.error('Erro ao verificar usuário:', error);
+        }
+        
+        // Mostrar itens de navegação (Conquistas e Feedback ficam visíveis mas inacessíveis se não for Lucas Gravina)
         const hiddenNavItems = document.querySelectorAll('.hidden-nav-item');
         console.log('Elementos hidden-nav-item encontrados:', hiddenNavItems.length);
         hiddenNavItems.forEach(nav => {
+            const navId = nav.id;
             nav.classList.remove('hidden-nav-item');
-            console.log('Removida classe hidden-nav-item de:', nav.textContent);
+            nav.style.display = '';
+            
+            // Se não for Lucas Gravina, tornar Conquistas e Feedback inacessíveis mas visíveis
+            if (!isLucasGravina && (navId === 'nav-conquistas' || navId === 'nav-feedback')) {
+                nav.style.pointerEvents = 'none';
+                nav.style.opacity = '0.5';
+                nav.style.cursor = 'not-allowed';
+                nav.setAttribute('disabled', 'true');
+                nav.onclick = (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    return false;
+                };
+                console.log('Botão restrito tornado inacessível:', nav.textContent);
+            } else {
+                nav.style.pointerEvents = '';
+                nav.style.opacity = '1';
+                nav.style.cursor = 'pointer';
+                nav.removeAttribute('disabled');
+                nav.onclick = null;
+                console.log('Removida classe hidden-nav-item de:', nav.textContent);
+            }
         });
         
         // Mostrar container do usuário
