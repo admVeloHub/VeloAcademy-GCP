@@ -35,7 +35,7 @@
 - FEATURE: Acesso direto à página conquistas.html continua bloqueado (redirecionamento automático)
 - STYLE: Adicionados estilos CSS para .nav-link[disabled] e .nav-link.disabled
 - FIX: Removida lógica de ocultação completa dos botões, mantendo apenas controle de acessibilidade
-### Commit Hash: [será preenchido após commit]
+### Commit Hash: e86675f
 
 ---
 
