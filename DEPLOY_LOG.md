@@ -14,6 +14,24 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-02-16 18:05:00
+### Tipo: GitHub Push
+### Versão: Correção de deploy Vercel
+### Arquivos Modificados:
+- api/auth/profile.js (movido para api-disabled/)
+- api/auth/profile/change-password.js (movido para api-disabled/)
+- api/auth/profile/confirm-upload.js (movido para api-disabled/)
+- api/auth/profile/get-upload-url.js (movido para api-disabled/)
+- vercel.json (mantido)
+### Descrição: Redução do número de Serverless Functions para resolver limite do plano Hobby
+- FIX: Movidas 4 funções de perfil não utilizadas para api-disabled/ para reduzir de 15 para 11 Serverless Functions
+- FIX: Resolvido erro "No more than 12 Serverless Functions can be added to a Deployment on the Hobby plan"
+- FUNCTIONS: Mantidas apenas funções essenciais: auth (login, validate-access, session), courses, progress e health
+- DEPLOY: Projeto agora está dentro do limite de 12 funções do plano Hobby do Vercel
+### Commit Hash: 0ebbc4d
+
+---
+
 ### Data/Hora: 2026-02-16 18:00:00
 ### Tipo: GitHub Push
 ### Versão: v1.2.0 (server-api.js)
