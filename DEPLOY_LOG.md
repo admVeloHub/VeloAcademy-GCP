@@ -14,6 +14,23 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-02-16 18:00:00
+### Tipo: GitHub Push
+### Versão: v1.2.0 (server-api.js)
+### Arquivos Modificados:
+- server-api.js (v1.2.0)
+### Descrição: Melhorias no sistema de autenticação e logging
+- FEATURE: Tratamento explícito quando password é null - usa senha padrão diretamente
+- FEATURE: Middleware de logging para todas as requisições HTTP (método, URL, body)
+- FEATURE: Logs detalhados de debug no processo de autenticação
+- FEATURE: Busca de usuário com logs detalhados incluindo listagem de usuários para debug
+- IMPROVEMENT: Validação melhorada da senha padrão com comparação de tamanhos e valores
+- IMPROVEMENT: Logs mais informativos para facilitar diagnóstico de problemas de login
+- FIX: Correção na lógica de validação quando password é null ou undefined
+### Commit Hash: bed9dd9
+
+---
+
 ### Data/Hora: 2026-02-16 17:45:00
 ### Tipo: GitHub Push
 ### Versão: v2.1.2 (LISTA_SCHEMAS.rb) + v1.0.1 (server.js)

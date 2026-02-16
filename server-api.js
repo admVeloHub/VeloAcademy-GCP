@@ -1,4 +1,4 @@
-// VERSION: v1.1.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.2.0 | DATE: 2026-02-16 | AUTHOR: VeloHub Development Team
 // Servidor API Express para gerenciamento de progresso de cursos com MongoDB
 
 // Carregar variáveis de ambiente do arquivo .env
@@ -15,6 +15,19 @@ const PORT = 3001; // Porta diferente do servidor estático
 // Middleware
 app.use(cors());
 app.use(express.json());
+
+// Middleware de logging para debug
+app.use((req, res, next) => {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+    if (req.body && Object.keys(req.body).length > 0) {
+        const bodyCopy = { ...req.body };
+        if (bodyCopy.password) {
+            bodyCopy.password = '***REDACTED***';
+        }
+        console.log('Body:', JSON.stringify(bodyCopy, null, 2));
+    }
+    next();
+});
 
 // Configuração MongoDB
 // URI obtida das variáveis de ambiente (.env local ou Vercel em produção)
@@ -461,8 +474,28 @@ app.post('/api/auth/login', async (req, res) => {
             });
         }
 
+        const emailLower = email.toLowerCase();
+        console.log('=== BUSCA USUÁRIO ===');
+        console.log('Email recebido:', email);
+        console.log('Email normalizado:', emailLower);
+        console.log('Buscando usuário no MongoDB...');
+
         const funcionario = await qualidadeDb.collection('qualidade_funcionarios')
-            .findOne({ userMail: email.toLowerCase() });
+            .findOne({ userMail: emailLower });
+
+        console.log('Usuário encontrado?', !!funcionario);
+        if (funcionario) {
+            console.log('Email do usuário encontrado:', funcionario.userMail);
+            console.log('Nome:', funcionario.colaboradorNome);
+        } else {
+            console.log('Usuário não encontrado com email:', emailLower);
+            // Tentar buscar todos os emails para debug
+            const todosUsuarios = await qualidadeDb.collection('qualidade_funcionarios')
+                .find({}, { projection: { userMail: 1, colaboradorNome: 1 } })
+                .limit(5)
+                .toArray();
+            console.log('Primeiros 5 usuários no banco:', todosUsuarios.map(u => ({ email: u.userMail, nome: u.colaboradorNome })));
+        }
 
         if (!funcionario) {
             return res.status(401).json({
@@ -496,11 +529,38 @@ app.post('/api/auth/login', async (req, res) => {
         
         console.log('=== DEBUG LOGIN (server-api.js) ===');
         console.log('Email recebido:', email);
-        console.log('Senha recebida (primeiros 3 chars):', password ? password.substring(0, 3) + '...' : 'null');
-        console.log('Senha armazenada (primeiros 3 chars):', funcionario.password ? funcionario.password.substring(0, 3) + '...' : 'null');
+        console.log('Senha recebida:', password);
+        console.log('Senha armazenada:', funcionario.password);
         console.log('Tipo da senha armazenada:', typeof funcionario.password);
+        console.log('Password é null?', funcionario.password === null || funcionario.password === undefined);
         
-        if (funcionario.password) {
+        // Se password é null ou undefined, usar senha padrão diretamente
+        if (!funcionario.password || funcionario.password === null || funcionario.password === undefined) {
+            console.log('Password não definido, usando senha padrão...');
+            const nomeCompleto = funcionario.colaboradorNome || '';
+            const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
+            
+            console.log('Nome completo:', nomeCompleto);
+            console.log('Partes do nome:', partesNome);
+            console.log('CPF:', funcionario.CPF);
+            
+            if (partesNome.length >= 2 && funcionario.CPF) {
+                const primeiroNome = partesNome[0];
+                const ultimoNome = partesNome[partesNome.length - 1];
+                const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
+                
+                console.log('Senha padrão calculada:', senhaPadrao);
+                console.log('Senha recebida:', password);
+                console.log('Comparação exata:', password === senhaPadrao);
+                console.log('Tamanho senha recebida:', password ? password.length : 0);
+                console.log('Tamanho senha padrão:', senhaPadrao.length);
+                
+                passwordValid = password === senhaPadrao;
+                console.log('Resultado validação senha padrão:', passwordValid);
+            } else {
+                console.log('Não foi possível calcular senha padrão - partesNome.length:', partesNome.length, 'CPF:', !!funcionario.CPF);
+            }
+        } else {
             // Verificar se a senha armazenada é um hash bcrypt (começa com $2a$, $2b$ ou $2y$)
             const isBcryptHash = typeof funcionario.password === 'string' && 
                                  (funcionario.password.startsWith('$2a$') || 
@@ -519,30 +579,23 @@ app.post('/api/auth/login', async (req, res) => {
                 console.log('Comparação texto plano:', passwordValid);
                 console.log('Senha recebida:', password);
                 console.log('Senha armazenada:', funcionario.password);
-                console.log('São iguais?', password === funcionario.password);
             }
-        }
-        
-        // Se ainda não validou, tentar senha padrão: nome.sobrenomeCPF
-        if (!passwordValid) {
-            const nomeCompleto = funcionario.colaboradorNome || '';
-            const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
             
-            console.log('Tentando senha padrão...');
-            console.log('Nome completo:', nomeCompleto);
-            console.log('Partes do nome:', partesNome);
-            console.log('CPF:', funcionario.CPF);
-            
-            if (partesNome.length >= 2 && funcionario.CPF) {
-                const primeiroNome = partesNome[0];
-                const ultimoNome = partesNome[partesNome.length - 1];
-                const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
+            // Se ainda não validou, tentar senha padrão como fallback
+            if (!passwordValid) {
+                console.log('Senha armazenada não corresponde, tentando senha padrão como fallback...');
+                const nomeCompleto = funcionario.colaboradorNome || '';
+                const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
                 
-                console.log('Senha padrão calculada:', senhaPadrao);
-                console.log('Senha recebida:', password);
-                
-                passwordValid = password === senhaPadrao;
-                console.log('Comparação senha padrão:', passwordValid);
+                if (partesNome.length >= 2 && funcionario.CPF) {
+                    const primeiroNome = partesNome[0];
+                    const ultimoNome = partesNome[partesNome.length - 1];
+                    const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
+                    
+                    console.log('Senha padrão calculada (fallback):', senhaPadrao);
+                    passwordValid = password === senhaPadrao;
+                    console.log('Comparação senha padrão (fallback):', passwordValid);
+                }
             }
         }
         
