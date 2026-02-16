@@ -1,4 +1,5 @@
-﻿const http = require('http');
+// VERSION: v1.0.1 | DATE: 2026-02-16 | AUTHOR: VeloHub Development Team
+const http = require('http');
 const fs = require('fs');
 const path = require('path');
 

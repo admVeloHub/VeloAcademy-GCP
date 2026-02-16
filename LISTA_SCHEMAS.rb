@@ -1,5 +1,5 @@
 listagem de schema de coleções do mongoDB
-  <!-- VERSION: v2.1.1 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team -->
+  <!-- VERSION: v2.1.2 | DATE: 2026-02-16 | AUTHOR: VeloHub Development Team -->
      
     🗄️ Database Principal: console_conteudo
   
@@ -295,7 +295,9 @@ updatedAt: Date,                // Data de atualização
   escala: String,                 // Escala
   acessos: {                      // Objeto de acessos
     Velohub: Boolean,             // Acesso ao VeloHub
+    Academy: Boolean,             // Acesso ao Academy
     Console: Boolean              // Acesso ao Console
+    Desk: Boolean                  // Acesso ao Desk
   },
   password: String,               // Senha do usuário (hash). Padrão ao primeiro acesso: nome.sobrenomeCPF (ex: joao.silva12345678901)
   desligado: Boolean,             // Se foi desligado

@@ -14,6 +14,20 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-02-16 17:45:00
+### Tipo: GitHub Push
+### Versão: v2.1.2 (LISTA_SCHEMAS.rb) + v1.0.1 (server.js)
+### Arquivos Modificados:
+- LISTA_SCHEMAS.rb (v2.1.2)
+- server.js (v1.0.1)
+### Descrição: Atualização de schemas MongoDB e correção de encoding no servidor
+- SCHEMA: Adicionados campos Academy e Desk no schema qualidade_funcionarios.acessos
+- FIX: Removido caractere BOM (Byte Order Mark) do início do server.js para compatibilidade
+- VERSION: Incrementadas versões dos arquivos conforme padrão vX.Y.Z
+### Commit Hash: ebedb87
+
+---
+
 ### Data/Hora: 2025-01-31 [HH:MM:SS]
 ### Tipo: GitHub Push
 ### Versão: v2.4.0 (auth.js) + ajustes em home.js e styles.css
