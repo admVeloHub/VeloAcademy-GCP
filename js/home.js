@@ -262,7 +262,7 @@ const homeApp = {
         });
     },
 
-    handleGoogleSignIn(response) {
+    async handleGoogleSignIn(response) {
         console.log('=== handleGoogleSignIn chamada ===');
         console.log('Response:', response);
         
@@ -294,6 +294,11 @@ const homeApp = {
                 localStorage.setItem('userName', payload.name);
                 localStorage.setItem('userPicture', payload.picture);
                 localStorage.setItem('dadosAtendenteChatbot', JSON.stringify(dadosUsuario));
+                
+                // Registrar sessão no backend (necessário para progresso e quiz)
+                if (typeof window.registerLoginSession === 'function') {
+                    await window.registerLoginSession(userData);
+                }
                 
                 this.hideModal();
                 
@@ -382,16 +387,23 @@ const homeApp = {
         console.log('=== Inicializando logout ===');
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Logout clicado');
-                // Limpar dados do usuário
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userPicture');
-                localStorage.removeItem('dadosAtendenteChatbot');
-                
-                // Redirecionar para página inicial
-                window.location.href = './index.html';
+                // Usar logout centralizado do auth.js (limpa veloacademy_user_session e redireciona)
+                if (typeof logout === 'function') {
+                    logout();
+                } else {
+                    // Fallback se auth.js não carregou
+                    localStorage.removeItem('veloacademy_user_session');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userPicture');
+                    localStorage.removeItem('academy_session_id');
+                    localStorage.removeItem('dadosAtendenteChatbot');
+                    window.location.href = './index.html';
+                }
             });
             console.log('Event listener de logout adicionado');
         }

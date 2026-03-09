@@ -80,17 +80,23 @@ const homeDashboardApp = {
 
     initLogout() {
         const logoutBtn = document.getElementById('logout-btn');
-        
-        logoutBtn.addEventListener('click', () => {
-            // Limpar dados do usuário
-            localStorage.removeItem('userEmail');
-            localStorage.removeItem('userName');
-            localStorage.removeItem('userPicture');
-            localStorage.removeItem('dadosAtendenteChatbot');
-            
-            // Redirecionar para landing page
-            window.location.href = './index.html';
-        });
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (typeof logout === 'function') {
+                    logout();
+                } else {
+                    localStorage.removeItem('veloacademy_user_session');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userPicture');
+                    localStorage.removeItem('academy_session_id');
+                    localStorage.removeItem('dadosAtendenteChatbot');
+                    window.location.href = './index.html';
+                }
+            });
+        }
     },
 
     initAnimations() {

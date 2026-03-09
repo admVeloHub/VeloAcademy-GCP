@@ -1,4 +1,4 @@
-// VERSION: v1.4.3 | DATE: 2025-12-15 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.4 | DATE: 2026-03-06 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -4595,16 +4595,21 @@ const veloAcademyApp = {
         console.log('=== Inicializando logout ===');
         const logoutBtn = document.getElementById('logout-btn');
         if (logoutBtn) {
-            logoutBtn.addEventListener('click', () => {
+            logoutBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
                 console.log('Logout clicado');
-                // Limpar dados do usuário
-                localStorage.removeItem('userEmail');
-                localStorage.removeItem('userName');
-                localStorage.removeItem('userPicture');
-                localStorage.removeItem('dadosAtendenteChatbot');
-                
-                // Redirecionar para página inicial
-                window.location.href = './index.html';
+                if (typeof logout === 'function') {
+                    logout();
+                } else {
+                    localStorage.removeItem('veloacademy_user_session');
+                    localStorage.removeItem('userEmail');
+                    localStorage.removeItem('userName');
+                    localStorage.removeItem('userPicture');
+                    localStorage.removeItem('academy_session_id');
+                    localStorage.removeItem('dadosAtendenteChatbot');
+                    window.location.href = './index.html';
+                }
             });
             console.log('Event listener de logout adicionado');
         }

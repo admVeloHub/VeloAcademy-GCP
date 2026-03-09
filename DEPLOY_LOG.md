@@ -14,6 +14,25 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-03-09 [HH:MM:SS]
+### Tipo: GitHub Push
+### Versão: Correções logout + sessões
+### Arquivos Modificados:
+- js/home.js
+- js/home-dashboard.js
+- js/login-page.js (v1.0.5)
+- js/veloacademy.js (v1.4.4)
+- DEPLOY_LOG.md
+### Descrição: Correções de autenticação e sessões
+- FIX: Logout agora usa logout() do auth.js em home.js, home-dashboard.js e veloacademy.js (limpa veloacademy_user_session)
+- FIX: Após logout, redireciona corretamente para login page em vez da hero page
+- FEATURE: registerLoginSession chamado em home.js handleGoogleSignIn (cria sessão no backend)
+- FEATURE: userEmail/userName/userPicture salvos no localStorage em login-page para ambos fluxos (Google e email/senha)
+- FEATURE: Sessões criadas em academy_registros.sessions para reconhecimento de progresso e quiz
+### Commit Hash: [a preencher após push]
+
+---
+
 ### Data/Hora: 2026-03-06 [HH:MM:SS]
 ### Tipo: GitHub Push
 ### Versão: v1.0.2 (progress-tracker.js)
@@ -24,7 +43,7 @@
 - FIX: getUserEmail() agora lê email de veloacademy_user_session quando userEmail não está em localStorage
 - FIX: Compatibilidade com login por email/senha (login-page.js) além do Google OAuth
 - FIX: Progresso de vídeos e desbloqueio de quiz funcionam para ambos os fluxos de login
-### Commit Hash: [a preencher após push]
+### Commit Hash: f63a794
 
 ---
 

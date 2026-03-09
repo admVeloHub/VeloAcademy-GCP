@@ -1,4 +1,4 @@
-// VERSION: v1.0.4 | DATE: 2025-01-31 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.5 | DATE: 2026-03-06 | AUTHOR: VeloHub Development Team
 // Componente de Login adaptado do React para JavaScript Vanilla
 
 (function() {
@@ -563,9 +563,16 @@
                 window.saveUserSession(userData);
             }
 
-            // Registrar login no backend
+            // Registrar login no backend (cria sessão em academy_registros.sessions)
             if (window.registerLoginSession) {
                 await window.registerLoginSession(userData);
+            }
+
+            // Salvar userEmail para progresso/quiz (compatibilidade)
+            localStorage.setItem('userEmail', userData.email);
+            localStorage.setItem('userName', userData.name);
+            if (userData.picture) {
+                localStorage.setItem('userPicture', userData.picture);
             }
 
             console.log('Login realizado com sucesso');
@@ -636,14 +643,19 @@
                 window.saveUserSession(userData);
             }
 
-            // Registrar login no backend
+            // Registrar login no backend (cria sessão em academy_registros.sessions)
             if (window.registerLoginSession) {
                 await window.registerLoginSession(userData);
             }
 
-            // Salvar sessionId
+            // Salvar sessionId e userEmail para progresso/quiz (compatibilidade)
             if (result.sessionId) {
                 localStorage.setItem('academy_session_id', result.sessionId);
+            }
+            localStorage.setItem('userEmail', userData.email);
+            localStorage.setItem('userName', userData.name);
+            if (userData.picture) {
+                localStorage.setItem('userPicture', userData.picture);
             }
 
             console.log('Login realizado com sucesso');
