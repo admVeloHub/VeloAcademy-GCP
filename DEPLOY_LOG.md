@@ -14,6 +14,20 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-03-06 [HH:MM:SS]
+### Tipo: GitHub Push
+### Versão: v1.0.2 (progress-tracker.js)
+### Arquivos Modificados:
+- js/progress-tracker.js (v1.0.2)
+- DEPLOY_LOG.md
+### Descrição: Correção "Usuário não autenticado" ao salvar progresso e desbloquear quiz
+- FIX: getUserEmail() agora lê email de veloacademy_user_session quando userEmail não está em localStorage
+- FIX: Compatibilidade com login por email/senha (login-page.js) além do Google OAuth
+- FIX: Progresso de vídeos e desbloqueio de quiz funcionam para ambos os fluxos de login
+### Commit Hash: [a preencher após push]
+
+---
+
 ### Data/Hora: 2026-02-16 18:05:00
 ### Tipo: GitHub Push
 ### Versão: Correção de deploy Vercel

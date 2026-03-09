@@ -1,5 +1,8 @@
-// VERSION: v1.0.1 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.2 | DATE: 2026-03-06 | AUTHOR: VeloHub Development Team
 // Sistema de rastreamento de progresso de vídeos e desbloqueio de quizzes
+// v1.0.2: getUserEmail agora lê também de veloacademy_user_session (compatibilidade com login email/senha)
+
+const USER_SESSION_KEY = 'veloacademy_user_session';
 
 const ProgressTracker = {
     // Função para obter URL base da API
@@ -21,9 +24,20 @@ const ProgressTracker = {
     progressCache: {},
     
     // Obter email do usuário autenticado
+    // Lê de localStorage (Google OAuth) ou veloacademy_user_session (login email/senha)
     getUserEmail() {
         try {
-            const userEmail = localStorage.getItem('userEmail');
+            let userEmail = localStorage.getItem('userEmail');
+            if (!userEmail) {
+                const sessionData = localStorage.getItem(USER_SESSION_KEY);
+                if (sessionData) {
+                    const session = JSON.parse(sessionData);
+                    userEmail = session?.user?.email || null;
+                    if (userEmail) {
+                        localStorage.setItem('userEmail', userEmail);
+                    }
+                }
+            }
             if (!userEmail) {
                 throw new Error('Usuário não autenticado');
             }
