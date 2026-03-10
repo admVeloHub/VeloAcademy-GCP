@@ -1,4 +1,4 @@
-// VERSION: v1.4.6 | DATE: 2026-03-09 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.7 | DATE: 2026-03-10 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -414,7 +414,18 @@ const veloAcademyApp = {
                 })
             });
             
-            const result = await response.json();
+            const text = await response.text();
+            let result;
+            try {
+                result = text ? JSON.parse(text) : {};
+            } catch (e) {
+                throw new Error(response.status === 404
+                    ? 'Endpoint de quiz não encontrado. Verifique se a API está configurada.'
+                    : `Resposta inválida do servidor (${response.status}): ${text.substring(0, 80)}...`);
+            }
+            if (!response.ok) {
+                throw new Error(result.error || `Erro ${response.status}: ${response.statusText}`);
+            }
             
             this.quizResult = {
                 score,

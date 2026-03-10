@@ -14,6 +14,22 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-03-10 [HH:MM:SS]
+### Tipo: GitHub Push
+### Versão: Endpoint quiz/result + tratamento erro 404
+### Arquivos Modificados:
+- api/quiz/result.js (novo)
+- js/veloacademy.js (v1.4.7)
+- DEPLOY_LOG.md
+### Descrição: Correção 404 e erro JSON no envio de quiz
+- FEATURE: Criado api/quiz/result.js para Vercel (endpoint POST /api/quiz/result)
+- FIX: Quiz retornava 404 em produção (endpoint só existia em server-api.js local)
+- FIX: Erro "Unexpected token 'T', The page c... is not valid JSON" ao receber HTML 404
+- FIX: veloacademy.js usa response.text() e trata resposta não-JSON com mensagem clara
+### Commit Hash: 0ff9d96
+
+---
+
 ### Data/Hora: 2026-03-06 [HH:MM:SS]
 ### Tipo: GitHub Push
 ### Versão: Correção modal slides/PDF
@@ -27,7 +43,7 @@
 - FIX: .aula-modal-body com max-height para não ocultar footer; footer com z-index
 - FIX: .pdf-modal-container com height: auto; header/body/footer com flex adequado
 - FIX: .pdf-modal-footer e .aula-modal-footer com position relative e z-index para visibilidade
-### Commit Hash: 39d94b6
+### Commit Hash: fac5e6c
 
 ---
 
