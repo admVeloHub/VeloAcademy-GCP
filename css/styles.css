@@ -3869,24 +3869,23 @@ footer {
     width: 85%;
     max-width: calc(100vw - 40px);
     max-height: calc(100vh - 40px);
-    height: calc(100vh - 40px);
+    height: auto;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     margin: 0;
     box-sizing: border-box;
     position: relative;
-    /* Garantir que nunca ultrapasse a viewport */
     align-self: center;
 }
 
 .pdf-modal-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 16px 19px;
     border-bottom: 1px solid var(--cor-borda);
-    flex-shrink: 0;
     min-height: 60px;
     box-sizing: border-box;
 }
@@ -3922,6 +3921,7 @@ footer {
 
 .pdf-modal-body {
     flex: 1 1 auto;
+    min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
     padding: 16px;
@@ -3929,7 +3929,6 @@ footer {
     justify-content: center;
     align-items: flex-start;
     background-color: #f5f5f5;
-    min-height: 0;
     box-sizing: border-box;
 }
 
@@ -3954,6 +3953,9 @@ footer {
     background-color: var(--cor-container);
     min-height: 60px;
     box-sizing: border-box;
+    /* Garantir que footer sempre visível */
+    position: relative;
+    z-index: 1;
 }
 
 .pdf-modal-progress {
@@ -4354,9 +4356,11 @@ footer {
     max-height: 90vh;
     display: flex;
     flex-direction: column;
+    overflow: hidden;
 }
 
 .aula-modal-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -4394,12 +4398,15 @@ footer {
 }
 
 .aula-modal-body {
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 19px;
     overflow: hidden;
     position: relative;
     padding-bottom: 56.25%;
     height: 0;
+    /* Limitar altura para não ocultar o footer */
+    max-height: calc(90vh - 132px);
 }
 
 .aula-modal-body iframe {
@@ -4418,6 +4425,9 @@ footer {
     border-top: 1px solid var(--cor-borda);
     background-color: var(--cor-container);
     gap: 13px;
+    flex-shrink: 0;
+    position: relative;
+    z-index: 1;
 }
 
 .aula-modal-progress {

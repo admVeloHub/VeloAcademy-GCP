@@ -1,4 +1,4 @@
-// VERSION: v1.4.4 | DATE: 2026-03-06 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.6 | DATE: 2026-03-09 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -364,107 +364,86 @@ const veloAcademyApp = {
             }
         }
 
-        // Calcular resultado e enviar UMA VEZ para o backend
+        // Calcular resultado e enviar para MongoDB (curso_certificados ou quiz_reprovas)
         try {
-            await this.submitQuizToAppsScript();
-            // Mostrar resultado local após envio bem-sucedido
+            await this.submitQuizToMongoDB();
             this.showQuizResult();
         } catch (error) {
             console.error('Erro ao enviar quiz:', error);
-            // Em caso de erro, mostrar resultado local mesmo assim
             this.showQuizResult();
         }
     },
 
-    // Função para enviar quiz para o Apps Script
-    submitQuizToAppsScript() {
-        return new Promise((resolve, reject) => {
-            try {
-                const userData = this.getAuthenticatedUserData();
-                const courseId = this.currentQuiz.courseId;
-                
-                // Calcular pontuação
-                let score = 0;
-                this.currentQuiz.questions.forEach((question, index) => {
-                    if (this.currentQuiz.userAnswers[index] === question.correctAnswer) {
-                        score++;
-                    }
-                });
-                
-                const totalQuestions = this.currentQuiz.questions.length;
-                const finalGrade = (score / totalQuestions) * 10;
-                const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
-                const isReproved = score < passingScore;
-                
-                // Calcular questões erradas
-                const wrongQuestions = this.calculateWrongQuestions();
-                
-                // Preparar dados para envio (formato simplificado)
-                const formData = new FormData();
-                formData.append('action', 'submitResult');
-                formData.append('name', userData.name);
-                formData.append('email', userData.email);
-                formData.append('courseId', courseId);
-                formData.append('approved', (!isReproved).toString());
-                formData.append('finalGrade', finalGrade.toString());
-                
-                // Adicionar questões erradas se houver
-                if (wrongQuestions.length > 0) {
-                    formData.append('wrongQuestions', JSON.stringify(wrongQuestions));
+    // Função para enviar resultado do quiz para MongoDB (curso_certificados ou quiz_reprovas)
+    async submitQuizToMongoDB() {
+        try {
+            const userData = this.getAuthenticatedUserData();
+            const courseId = this.currentQuiz.courseId;
+            
+            // Calcular pontuação
+            let score = 0;
+            this.currentQuiz.questions.forEach((question, index) => {
+                if (this.currentQuiz.userAnswers[index] === question.correctAnswer) {
+                    score++;
                 }
-                
-                // Enviar dados
-                fetch(this.appsScriptConfig.scriptUrl, {
-                    method: 'POST',
-                    body: formData
+            });
+            
+            const totalQuestions = this.currentQuiz.questions.length;
+            const finalGrade = (score / totalQuestions) * 10;
+            const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
+            const isReproved = score < passingScore;
+            const wrongQuestions = this.calculateWrongQuestions();
+            const courseName = this.getCourseTitle(courseId);
+            
+            const apiBaseUrl = typeof ProgressTracker !== 'undefined' ? ProgressTracker.getApiBaseUrl() : 
+                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3001/api' : '/api');
+            
+            const response = await fetch(`${apiBaseUrl}/quiz/result`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    name: userData.name,
+                    email: userData.email,
+                    courseId,
+                    courseName,
+                    score,
+                    totalQuestions,
+                    finalGrade,
+                    approved: !isReproved,
+                    wrongQuestions
                 })
-                .then(response => response.text())
-                .then(data => {
-                    // Armazenar resultado para uso posterior
-                    this.quizResult = {
-                        score,
-                        totalQuestions,
-                        finalGrade,
-                        passingScore,
-                        isReproved,
-                        wrongQuestions,
-                        response: data
-                    };
-                    
-                    if (!isReproved) {
-                        // Para aprovados, extrair URL do certificado
-                        const match = data.match(/url=([^"'\s]+)/);
-                        if (match) {
-                            this.certificateUrl = match[1];
-                        }
-                    }
-                    resolve(data);
-                })
-                .catch(error => {
-                    console.error('Erro ao enviar quiz:', error);
-                    reject(error);
-                });
-                
-            } catch (error) {
-                console.error('Erro ao processar quiz:', error);
-                
-                // Verificar se é erro de autenticação
-                if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
-                    alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
-                    // Limpar dados inválidos e redirecionar
-                    localStorage.removeItem('userEmail');
-                    localStorage.removeItem('userName');
-                    localStorage.removeItem('userPicture');
-                    localStorage.removeItem('dadosAtendenteChatbot');
-                    setTimeout(() => {
-                        window.location.href = './index.html';
-                    }, 2000);
-                    return;
-                }
-                
-                reject(error);
+            });
+            
+            const result = await response.json();
+            
+            this.quizResult = {
+                score,
+                totalQuestions,
+                finalGrade,
+                passingScore,
+                isReproved,
+                wrongQuestions,
+                response: result
+            };
+            
+            if (!result.success) {
+                throw new Error(result.error || 'Erro ao registrar resultado');
             }
-        });
+            
+            return result;
+        } catch (error) {
+            console.error('Erro ao processar quiz:', error);
+            if (error.message.includes('não está autenticado') || error.message.includes('não autorizado')) {
+                alert('Erro de autenticação: ' + error.message + '\n\nRedirecionando para login...');
+                localStorage.removeItem('userEmail');
+                localStorage.removeItem('userName');
+                localStorage.removeItem('userPicture');
+                localStorage.removeItem('dadosAtendenteChatbot');
+                setTimeout(() => { window.location.href = './index.html'; }, 2000);
+                return;
+            }
+            throw error;
+        }
     },
 
     // Função auxiliar para calcular questões erradas
@@ -540,10 +519,7 @@ const veloAcademyApp = {
                 </div>
                 ${wrongQuestionsSection}
                 <div class="result-actions">
-                    ${isReproved ? 
-                        `<button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>` :
-                        `<button class="btn-primary" onclick="veloAcademyApp.generateCertificate()">Receber Certificado</button>`
-                    }
+                    <button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Enviar resultado</button>
                 </div>
             </div>
         `;
@@ -552,8 +528,8 @@ const veloAcademyApp = {
         this.switchView('quiz-view');
     },
 
-    // Função auxiliar para calcular resultado local (fallback)
-    calculateAndShowResult() {
+    // Função auxiliar para calcular resultado e tentar enviar ao MongoDB (fallback quando submitQuizToMongoDB falhou)
+    async calculateAndShowResult() {
         if (!this.currentQuiz) return;
 
         let score = 0;
@@ -567,18 +543,24 @@ const veloAcademyApp = {
         const finalGrade = (score / totalQuestions) * 10;
         const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
         const isReproved = score < passingScore;
+        const wrongQuestions = this.calculateWrongQuestions();
 
-        // Armazenar resultado
         this.quizResult = {
             score,
             totalQuestions,
             finalGrade,
             passingScore,
             isReproved,
-            wrongQuestions: this.calculateWrongQuestions()
+            wrongQuestions
         };
 
-        // Mostrar resultado
+        // Tentar enviar ao MongoDB (caso o envio inicial tenha falhado)
+        try {
+            await this.submitQuizToMongoDB();
+        } catch (e) {
+            console.warn('Envio ao MongoDB no fallback falhou:', e);
+        }
+
         this.showQuizResult();
     },
 
@@ -678,10 +660,7 @@ const veloAcademyApp = {
                 </div>
                 ${wrongQuestionsSection}
                 <div class="result-actions">
-                    ${isPassed ? 
-                        `<button class="btn-primary" onclick="veloAcademyApp.generateCertificate()">Receba o Certificado</button>` :
-                        `<button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Voltar ao Curso</button>`
-                    }
+                    <button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Enviar resultado</button>
                 </div>
             </div>
         `;
@@ -728,11 +707,6 @@ const veloAcademyApp = {
         // Validar se o usuário está realmente logado
         if (!userName || !userEmail) {
             throw new Error('Usuário não está autenticado. Faça login novamente.');
-        }
-        
-        // Verificar se o email é do domínio autorizado
-        if (!userEmail.endsWith('@velotax.com.br')) {
-            throw new Error('Email não autorizado para emissão de certificado.');
         }
         
         // Usar dados mais completos se disponíveis

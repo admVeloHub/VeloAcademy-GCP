@@ -14,6 +14,23 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-03-06 [HH:MM:SS]
+### Tipo: GitHub Push
+### Versão: Correção modal slides/PDF
+### Arquivos Modificados:
+- css/styles.css
+- js/veloacademy.js
+- server-api.js
+- DEPLOY_LOG.md
+### Descrição: Modal de conteúdo para slides e PDF
+- FIX: Conteúdo do modal maior que o frame ocultava botões Próximo e Finalizar
+- FIX: .aula-modal-body com max-height para não ocultar footer; footer com z-index
+- FIX: .pdf-modal-container com height: auto; header/body/footer com flex adequado
+- FIX: .pdf-modal-footer e .aula-modal-footer com position relative e z-index para visibilidade
+### Commit Hash: 39d94b6
+
+---
+
 ### Data/Hora: 2026-03-09 [HH:MM:SS]
 ### Tipo: GitHub Push
 ### Versão: Correções logout + sessões
@@ -29,7 +46,7 @@
 - FEATURE: registerLoginSession chamado em home.js handleGoogleSignIn (cria sessão no backend)
 - FEATURE: userEmail/userName/userPicture salvos no localStorage em login-page para ambos fluxos (Google e email/senha)
 - FEATURE: Sessões criadas em academy_registros.sessions para reconhecimento de progresso e quiz
-### Commit Hash: [a preencher após push]
+### Commit Hash: 24232f4
 
 ---
 

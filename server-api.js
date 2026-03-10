@@ -1,4 +1,4 @@
-// VERSION: v1.2.0 | DATE: 2026-02-16 | AUTHOR: VeloHub Development Team
+// VERSION: v1.3.0 | DATE: 2026-03-09 | AUTHOR: VeloHub Development Team
 // Servidor API Express para gerenciamento de progresso de cursos com MongoDB
 
 // Carregar variáveis de ambiente do arquivo .env
@@ -8,6 +8,7 @@ const express = require('express');
 const { MongoClient } = require('mongodb');
 const cors = require('cors');
 const path = require('path');
+const { v4: uuidv4 } = require('uuid');
 
 const app = express();
 const PORT = 3001; // Porta diferente do servidor estático
@@ -296,6 +297,76 @@ app.get('/api/progress/user/:userEmail', async (req, res) => {
     }
 });
 
+// POST /api/quiz/result - Registrar resultado do quiz (aprovado -> curso_certificados, reprovado -> quiz_reprovas)
+app.post('/api/quiz/result', async (req, res) => {
+    try {
+        const { name, email, courseId, courseName, score, totalQuestions, finalGrade, approved, wrongQuestions } = req.body;
+
+        if (!name || !email || !courseId) {
+            return res.status(400).json({ 
+                success: false, 
+                error: 'Campos obrigatórios: name, email, courseId' 
+            });
+        }
+
+        if (!db) {
+            return res.status(503).json({ 
+                success: false, 
+                error: 'MongoDB não disponível' 
+            });
+        }
+
+        const now = new Date();
+        const wrongQuestionsStr = wrongQuestions && Array.isArray(wrongQuestions) 
+            ? JSON.stringify(wrongQuestions) 
+            : (wrongQuestions || '[]');
+        const wrongQuestionsDisplay = wrongQuestionsStr !== '[]' ? wrongQuestionsStr : 'Sem Erros';
+
+        if (approved) {
+            const certificadosCollection = db.collection('curso_certificados');
+            const certificateId = uuidv4();
+            const doc = {
+                date: now,
+                name: name.trim(),
+                email: email.toLowerCase().trim(),
+                courseId: courseId,
+                courseName: courseName || courseId,
+                score: score != null ? parseInt(score) : null,
+                totalQuestions: totalQuestions != null ? parseInt(totalQuestions) : null,
+                finalGrade: finalGrade != null ? parseFloat(finalGrade) : null,
+                wrongQuestions: wrongQuestionsDisplay,
+                status: 'Aprovado',
+                certificateUrl: '',
+                certificateId: certificateId
+            };
+            await certificadosCollection.insertOne(doc);
+            console.log('Certificado registrado:', { email: doc.email, courseId: doc.courseId });
+            return res.json({ success: true, collection: 'curso_certificados', certificateId });
+        } else {
+            const reprovasCollection = db.collection('quiz_reprovas');
+            const doc = {
+                date: now,
+                name: name.trim(),
+                email: email.toLowerCase().trim(),
+                courseId: courseId,
+                courseName: courseName || courseId,
+                finalGrade: finalGrade != null ? parseFloat(finalGrade) : null,
+                wrongQuestions: wrongQuestionsDisplay
+            };
+            await reprovasCollection.insertOne(doc);
+            console.log('Reprovação registrada:', { email: doc.email, courseId: doc.courseId });
+            return res.json({ success: true, collection: 'quiz_reprovas' });
+        }
+    } catch (error) {
+        console.error('Erro ao registrar resultado do quiz:', error);
+        res.status(500).json({ 
+            success: false, 
+            error: 'Erro ao registrar resultado',
+            details: error.message 
+        });
+    }
+});
+
 // GET /api/courses - Listar todos os cursos ativos
 app.get('/api/courses', async (req, res) => {
     try {
@@ -433,7 +504,6 @@ app.get('/api/courses/:cursoNome', async (req, res) => {
 
 // Importar módulos de autenticação
 const bcrypt = require('bcrypt');
-const { v4: uuidv4 } = require('uuid');
 
 // Função auxiliar para conectar ao banco console_analises
 async function getQualidadeDb() {
@@ -875,6 +945,7 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   POST /api/progress/save`);
     console.log(`   GET  /api/progress/:userEmail/:subtitle`);
     console.log(`   POST /api/progress/unlock-quiz`);
+    console.log(`   POST /api/quiz/result`);
     console.log(`   GET  /api/progress/user/:userEmail`);
     console.log(`   GET  /api/courses`);
     console.log(`   GET  /api/courses/:cursoNome`);
