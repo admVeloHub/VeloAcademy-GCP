@@ -15,6 +15,26 @@
 ## Deploys Realizados
 
 ### Data/Hora: 2026-03-12
+### Tipo: GitHub Push (preparação deploy GCP)
+### Versão: v1.4.0 (server-api.js) + configuração Docker/GCP
+### Arquivos Modificados:
+- server-api.js (v1.4.0)
+- Dockerfile (v1.0.0 - novo)
+- .dockerignore (novo)
+- cloudbuild.yaml (v1.0.0 - novo)
+- DEPLOY_GCP.md (novo)
+- package.json
+### Descrição: Configuração para deploy no GCP Cloud Run em substituição ao Vercel
+- FEATURE: server-api.js agora serve arquivos estáticos além da API (servidor unificado)
+- FEATURE: PORT lido de process.env para compatibilidade com Cloud Run
+- FEATURE: Dockerfile para build da imagem
+- FEATURE: cloudbuild.yaml para pipeline de build e deploy
+- DOCS: DEPLOY_GCP.md com instruções completas de deploy
+### Commit Hash: [preencher após commit]
+
+---
+
+### Data/Hora: 2026-03-12
 ### Tipo: GitHub Push
 ### Versão: v1.4.8 (veloacademy.js)
 ### Arquivos Modificados:
@@ -26,7 +46,7 @@
 - FIX: startQuizFromButton lê dados do DOM; loadQuizFromAppsScript armazena courseName em currentQuiz
 - FIX: submitQuizToMongoDB usa currentQuiz.courseName (temaNome) em vez de getCourseTitle
 - FIX: Título do quiz na interface usa temaNome quando disponível
-### Commit Hash: [a preencher após push]
+### Commit Hash: bf61725
 
 ---
 

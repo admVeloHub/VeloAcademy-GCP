@@ -1,4 +1,4 @@
-// VERSION: v1.3.0 | DATE: 2026-03-09 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.0 | DATE: 2026-03-12 | AUTHOR: VeloHub Development Team
 // Servidor API Express para gerenciamento de progresso de cursos com MongoDB
 
 // Carregar variáveis de ambiente do arquivo .env
@@ -11,7 +11,7 @@ const path = require('path');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-const PORT = 3001; // Porta diferente do servidor estático
+const PORT = process.env.PORT || 3001; // Cloud Run usa PORT do ambiente
 
 // Middleware
 app.use(cors());
@@ -936,6 +936,14 @@ app.get('/api/health', (req, res) => {
         mongodb_uri_configured: !!MONGODB_URI && MONGODB_URI !== 'mongodb://localhost:27017',
         timestamp: new Date().toISOString()
     });
+});
+
+// Servir arquivos estáticos (HTML, CSS, JS) - para deploy GCP Cloud Run
+app.use(express.static(path.join(__dirname)));
+// Fallback SPA: rotas não-API servem index.html
+app.get('*', (req, res, next) => {
+    if (req.path.startsWith('/api')) return next();
+    res.sendFile(path.join(__dirname, 'index.html'));
 });
 
 // Iniciar servidor

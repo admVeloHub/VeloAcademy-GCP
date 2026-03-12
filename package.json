@@ -5,6 +5,7 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
+    "start:gcp": "node server-api.js",
     "dev": "node server.js",
     "api": "node server-api.js",
     "migrate-courses": "node scripts/migrate-courses-to-mongodb.js",
