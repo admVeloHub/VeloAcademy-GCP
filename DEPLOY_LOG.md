@@ -14,6 +14,22 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-03-12
+### Tipo: GitHub Push
+### Versão: v1.4.8 (veloacademy.js)
+### Arquivos Modificados:
+- js/veloacademy.js (v1.4.8)
+- DEPLOY_LOG.md
+### Descrição: Garantir courseID e courseName corretos no registro do quiz no MongoDB
+- FIX: courseId e courseName agora vêm de academy_registros.cursos_conteudo (quizId e temaNome)
+- FIX: Botão do quiz passa temaNome via data-course-name e quizId via data-quiz-id
+- FIX: startQuizFromButton lê dados do DOM; loadQuizFromAppsScript armazena courseName em currentQuiz
+- FIX: submitQuizToMongoDB usa currentQuiz.courseName (temaNome) em vez de getCourseTitle
+- FIX: Título do quiz na interface usa temaNome quando disponível
+### Commit Hash: [a preencher após push]
+
+---
+
 ### Data/Hora: 2026-03-10 [HH:MM:SS]
 ### Tipo: GitHub Push
 ### Versão: Endpoint quiz/result + tratamento erro 404

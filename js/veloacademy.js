@@ -1,4 +1,4 @@
-// VERSION: v1.4.7 | DATE: 2026-03-10 | AUTHOR: VeloHub Development Team
+// VERSION: v1.4.8 | DATE: 2026-03-12 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -166,7 +166,7 @@ const veloAcademyApp = {
     currentQuiz: null,
 
     // Função para carregar quiz do Google Apps Script via JSONP
-    loadQuizFromAppsScript(courseId) {
+    loadQuizFromAppsScript(courseId, courseName = null) {
         return new Promise((resolve, reject) => {
             console.log('=== INICIANDO CARREGAMENTO DO QUIZ VIA JSONP ===');
             console.log('Course ID:', courseId);
@@ -209,7 +209,8 @@ const veloAcademyApp = {
                     }
                     
                     this.currentQuiz = {
-                        courseId: courseId,
+                        courseId: courseId, // quizId (academy_registros.cursos_conteudo)
+                        courseName: courseName || null, // temaNome (academy_registros.cursos_conteudo)
                         questions: data.quiz.questions,
                         passingScore: data.quiz.passingScore || Math.ceil(data.quiz.questions.length * 0.7), // Fallback: 70% das questões
                         currentQuestion: 0,
@@ -247,10 +248,22 @@ const veloAcademyApp = {
 
 
 
+    // Função para iniciar quiz a partir do botão (lê data-quiz-id e data-course-name do DOM)
+    // courseId = quizId, courseName = temaNome (academy_registros.cursos_conteudo)
+    startQuizFromButton(btn) {
+        const courseId = btn.getAttribute('data-quiz-id');
+        const courseName = btn.getAttribute('data-course-name');
+        if (!courseId) {
+            console.error('Botão de quiz sem data-quiz-id');
+            return;
+        }
+        this.startQuiz(courseId, courseName);
+    },
+
     // Função para iniciar o quiz
-    startQuiz(courseId) {
-        console.log('Iniciando quiz para:', courseId);
-        this.loadQuizFromAppsScript(courseId);
+    startQuiz(courseId, courseName = null) {
+        console.log('Iniciando quiz para:', courseId, 'courseName:', courseName);
+        this.loadQuizFromAppsScript(courseId, courseName);
     },
 
     // Função para mostrar a interface do quiz
@@ -281,7 +294,7 @@ const veloAcademyApp = {
 
         quizView.innerHTML = `
             <div class="quiz-header">
-                <h2>Quiz - ${this.getCourseTitle(this.currentQuiz.courseId)}</h2>
+                <h2>Quiz - ${(this.currentQuiz.courseName && this.currentQuiz.courseName.trim()) ? this.currentQuiz.courseName.trim() : this.getCourseTitle(this.currentQuiz.courseId)}</h2>
                 <div class="quiz-info">
                     <span>Pergunta ${questionNumber} de ${totalQuestions}</span>
                 </div>
@@ -393,7 +406,10 @@ const veloAcademyApp = {
             const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
             const isReproved = score < passingScore;
             const wrongQuestions = this.calculateWrongQuestions();
-            const courseName = this.getCourseTitle(courseId);
+            // courseName = temaNome (academy_registros.cursos_conteudo), passado no botão do quiz
+            const courseName = (this.currentQuiz.courseName && this.currentQuiz.courseName.trim()) 
+                ? this.currentQuiz.courseName.trim() 
+                : this.getCourseTitle(courseId);
             
             const apiBaseUrl = typeof ProgressTracker !== 'undefined' ? ProgressTracker.getApiBaseUrl() : 
                 (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3001/api' : '/api');
@@ -2174,9 +2190,12 @@ const veloAcademyApp = {
 
                     });
                     
-                    // Adicionar botão de quiz se hasQuiz for true (usando dados do MongoDB)
+                    // Adicionar botão de quiz se hasQuiz for true (usando dados do MongoDB - academy_registros.cursos_conteudo)
+                    // courseId = quizId, courseName = temaNome (section.subtitle)
                     if (section.hasQuiz && section.quizId) {
-                        const quizCourseId = section.quizId; // Usar quizId do MongoDB
+                        const quizCourseId = section.quizId; // quizId -> courseId no MongoDB
+                        const courseNameFromSection = section.subtitle; // temaNome -> courseName no MongoDB
+                        const courseNameEscaped = (courseNameFromSection || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
                         
                         // Verificar se há vídeos nesta seção que precisam ser completados
                         const sectionVideos = section.lessons.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath));
@@ -2191,8 +2210,10 @@ const veloAcademyApp = {
                                 <button class="btn-quiz" 
                                         id="${quizButtonId}"
                                         data-course-id="${courseId}"
+                                        data-quiz-id="${quizCourseId}"
+                                        data-course-name="${courseNameEscaped}"
                                         data-subtitle="${section.subtitle}"
-                                        onclick="veloAcademyApp.startQuiz('${quizCourseId}')">
+                                        onclick="veloAcademyApp.startQuizFromButton(this)">
                                     <i class="fas fa-question-circle"></i> Fazer Quiz
                                 </button>
                             </div>
