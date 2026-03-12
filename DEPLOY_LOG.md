@@ -30,7 +30,7 @@
 - FEATURE: Dockerfile para build da imagem
 - FEATURE: cloudbuild.yaml para pipeline de build e deploy
 - DOCS: DEPLOY_GCP.md com instruções completas de deploy
-### Commit Hash: [preencher após commit]
+### Commit Hash: f7ed4b7
 
 ---
 
