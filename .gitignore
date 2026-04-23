@@ -31,3 +31,6 @@ dist/
 build/
 *.version
 
+# Migração / alinhamento de collections (credenciais locais; manter fora do repositório)
+/scripts/
+

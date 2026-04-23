@@ -1,4 +1,4 @@
-// VERSION: v1.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.2 | DATE: 2026-03-27 | AUTHOR: VeloHub Development Team
 // GET /api/health - Health check
 
 const { getDatabase, MONGODB_URI } = require('../lib/mongodb');

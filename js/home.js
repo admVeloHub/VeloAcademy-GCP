@@ -1,3 +1,4 @@
+// VERSION: v1.0.9 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // JavaScript para a página Home da VeloAcademy (Landing Page)
 const homeApp = {
     // ================== CONFIGURAÇÕES GLOBAIS ==================
@@ -15,6 +16,8 @@ const homeApp = {
         this.checkConnectivity();
         this.initLogout();
         this.verificarIdentificacao();
+        this.fetchHomeRecentTemas();
+        this.fetchHomeQuickTips();
         
         // Verificação adicional para botões que podem ser carregados depois
         setTimeout(() => {
@@ -30,36 +33,176 @@ const homeApp = {
         
         console.log('Modal encontrado:', !!this.loginModal);
         
-        // Botão Explorar Cursos do Hero
-        const heroExplorarCursosBtn = document.getElementById('hero-explorar-cursos-btn');
-        console.log('Botão Explorar Cursos encontrado:', !!heroExplorarCursosBtn);
-        if (heroExplorarCursosBtn) {
-            heroExplorarCursosBtn.addEventListener('click', (e) => {
-                console.log('=== Botão Explorar Cursos clicado! ===');
-                e.preventDefault();
-                this.handleExplorarCursosClick();
-            });
-            heroExplorarCursosBtn.setAttribute('data-listener-added', 'true');
-            console.log('Event listener adicionado ao botão hero');
-        }
-        
-        // Botão Ver Cursos do Dashboard
+        // Card “Cursos” (link com id legado dashboard-ver-cursos-btn)
         const dashboardVerCursosBtn = document.getElementById('dashboard-ver-cursos-btn');
-        console.log('Botão Ver Cursos encontrado:', !!dashboardVerCursosBtn);
-        console.log('Elemento do botão dashboard:', dashboardVerCursosBtn);
+        console.log('Card Cursos encontrado:', !!dashboardVerCursosBtn);
         if (dashboardVerCursosBtn) {
-            console.log('Adicionando event listener ao botão dashboard...');
             dashboardVerCursosBtn.addEventListener('click', (e) => {
-                console.log('=== Botão Ver Cursos clicado! ===');
-                console.log('Event:', e);
                 e.preventDefault();
                 this.handleExplorarCursosClick();
             });
             dashboardVerCursosBtn.setAttribute('data-listener-added', 'true');
-            console.log('Event listener adicionado com sucesso ao botão dashboard');
         } else {
-            console.error('ERRO: Botão dashboard não encontrado!');
+            console.error('ERRO: Card dashboard cursos não encontrado!');
         }
+    },
+
+    formatRecentCourseDate(iso) {
+        if (!iso) return 'Atualização sem data';
+        try {
+            const d = new Date(iso);
+            if (Number.isNaN(d.getTime())) return 'Atualização sem data';
+            return d.toLocaleString('pt-BR', {
+                day: '2-digit',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        } catch (e) {
+            return 'Atualização sem data';
+        }
+    },
+
+    fetchHomeRecentTemas() {
+        const ul = document.getElementById('home-recent-courses-list');
+        if (!ul) return;
+
+        const base = typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '/api';
+        const root = String(base).replace(/\/$/, '');
+        const url = `${root}/temas/recent?limit=4`;
+
+        ul.classList.remove('home-recent-courses-list--error', 'home-recent-courses-list--empty');
+        ul.innerHTML = '';
+
+        fetch(url, { method: 'GET', credentials: 'omit' })
+            .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+            .then(({ ok, body }) => {
+                if (!ok || !body || body.success !== true || !Array.isArray(body.temas)) {
+                    throw new Error((body && body.error) || 'Resposta inválida');
+                }
+                const temas = body.temas;
+                if (temas.length === 0) {
+                    ul.classList.add('home-recent-courses-list--empty');
+                    const li = document.createElement('li');
+                    li.className = 'home-recent-courses-list__item';
+                    li.textContent = 'Nenhum tema ativo encontrado.';
+                    ul.appendChild(li);
+                    return;
+                }
+                temas.forEach((tema) => {
+                    const li = document.createElement('li');
+                    li.className = 'home-recent-courses-list__item';
+                    const a = document.createElement('a');
+                    a.className = 'home-recent-course-card';
+                    a.href = './cursos.html';
+
+                    const title = document.createElement('div');
+                    title.className = 'home-recent-course-card__title';
+                    title.textContent = tema.temaNome || 'Tema';
+
+                    const meta = document.createElement('div');
+                    meta.className = 'home-recent-course-card__meta';
+                    const cursoPart = tema.cursoNome ? `Curso: ${tema.cursoNome} · ` : '';
+                    meta.textContent = `${cursoPart}Atualizado em ${this.formatRecentCourseDate(tema.updatedAt)}`;
+
+                    a.appendChild(title);
+                    a.appendChild(meta);
+
+                    const modText = typeof tema.moduleNome === 'string' ? tema.moduleNome.trim() : '';
+                    if (modText) {
+                        const desc = document.createElement('div');
+                        desc.className = 'home-recent-course-card__desc';
+                        desc.textContent = modText.length > 120 ? `${modText.slice(0, 120)}…` : modText;
+                        a.appendChild(desc);
+                    }
+
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                });
+            })
+            .catch(() => {
+                ul.classList.add('home-recent-courses-list--error');
+                ul.innerHTML = '';
+                const li = document.createElement('li');
+                li.className = 'home-recent-courses-list__item';
+                li.textContent = 'Não foi possível carregar os temas recentes.';
+                ul.appendChild(li);
+            });
+    },
+
+    fetchHomeQuickTips() {
+        const ul = document.getElementById('home-quick-tips-list');
+        if (!ul) return;
+
+        const base = typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '/api';
+        const root = String(base).replace(/\/$/, '');
+        const url = `${root}/youtube/tutorias?limit=6`;
+
+        ul.classList.remove('home-quick-tips-list--error', 'home-quick-tips-list--empty');
+        ul.innerHTML = '';
+
+        fetch(url, { method: 'GET', credentials: 'omit' })
+            .then((r) => r.json().then((body) => ({ ok: r.ok, body })))
+            .then(({ ok, body }) => {
+                if (!body || body.success !== true || !Array.isArray(body.videos)) {
+                    throw new Error((body && body.error) || 'Resposta inválida');
+                }
+                const videos = body.videos;
+                if (videos.length === 0) {
+                    ul.classList.add('home-quick-tips-list--empty');
+                    const li = document.createElement('li');
+                    li.className = 'home-quick-tips-list__item';
+                    li.textContent =
+                        'Nenhum vídeo disponível. Verifique YOUTUBE_DATA_API_KEY e YOUTUBE_TUTORIAS_PLAYLIST_ID no ambiente da API.';
+                    ul.appendChild(li);
+                    return;
+                }
+                videos.forEach((v) => {
+                    if (!v || !v.videoId) return;
+                    const li = document.createElement('li');
+                    li.className = 'home-quick-tips-list__item';
+                    const a = document.createElement('a');
+                    a.className = 'home-quick-tip-card';
+                    a.href = `https://www.youtube.com/watch?v=${encodeURIComponent(v.videoId)}`;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+
+                    const thumbWrap = document.createElement('div');
+                    thumbWrap.className = 'home-quick-tip-card__thumb';
+                    if (v.thumbnailUrl) {
+                        const img = document.createElement('img');
+                        img.src = v.thumbnailUrl;
+                        img.alt = '';
+                        img.loading = 'lazy';
+                        thumbWrap.appendChild(img);
+                    }
+                    a.appendChild(thumbWrap);
+
+                    const bodyEl = document.createElement('div');
+                    bodyEl.className = 'home-quick-tip-card__body';
+                    const title = document.createElement('p');
+                    title.className = 'home-quick-tip-card__title';
+                    title.textContent = v.title || 'Vídeo';
+                    bodyEl.appendChild(title);
+                    const cta = document.createElement('p');
+                    cta.className = 'home-quick-tip-card__cta';
+                    cta.textContent = 'Assistir no YouTube';
+                    bodyEl.appendChild(cta);
+                    a.appendChild(bodyEl);
+
+                    li.appendChild(a);
+                    ul.appendChild(li);
+                });
+            })
+            .catch(() => {
+                ul.classList.add('home-quick-tips-list--error');
+                ul.innerHTML = '';
+                const li = document.createElement('li');
+                li.className = 'home-quick-tips-list__item';
+                li.textContent = 'Não foi possível carregar as dicas rápidas.';
+                ul.appendChild(li);
+            });
     },
 
     handleExplorarCursosClick() {
@@ -78,34 +221,13 @@ const homeApp = {
     verifyButtonsLoaded() {
         console.log('=== Verificando se botões foram carregados ===');
         
-        // Verificar botão do dashboard novamente
         const dashboardBtn = document.getElementById('dashboard-ver-cursos-btn');
-        console.log('Botão dashboard na verificação tardia:', !!dashboardBtn);
-        
         if (dashboardBtn && !dashboardBtn.hasAttribute('data-listener-added')) {
-            console.log('Adicionando event listener tardio ao botão dashboard...');
             dashboardBtn.addEventListener('click', (e) => {
-                console.log('=== Botão Ver Cursos clicado (listener tardio)! ===');
                 e.preventDefault();
-                this.showModal();
+                this.handleExplorarCursosClick();
             });
             dashboardBtn.setAttribute('data-listener-added', 'true');
-            console.log('Event listener tardio adicionado com sucesso');
-        }
-        
-        // Verificar botão do hero também
-        const heroBtn = document.getElementById('hero-explorar-cursos-btn');
-        console.log('Botão hero na verificação tardia:', !!heroBtn);
-        
-        if (heroBtn && !heroBtn.hasAttribute('data-listener-added')) {
-            console.log('Adicionando event listener tardio ao botão hero...');
-            heroBtn.addEventListener('click', (e) => {
-                console.log('=== Botão Explorar Cursos clicado (listener tardio)! ===');
-                e.preventDefault();
-                this.showModal();
-            });
-            heroBtn.setAttribute('data-listener-added', 'true');
-            console.log('Event listener tardio adicionado com sucesso');
         }
     },
 
@@ -135,27 +257,23 @@ const homeApp = {
 
     // ================== FUNÇÕES DE CONTROLE DE UI ==================
     showModal() {
+        if (!this.loginModal) {
+            return;
+        }
         console.log('=== Tentando mostrar modal ===');
-        console.log('Modal element:', this.loginModal);
-        if (this.loginModal) {
         this.loginModal.classList.add('show');
         document.body.style.overflow = 'hidden';
-            console.log('Modal mostrado com sucesso');
-            console.log('Classes do modal:', this.loginModal.className);
-        } else {
-            console.error('Modal element não encontrado!');
-        }
+        console.log('Modal mostrado com sucesso');
     },
 
     hideModal() {
+        if (!this.loginModal) {
+            return;
+        }
         console.log('=== Ocultando modal ===');
-        if (this.loginModal) {
         this.loginModal.classList.remove('show');
         document.body.style.overflow = 'auto';
-            console.log('Modal ocultado com sucesso');
-        } else {
-            console.error('Modal element não encontrado para ocultar!');
-        }
+        console.log('Modal ocultado com sucesso');
     },
 
     showHeaderButtons() {
@@ -248,7 +366,7 @@ const homeApp = {
         this.waitForGoogleScript().then(accounts => {
             console.log('Google Script carregado com sucesso');
             this.tokenClient = accounts.oauth2.initTokenClient({
-                client_id: this.CLIENT_ID,
+                client_id: (typeof window.getClientId === 'function' ? window.getClientId() : this.CLIENT_ID),
                 scope: 'profile email',
                 callback: (response) => this.handleGoogleSignIn(response)
             });
@@ -464,7 +582,7 @@ const homeApp = {
         }, observerOptions);
 
         // Observar elementos para animação
-        const animatedElements = document.querySelectorAll('.hero-content, .hero-image');
+        const animatedElements = document.querySelectorAll('.hero-content');
         console.log('Elementos para animação encontrados:', animatedElements.length);
         animatedElements.forEach(el => {
             el.style.opacity = '0';

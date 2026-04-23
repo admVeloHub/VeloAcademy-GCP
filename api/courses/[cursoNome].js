@@ -1,4 +1,4 @@
-// VERSION: v2.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v2.0.3 | DATE: 2026-03-27 | AUTHOR: VeloHub Development Team
 // GET /api/courses/:cursoNome - Obter curso específico
 // Suporta estrutura normalizada (4 coleções) com fallback para estrutura antiga
 
@@ -216,7 +216,7 @@ module.exports = async (req, res) => {
         if (!db) {
             return res.status(503).json({
                 success: false,
-                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.'
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).'
             });
         }
 

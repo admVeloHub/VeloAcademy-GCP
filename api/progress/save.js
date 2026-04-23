@@ -1,7 +1,8 @@
-// VERSION: v1.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v1.1.0 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // POST /api/progress/save - Salvar progresso de aula
 
 const { getDatabase } = require('../../lib/mongodb');
+const { registerTemaVisualizacaoIfNeeded } = require('../../lib/tema-visual-certificado');
 
 const COLLECTION_NAME = 'course_progress';
 
@@ -25,7 +26,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { userEmail, subtitle, lessonTitle, allLessonTitles } = req.body;
+        const { userEmail, subtitle, lessonTitle, allLessonTitles, colaboradorNome } = req.body;
 
         if (!userEmail || !subtitle || !lessonTitle) {
             return res.status(400).json({
@@ -39,7 +40,7 @@ module.exports = async (req, res) => {
         if (!db) {
             return res.status(503).json({
                 success: false,
-                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.'
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).'
             });
         }
 
@@ -110,6 +111,19 @@ module.exports = async (req, res) => {
                 progressData.completedAt = new Date();
             }
             await collection.insertOne(progressData);
+        }
+
+        if (db && quizUnlocked) {
+            try {
+                await registerTemaVisualizacaoIfNeeded(db, {
+                    userEmail,
+                    colaboradorNome: colaboradorNome || '',
+                    subtitle,
+                    quizUnlocked: true
+                });
+            } catch (certErr) {
+                console.error('Registro tema visualização (conquistas):', certErr && certErr.message);
+            }
         }
 
         return res.status(200).json({

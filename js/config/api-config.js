@@ -1,31 +1,48 @@
-// VERSION: v1.0.1 | DATE: 2025-01-31 | AUTHOR: VeloHub Development Team
-// Configuração centralizada da API base URL
+// VERSION: v1.1.1 | DATE: 2026-04-13 | AUTHOR: VeloHub Development Team
+// URL base da API — deve coincidir com o host da máquina em dev (LAN, localhost, porta 3001).
 
 /**
- * Obtém a URL base da API
- * @returns {string} URL base da API
+ * Hostname é rede local ou loopback (dev).
  */
-function getApiBaseUrl() {
-    // Em desenvolvimento local, sempre usar servidor API local na porta 3001
-    if (typeof window !== 'undefined' && 
-        (window.location.hostname === 'localhost' || 
-         window.location.hostname === '127.0.0.1')) {
-        // Sempre usar localhost:3001 em desenvolvimento local
-        return 'http://localhost:3001/api';
-    }
-    
-    // Em produção, usar URL relativa (mesmo domínio do frontend)
-    // Os endpoints de auth são serverless functions do Vercel no mesmo domínio
-    return '/api';
+function isLocalOrPrivateHost(hostname) {
+    if (!hostname) return false;
+    const h = String(hostname).toLowerCase();
+    if (h === 'localhost' || h === '127.0.0.1' || h === '[::1]') return true;
+    if (/^192\.168\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    if (/^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    if (/^172\.(1[6-9]|2\d|3[0-1])\.\d{1,3}\.\d{1,3}$/.test(h)) return true;
+    return false;
 }
 
-// Exportar para uso global
+/**
+ * Obtém a URL base da API (sempre com /api no fim, sem barra dupla).
+ */
+function getApiBaseUrl() {
+    if (typeof window === 'undefined') {
+        return '/api';
+    }
+
+    const { protocol, hostname, port } = window.location;
+
+    // Produção: mesmo domínio (Vercel, GCP com reverse proxy, etc.)
+    if (!isLocalOrPrivateHost(hostname)) {
+        return '/api';
+    }
+
+    // Dev: API servida pelo server-api.js na mesma origem (porta 3001)
+    if (port === '3001') {
+        return '/api';
+    }
+
+    // Dev: front noutra porta (ex.: 3000) ou IP da rede — API fica em :3001 neste host
+    return `${protocol}//${hostname}:3001/api`;
+}
+
 if (typeof window !== 'undefined') {
     window.getApiBaseUrl = getApiBaseUrl;
     window.API_BASE_URL = getApiBaseUrl();
 }
 
-// Exportar para módulos (se usando CommonJS)
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = { getApiBaseUrl };
 }

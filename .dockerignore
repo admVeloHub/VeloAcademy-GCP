@@ -8,6 +8,9 @@ yarn-error.log*
 .env
 .env.*
 !.env.example
+# Cópia acidental de secrets do ecossistema (se o contexto de build os incluir)
+FONTE DA VERDADE
+**/FONTE DA VERDADE
 
 # Git
 .git

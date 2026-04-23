@@ -1,4 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+/* VERSION (global): v1.0.25 | DATE: 2026-04-23 | conquistas: Excelência XP (tipografia secundária) */
 
 :root {
     /* PALETA OFICIAL VELOHUB */
@@ -466,23 +467,259 @@ main {
     min-height: calc(100vh - 160px);
 }
 
-/* Landing page - ocupa toda a tela */
+/* Landing page — conteúdo alinhado ao topo, perto do header */
 body:has(.hero-section) main {
     min-height: 100vh;
     padding: 0;
     display: flex;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    padding-top: 0.5rem;
+}
+
+body:has(.hero-section) main.home-page-main > .main-container {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: 1200px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Home — zona abaixo do hero: gutters = 10% da largura da viewport em 3 faixas (laterais + entre blocos) */
+.home-remainder-frame {
+    --home-remainder-gutter: calc(10vw / 3);
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    width: 100%;
+    box-sizing: border-box;
+    padding-left: var(--home-remainder-gutter);
+    padding-right: var(--home-remainder-gutter);
+    padding-top: 10px;
+    padding-bottom: var(--home-remainder-gutter);
+}
+
+.home-remainder-inner {
+    flex: 1 1 auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: var(--home-remainder-gutter);
+}
+
+.home-remainder-inner > .container-secondary {
+    margin: 0;
+    min-height: 3rem;
+    box-sizing: border-box;
+}
+
+.home-remainder-inner > .home-secondary-split--30 {
+    flex: 3 1 0;
+    min-height: 0;
+}
+
+.home-remainder-inner > .home-secondary-split--60 {
+    flex: 6 1 0;
+    min-height: 0;
+}
+
+@media (max-width: 768px) {
+    .home-remainder-inner {
+        flex-direction: column;
+    }
+
+    .home-remainder-inner > .home-secondary-split--30,
+    .home-remainder-inner > .home-secondary-split--60 {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
+
+.home-remainder-inner .home-secondary-title {
+    margin: 0 0 0.75rem;
+    font-size: 1rem;
+    font-weight: 600;
+    line-height: 1.3;
+    color: var(--cor-texto);
+    border-bottom: 1px solid var(--cor-borda);
+    padding-bottom: 0.5rem;
+}
+
+.home-recent-courses-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: min(55vh, 28rem);
+    overflow-y: auto;
+}
+
+.home-recent-courses-list__item {
+    margin: 0;
+}
+
+.home-recent-course-card {
+    display: block;
+    text-decoration: none;
+    color: inherit;
+    background-color: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 10px 12px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    box-sizing: border-box;
+}
+
+.home-recent-course-card:hover {
+    border-color: var(--cor-accent);
+    box-shadow: 0 4px 12px var(--cor-sombra);
+    transform: translateY(-1px);
+}
+
+.home-recent-course-card__title {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: var(--cor-texto);
+    line-height: 1.25;
+    margin: 0 0 4px;
+}
+
+.home-recent-course-card__meta {
+    font-size: 0.72rem;
+    color: var(--cor-texto-secundario);
+    margin: 0 0 4px;
+}
+
+.home-recent-course-card__desc {
+    font-size: 0.75rem;
+    color: var(--cor-texto-secundario);
+    line-height: 1.4;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.home-recent-courses-list--empty,
+.home-recent-courses-list--error {
+    font-size: 0.8rem;
+    color: var(--cor-texto-secundario);
+    padding: 0.5rem 0;
+}
+
+.home-quick-tips-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: min(55vh, 28rem);
+    overflow-y: auto;
+}
+
+.home-quick-tips-list__item {
+    margin: 0;
+}
+
+.home-quick-tip-card {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    gap: 10px;
+    text-decoration: none;
+    color: inherit;
+    background-color: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+    border-radius: 8px;
+    padding: 8px 10px;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
+    box-sizing: border-box;
+    min-height: 4.25rem;
+}
+
+.home-quick-tip-card:hover {
+    border-color: var(--cor-accent);
+    box-shadow: 0 4px 12px var(--cor-sombra);
+    transform: translateY(-1px);
+}
+
+.home-quick-tip-card__thumb {
+    flex: 0 0 5.5rem;
+    width: 5.5rem;
+    border-radius: 6px;
+    overflow: hidden;
+    background: var(--cor-borda);
+    align-self: center;
+}
+
+.home-quick-tip-card__thumb img {
+    display: block;
+    width: 100%;
+    height: auto;
+    vertical-align: middle;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+}
+
+.home-quick-tip-card__body {
+    flex: 1 1 auto;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
     justify-content: center;
+}
+
+.home-quick-tip-card__title {
+    font-size: 0.82rem;
+    font-weight: 600;
+    color: var(--cor-texto);
+    line-height: 1.25;
+    margin: 0;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+}
+
+.home-quick-tip-card__cta {
+    font-size: 0.7rem;
+    color: var(--cor-accent);
+    margin: 6px 0 0;
+    font-weight: 500;
+}
+
+.home-quick-tips-list--empty,
+.home-quick-tips-list--error {
+    font-size: 0.8rem;
+    color: var(--cor-texto-secundario);
+    padding: 0.5rem 0;
 }
 
 body:has(.hero-section) .hero-section {
     width: 100%;
     max-width: 1200px;
     margin: 0 auto;
-    padding: 32px 16px;
+    padding: 0.75rem 16px 2rem;
+}
+
+body:has(.home-remainder-frame) .hero-section {
+    padding-bottom: 0;
 }
 .main-container {
     position: relative;
+}
+
+/* Conquistas: .container tem padding 0 — afasta os container-secondary do limite do viewport */
+.main-container:has(.conquistas-badges-section) {
+    padding-left: 10px;
+    padding-right: 10px;
 }
 .view {
     opacity: 0;
@@ -893,21 +1130,46 @@ body:has(.hero-section) .hero-section {
     opacity: 0.6;
 }
 
-/* Hero Section */
+/* Hero Section — título centralizado; subtítulo abaixo do título */
 .hero-section {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 48px;
+    grid-template-columns: 1fr;
+    gap: 0;
     align-items: center;
-    padding: 64px 0;
-    min-height: 70vh;
+    justify-items: center;
+    padding: 1rem 0 3rem;
+    min-height: auto;
+    text-align: center;
+}
+
+.hero-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.hero-heading-row {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    margin-bottom: 0.5rem;
+    width: 100%;
+    max-width: 42rem;
 }
 
 .hero-title {
     font-size: 2.8rem;
     font-weight: 700;
-    margin-bottom: 20px;
-    line-height: 1.2;
+    margin: 0;
+    line-height: 1.15;
+    text-align: center;
+    width: 100%;
 }
 
 .accent-text {
@@ -921,14 +1183,11 @@ body:has(.hero-section) .hero-section {
 .hero-subtitle {
     font-size: 1rem;
     color: var(--cor-texto-secundario);
-    margin-bottom: 40px;
-    line-height: 1.6;
-}
-
-.hero-buttons {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
+    margin: 0.75rem 0 0;
+    line-height: 1.5;
+    text-align: center;
+    width: 100%;
+    max-width: 36rem;
 }
 
 .btn-primary {
@@ -943,42 +1202,6 @@ body:has(.hero-section) .hero-section {
 .btn-primary:hover {
     transform: translateY(-3px);
     box-shadow: 0 6px 20px rgba(77, 171, 247, 0.4);
-}
-
-.hero-image {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.hero-card {
-    background: linear-gradient(135deg, var(--cor-card), var(--cor-container));
-    border: 1px solid var(--cor-borda);
-    border-radius: 16px;
-    padding: 32px;
-    text-align: center;
-    box-shadow: 0 10px 30px var(--cor-sombra);
-    transition: transform 0.3s ease;
-}
-
-.hero-card:hover {
-    transform: translateY(-10px);
-}
-
-.hero-card i {
-    font-size: 3.2rem;
-    color: var(--cor-accent);
-    margin-bottom: 16px;
-}
-
-.hero-card h3 {
-    font-size: 1.2rem;
-    margin-bottom: 8px;
-    color: var(--cor-texto-principal);
-}
-
-.hero-card p {
-    color: var(--cor-texto-secundario);
 }
 
 /* Features Section */
@@ -1221,8 +1444,8 @@ footer p {
 @media (max-width: 768px) {
     .hero-section {
         grid-template-columns: 1fr;
-        gap: 32px;
-        padding: 32px 0;
+        gap: 24px;
+        padding: 0.75rem 0 2rem;
         text-align: center;
     }
 
@@ -1230,8 +1453,8 @@ footer p {
         font-size: 2rem;
     }
 
-    .hero-buttons {
-        justify-content: center;
+    .hero-subtitle {
+        font-size: 0.95rem;
     }
 
     .features-grid {
@@ -1297,11 +1520,6 @@ footer p {
 
     .hero-subtitle {
         font-size: 0.9rem;
-    }
-
-    .hero-buttons {
-        flex-direction: column;
-        align-items: center;
     }
 
     .stats-grid {
@@ -1833,7 +2051,220 @@ footer p {
     }
 }
 
+/* Home — cards compactos logo abaixo do subtítulo (só index com modificadores) */
+.dashboard-section--home-inline {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 1120px;
+}
+
+.dashboard-grid--home-inline {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px 14px;
+    margin-bottom: 0;
+}
+
+.dashboard-section--home-inline .dashboard-card--home-value {
+    position: relative;
+    text-align: left;
+    padding: 14px 14px 12px;
+    border-radius: 10px;
+    overflow: hidden;
+    display: block;
+    min-height: 0;
+}
+
+.dashboard-section--home-inline .dashboard-card-body-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.dashboard-section--home-inline .dashboard-card-copy {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.dashboard-section--home-inline .dashboard-card--home-value::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--cor-accent), #64b5f6);
+    border-radius: 10px 10px 0 0;
+    opacity: 0.85;
+}
+
+.dashboard-section--home-inline .dashboard-card--home-value:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 22px rgba(0, 0, 0, 0.08);
+}
+
+.dashboard-section--home-inline a.dashboard-card--clickable {
+    text-decoration: none;
+    color: inherit;
+    cursor: pointer;
+    box-sizing: border-box;
+}
+
+.dashboard-section--home-inline a.dashboard-card--clickable:link,
+.dashboard-section--home-inline a.dashboard-card--clickable:visited {
+    color: inherit;
+}
+
+.dashboard-section--home-inline .dashboard-card--clickable:focus-visible {
+    outline: 2px solid var(--cor-accent);
+    outline-offset: 2px;
+}
+
+.dashboard-section--home-inline .dashboard-card--disabled {
+    cursor: not-allowed;
+    opacity: 0.72;
+    pointer-events: none;
+}
+
+.dashboard-section--home-inline .dashboard-card--disabled:hover {
+    transform: none;
+    box-shadow: none;
+}
+
+.dashboard-section--home-inline .dashboard-card-body-row .card-icon--compact {
+    margin: 0;
+    flex-shrink: 0;
+    align-self: center;
+}
+
+.dashboard-section--home-inline .card-icon--compact {
+    width: 36px;
+    height: 36px;
+    margin: 0 auto 10px;
+    align-self: center;
+}
+
+.dashboard-section--home-inline .card-icon--compact i {
+    font-size: 0.95rem;
+}
+
+.dashboard-section--home-inline .card-icon--compact.card-icon--png {
+    width: 48px;
+    height: 48px;
+    min-width: 48px;
+    min-height: 48px;
+    background: transparent;
+    border-radius: 10px;
+    margin: 0 auto 8px;
+    align-self: center;
+}
+
+.dashboard-section--home-inline .dashboard-card-body-row .card-icon--compact.card-icon--png {
+    margin: 0;
+}
+
+.dashboard-section--home-inline .card-icon--png .card-icon-img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+    display: block;
+}
+
+.dashboard-section--home-inline .dashboard-card-copy h3 {
+    font-size: 0.88rem;
+    font-weight: 600;
+    line-height: 1.25;
+    margin: 0 0 4px;
+    color: var(--cor-texto);
+    width: 100%;
+    text-align: center;
+}
+
+.dashboard-section--home-inline .dashboard-card-copy p {
+    font-size: 0.78rem;
+    line-height: 1.45;
+    margin: 0;
+    color: var(--cor-texto-secundario);
+    width: 100%;
+    text-align: center;
+}
+
+@media (max-width: 960px) {
+    .dashboard-grid--home-inline {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 520px) {
+    .dashboard-grid--home-inline {
+        grid-template-columns: 1fr;
+    }
+}
+
 /* --- 🚪 TELA DE LOGIN 🚪 --- */
+/* login-page.js — splash ENTRAR + painel (v1.0.9) */
+/* Borda esquerda do botão = alinhada ao “A” de “academy” no fundo; ajuste --login-entrada-left se o crop mudar */
+.login-page-container {
+    position: relative;
+    min-height: 100vh;
+    --login-entrada-left: 46%;
+}
+
+.login-entry-stage {
+    position: absolute;
+    z-index: 2;
+    left: var(--login-entrada-left);
+    top: calc(50% - 100px);
+    transform: translateY(-50%);
+    pointer-events: auto;
+}
+
+#login-open-btn {
+    min-width: 11.5rem;
+    width: min(72vw, 15.5rem);
+    justify-content: center;
+    box-sizing: border-box;
+}
+
+.login-entry-stage[hidden] {
+    display: none !important;
+}
+
+#login-panel {
+    display: none;
+    position: absolute;
+    inset: 0;
+    z-index: 3;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 2rem;
+    box-sizing: border-box;
+}
+
+#login-panel.login-panel--visible {
+    display: flex;
+}
+
+@media (max-width: 640px) {
+    #login-open-btn {
+        min-width: 10rem;
+        width: min(78vw, 14rem);
+    }
+
+    #login-panel {
+        padding-right: 1rem;
+        justify-content: center;
+    }
+}
+
 #identificacao-overlay {
     position: fixed;
     top: 0; left: 0;
@@ -1902,32 +2333,6 @@ footer p {
 .google-signin-btn img {
     width: 20px;
     height: 20px;
-}
-
-/* Botão Explorar Cursos no Header */
-.btn-explorar-cursos {
-    background: linear-gradient(135deg, var(--cor-accent), #0056b3);
-    color: white !important;
-    border: none;
-    padding: 12px 20px;
-    border-radius: 8px;
-    font-weight: 600;
-    transition: all 0.3s ease;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    text-decoration: none;
-}
-
-.btn-explorar-cursos:hover {
-    background: linear-gradient(135deg, #0056b3, var(--cor-accent));
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 123, 255, 0.3);
-}
-
-.btn-explorar-cursos i {
-    font-size: 16px;
 }
 
 /* Ocultar botões do header até login */
@@ -2889,6 +3294,151 @@ footer {
     border-radius: 8px;
     padding: 16px;
     margin: 8px;
+}
+
+/* Conquistas: badges dinâmicos (temas / módulos) */
+.conquistas-badges-section {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    margin: 8px 0 16px;
+}
+
+/* Título no topo esquerdo do container: Azul Médio + projeção leve (3D) */
+.conquistas-badges-section > .home-secondary-title {
+    margin: 0 0 12px;
+    padding: 0;
+    width: 100%;
+    text-align: left;
+    font-size: 1.1rem;
+    font-weight: 700;
+    line-height: 1.25;
+    letter-spacing: 0.02em;
+    color: var(--blue-medium);
+    border-bottom: none;
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.4),
+        1px 2px 2px rgba(0, 0, 88, 0.22),
+        2px 4px 8px rgba(0, 0, 0, 0.12);
+}
+
+.dark .conquistas-badges-section > .home-secondary-title {
+    text-shadow:
+        0 1px 0 rgba(0, 0, 0, 0.55),
+        1px 2px 4px rgba(0, 0, 0, 0.5),
+        2px 4px 14px rgba(22, 52, 255, 0.35);
+}
+
+.conquistas-badges-hint {
+    color: var(--cor-texto-secundario);
+    font-size: 0.9rem;
+    margin: 0 0 10px;
+}
+
+.conquistas-badges-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(112px, 1fr));
+    gap: 14px;
+    margin-top: 8px;
+}
+
+.conquistas-badge-card {
+    margin: 0;
+    padding: 10px;
+    border: 1px solid var(--cor-borda);
+    border-radius: var(--borda-raio);
+    background: var(--cor-card);
+    box-shadow: 0 1px 3px var(--cor-sombra);
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    text-align: center;
+}
+
+.conquistas-badge-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 10px var(--cor-sombra);
+}
+
+.conquistas-badge-visual {
+    width: 72px;
+    height: 72px;
+    margin: 0 auto 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    overflow: hidden;
+    background: var(--cor-fundo);
+    border: 1px solid var(--cor-borda);
+}
+
+.conquistas-badge-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+
+.conquistas-badge-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--cor-accent);
+    font-size: 1.75rem;
+    opacity: 0.85;
+}
+
+.conquistas-badge-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.78rem;
+    line-height: 1.25;
+    color: var(--cor-texto-principal);
+}
+
+.conquistas-badge-name {
+    font-weight: 600;
+    word-break: break-word;
+}
+
+.conquistas-badge-course {
+    font-size: 0.72rem;
+    color: var(--cor-texto-secundario);
+    word-break: break-word;
+}
+
+.conquistas-badge-sub {
+    font-size: 0.7rem;
+    color: var(--cor-texto-secundario);
+}
+
+.conquistas-badge-tier {
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--cor-texto-secundario);
+}
+
+.conquistas-badge-xp {
+    font-size: 0.65rem;
+    font-weight: 300;
+    font-style: italic;
+    color: var(--cor-texto-secundario);
+    opacity: 0.92;
+    margin-top: 2px;
+}
+
+.dark .conquistas-badge-xp {
+    opacity: 0.88;
+}
+
+.conquistas-badges-empty {
+    margin: 0;
+    padding: 12px 8px;
+    font-size: 0.9rem;
+    color: var(--cor-texto-secundario);
+    grid-column: 1 / -1;
 }
 
 /* ============================================= */

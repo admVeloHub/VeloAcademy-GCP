@@ -1,16 +1,17 @@
 {
   "name": "veloacademy",
   "version": "1.0.0",
-  "description": "Plataforma de treinamento VeloAcademy",
+  "description": "VeloAcademy — dev local: terminal 1 \"npm run api\" (API :3001), terminal 2 \"npm run dev\" (front :3000); abrir http://localhost:3000 (interface em pt-BR)",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "start:gcp": "node server-api.js",
     "dev": "node server.js",
+    "front": "node server.js",
     "api": "node server-api.js",
     "migrate-courses": "node scripts/migrate-courses-to-mongodb.js",
     "test:api": "bash scripts/test-api.sh",
-    "test:syntax": "node -c lib/mongodb.js && node -c api/progress/save.js && node -c api/progress/unlock-quiz.js && node -c api/health.js && echo '✅ Sintaxe válida!'"
+    "test:syntax": "node -c lib/load-fonte-env.cjs && node -c lib/google-client-inject.cjs && node -c lib/mongodb.js && node -c lib/recent-temas.js && node -c lib/youtube-tutorias-playlist.js && node -c lib/cursos-conteudo-lookup.js && node -c lib/modulo-certificados.js && node -c lib/tema-visual-certificado.js && node -c lib/conquistas-excelencia.js && node -c lib/quiz-register-result.js && node -c lib/quiz-content.js && node -c lib/conquistas-quiz-approved.js && node -c lib/conquistas-badges.js && node -c api/progress/save.js && node -c api/progress/unlock-quiz.js && node -c api/quiz/start.js && node -c api/quiz/submit.js && node -c api/conquistas/quiz-approved.js && node -c \"api/conquistas/temas/[userEmail].js\" && node -c \"api/conquistas/modulos/[userEmail].js\" && node -c \"api/conquistas/excelencia/[userEmail].js\" && node -c api/temas/recent.js && node -c api/youtube/tutorias.js && node -c api/health.js && echo '✅ Sintaxe válida!'"
   },
   "author": "VeloHub Development Team",
   "license": "MIT",

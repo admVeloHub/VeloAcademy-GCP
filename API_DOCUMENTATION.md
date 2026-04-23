@@ -1,6 +1,6 @@
 # Documentação da API VeloAcademy - Estrutura Normalizada
 
-<!-- VERSION: v1.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team -->
+<!-- VERSION: v1.1.2 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team -->
 
 ## Visão Geral
 
@@ -10,6 +10,64 @@ A API VeloAcademy utiliza uma estrutura normalizada em 4 coleções MongoDB sepa
 2. **academy_registros.modulos** - Módulos dos cursos (referência: cursoId)
 3. **academy_registros.secoes** - Seções/Temas dos módulos (referência: moduloId)
 4. **academy_registros.aulas** - Aulas das seções (referência: secaoId)
+
+## Quiz (MongoDB — conteúdo e correção no backend)
+
+Cada documento em **`quiz_conteudo`** representa **um quiz completo**: `quizID`, array **`questões`** (cada item: `pergunta`, `opção1`…`opção4` — `opção1` é sempre a correta na importação), `notaCorte`, `createdAt`, `updatedAt`. Índice recomendado único em `quizID`. Randomização e gabarito ficam em `quiz_attempts`. O endpoint **`POST /api/quiz/result` foi removido** (a nota não é mais aceita do cliente).
+
+### POST /api/quiz/start
+
+Inicia uma tentativa: lê perguntas por `quizId`, embaralha opções no servidor e grava `quiz_attempts`.
+
+**Body:**
+```json
+{ "quizId": "pix" }
+```
+(`quizID` também é aceito.)
+
+**Resposta (200):**
+```json
+{
+  "success": true,
+  "attemptId": "uuid",
+  "quizID": "pix",
+  "totalQuestions": 10,
+  "passingScore": 7,
+  "questions": [
+    { "questionId": "...", "question": "Enunciado...", "options": ["A", "B", "C", "D"] }
+  ]
+}
+```
+
+### POST /api/quiz/submit
+
+Corrige a tentativa, grava **`tema_certificados`** (ex-`curso_certificados`) ou **`quiz_reprovas`** com **`colaboradorNome`** (API continua a enviar `name` no body; documentos legados podem ter `name`), snapshot `temaTitulo` / `temaTrophyIconUrl` / `badgeCategoria` (opção B) nos aprovados, e pode registar **`modulo_certificados`** quando o módulo fica completo.
+
+**Body:**
+```json
+{
+  "attemptId": "uuid",
+  "answers": [0, 2, 1, 3],
+  "name": "Nome",
+  "email": "user@example.com",
+  "courseName": "Tema da seção"
+}
+```
+`answers`: índice 0–3 da opção escolhida por questão, na ordem de `start`; omitido ou inválido conta como erro.
+
+**Resposta (200):** `success`, `score`, `totalQuestions`, `finalGrade`, `passingScore`, `approved`, `wrongQuestions` (números 1-based), `collection`, `certificateId` (se aprovado — string do `_id` do documento em `tema_certificados`; legado pode ter sido UUID gravado no doc).
+
+### POST /api/conquistas/quiz-approved
+
+Stub para futura política de badges na aba Conquistas.
+
+**Body:** `email`, `quizID`, `certificateId` (obrigatórios); `courseName` opcional.
+
+### GET /api/conquistas/excelencia/:userEmail
+
+Lista troféus de **Excelência do Atendimento** (`atendimento_trophies`) para o email do utilizador (filtro por `colaboradorEmail` ou `email` no documento).
+
+**Resposta (200):** `{ "success": true, "trophies": [ { "id", "conquista_titulo", "trophy_url", "xpClass", "createdAt" } ] }`
 
 ## Endpoints Disponíveis
 

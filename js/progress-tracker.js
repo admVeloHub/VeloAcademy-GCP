@@ -1,17 +1,15 @@
-// VERSION: v1.0.2 | DATE: 2026-03-06 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.4 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // Sistema de rastreamento de progresso de vídeos e desbloqueio de quizzes
 // v1.0.2: getUserEmail agora lê também de veloacademy_user_session (compatibilidade com login email/senha)
 
 const USER_SESSION_KEY = 'veloacademy_user_session';
 
 const ProgressTracker = {
-    // Função para obter URL base da API
+    // Função para obter URL base da API (centralizado em js/config/api-config.js)
     getApiBaseUrl() {
-        // Em desenvolvimento, usar localhost
-        if (typeof window !== 'undefined' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-            return 'http://localhost:3001/api';
+        if (typeof window !== 'undefined' && typeof window.getApiBaseUrl === 'function') {
+            return window.getApiBaseUrl();
         }
-        // Em produção, usar URL relativa (API no mesmo domínio)
         return '/api';
     },
     
@@ -47,6 +45,21 @@ const ProgressTracker = {
             return null;
         }
     },
+
+    /** Nome para certificados / conquistas (sessão Academy) */
+    getUserDisplayName() {
+        try {
+            const sessionData = localStorage.getItem(USER_SESSION_KEY);
+            if (sessionData) {
+                const session = JSON.parse(sessionData);
+                const n = session?.user?.name;
+                if (n && String(n).trim()) return String(n).trim();
+            }
+        } catch (e) {
+            /* ignore */
+        }
+        return '';
+    },
     
     // Salvar progresso de aula completada
     async saveVideoProgress(subtitle, lessonTitle, allLessonTitles = null) {
@@ -60,7 +73,8 @@ const ProgressTracker = {
             const requestBody = {
                 userEmail,
                 subtitle,
-                lessonTitle
+                lessonTitle,
+                colaboradorNome: this.getUserDisplayName()
             };
             
             // Adicionar lista completa de aulas se fornecida

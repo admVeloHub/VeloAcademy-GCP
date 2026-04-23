@@ -14,6 +14,61 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-04-23 (Client ID no container)
+### Tipo: Alteração local
+### Versão: server-api v1.7.2, server.js v1.0.6, index v1.1.5, google-config v1.1.0, home v1.0.9, login-page v1.2.2, lib/google-client-inject v1.0.0, .env.example v1.1.0
+### Arquivos Modificados:
+- lib/google-client-inject.cjs (novo)
+- server-api.js, server.js, index.html, js/config/google-config.js, js/home.js, js/login-page.js, .env.example, package.json, DEPLOY_LOG.md
+### Descrição:
+- `GOOGLE_CLIENT_ID` lido do ambiente (FONTE DA VERDADE / Cloud Run) e servido em `GET /api/config/google-client.js` para o browser; `index.html` carrega o script antes de `google-config.js`. Fallback no JS mantido se env ausente. Front estático (server.js) repete a mesma rota para `npm run dev` na porta 3000.
+### Commit Hash: (preencher no push)
+
+---
+
+### Data/Hora: 2026-04-23
+### Tipo: Alteração local (higienização de segurança; preparação de push)
+### Versão: server-api v1.7.0, lib/mongodb v1.0.4, lib/load-fonte-env v1.0.0, api/auth/login v1.1.0
+### Arquivos Modificados:
+- lib/load-fonte-env.cjs (novo — carregamento FONTE DA VERDADE partilhado)
+- server-api.js, lib/mongodb.js, api/auth/login.js, package.json (test:syntax)
+- .dockerignore (exclusão FONTE DA VERDADE), .env.example (novo, template)
+- Removidos: Untitled-1.js, 2.md, google-signin-config.js
+### Descrição:
+- Segurança: `api/auth/login` sem logs de senha/PII; alinhado a `server-api.js` e `DEBUG_LOGIN`.
+- `MONGO_ENV`: mesmo fluxo de `FONTE DA VERDADE` / `.env` local em `lib/mongodb` (Vercel/api).
+- Docker: reforçado para não copiar `FONTE DA VERDADE` se existir no contexto de build.
+- Scanner: `gitleaks` via npx indisponível no ambiente; inspeção `git log` sem ficheiros `.env` no histórico deste repositório. Rotação de credenciais e `git filter-repo` + `git push --force` ficam a cargo operacional se surgirem confirmações de segredos no histórico (instalar `git-filter-repo`; fazer `git clone --mirror` de backup antes).
+### Commit Hash: (preencher no push)
+
+---
+
+### Data/Hora: 2026-03-27 (atualização schema)
+### Tipo: Alteração local
+### Versão: lib/quiz-content v1.1.0, api/quiz/start v1.1.0, LISTA_SCHEMAS v4.15.0
+### Arquivos Modificados:
+- lib/quiz-content.js, api/quiz/start.js, LISTA_SCHEMAS.rb, API_DOCUMENTATION.md, api/quiz/submit.js (versão)
+### Descrição: Schema `quiz_conteudo` — um documento por quiz com array `questões` (pergunta + opção1–4); `questionId` na API = `{_id}_{índice}`; tentativas com `questionIndex` e `quizContentId`; índice único em `quizID` com fallback.
+### Commit Hash: (preencher no push)
+
+---
+
+### Data/Hora: 2026-03-27
+### Tipo: Alteração local / preparação deploy
+### Versão: v1.5.0 (veloacademy.js, server-api.js) + APIs quiz MongoDB
+### Arquivos Modificados:
+- js/veloacademy.js (v1.5.0)
+- server-api.js (v1.5.0)
+- api/quiz/start.js, api/quiz/submit.js (novos)
+- api/conquistas/quiz-approved.js (novo)
+- lib/quiz-register-result.js, lib/quiz-content.js, lib/conquistas-quiz-approved.js (novos)
+- api/quiz/result.js (removido)
+- LISTA_SCHEMAS.rb, API_DOCUMENTATION.md, DEPLOY_LOG.md, package.json
+### Descrição: Quiz sem Google Apps Script/Sheets — conteúdo em `quiz_conteudo`, tentativas em `quiz_attempts`, correção em `POST /api/quiz/submit`; removido `POST /api/quiz/result`; certificado via Apps Script removido do front (Conquistas futura).
+### Commit Hash: (preencher no push)
+
+---
+
 ### Data/Hora: 2026-03-12
 ### Tipo: GitHub Push (preparação deploy GCP)
 ### Versão: v1.4.0 (server-api.js) + configuração Docker/GCP

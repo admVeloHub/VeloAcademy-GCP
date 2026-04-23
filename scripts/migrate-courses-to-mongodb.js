@@ -1,15 +1,30 @@
-// VERSION: v2.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
+// VERSION: v2.0.2 | DATE: 2026-03-27 | AUTHOR: VeloHub Development Team
 // Script para migrar dados de cursos.json para MongoDB
 // Uso: node migrate-courses-to-mongodb.js [--normalized]
 // --normalized: Migra para estrutura normalizada (4 coleções) ao invés da estrutura antiga
 
-require('dotenv').config();
+(function loadVelohubFonteEnv(here) {
+  const path = require('path');
+  const fs = require('fs');
+  let d = here;
+  for (let i = 0; i < 14; i++) {
+    const loader = path.join(d, 'FONTE DA VERDADE', 'bootstrapFonteEnv.cjs');
+    if (fs.existsSync(loader)) {
+      require(loader).loadFrom(here);
+      return;
+    }
+    const parent = path.dirname(d);
+    if (parent === d) break;
+    d = parent;
+  }
+})(__dirname);
+
 const { MongoClient } = require('mongodb');
 const fs = require('fs');
 const path = require('path');
 
 // Configuração MongoDB
-const MONGODB_URI = process.env.MONGODB_URI || process.env.VERCEL_MONGODB_URI;
+const MONGODB_URI = (process.env.MONGO_ENV || '').trim();
 const DB_NAME = process.env.DB_NAME_ACADEMY || 'academy_registros';
 const COLLECTION_NAME = 'cursos_conteudo';
 
@@ -332,8 +347,8 @@ async function migrateToNormalized(db, cursosData) {
 // Função principal
 async function migrateCourses() {
     if (!MONGODB_URI) {
-        console.error('❌ MONGODB_URI não configurada!');
-        console.error('Configure a variável de ambiente MONGODB_URI ou VERCEL_MONGODB_URI');
+        console.error('❌ MONGO_ENV não configurada!');
+        console.error('Configure MONGO_ENV na FONTE DA VERDADE (.env).');
         process.exit(1);
     }
     

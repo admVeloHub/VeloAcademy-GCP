@@ -1,26 +1,15 @@
-// VERSION: v1.0.1 | DATE: 2025-01-31 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.4 | DATE: 2026-03-27 | AUTHOR: VeloHub Development Team
 // Serviços centralizados de autenticação
 
-// Função auxiliar para obter URL da API (evita conflito de declaração)
+/** URL da API em tempo real (não fixar no load — host/porta mudam em LAN) */
 function getAuthApiBaseUrl() {
-    // Tentar usar função global se disponível
-    if (typeof window !== 'undefined' && window.getApiBaseUrl) {
+    if (typeof window !== 'undefined' && typeof window.getApiBaseUrl === 'function') {
         try {
             return window.getApiBaseUrl();
         } catch (error) {
-            console.warn('Erro ao obter API base URL da função global:', error);
+            console.warn('Erro ao obter API base URL:', error);
         }
     }
-    
-    // Fallback: determinar URL base
-    if (typeof window !== 'undefined' && 
-        (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-        // Sempre usar localhost:3001 em desenvolvimento local
-        return 'http://localhost:3001/api';
-    }
-    
-    // Em produção, usar URL relativa (mesmo domínio do frontend)
-    // Os endpoints de auth são serverless functions do Vercel
     return '/api';
 }
 
@@ -36,10 +25,6 @@ function getAuthClientId() {
     return '278491073220-eb4ogvn3aifu0ut9mq3rvu5r9r9l3137.apps.googleusercontent.com';
 }
 
-// Obter URL base para endpoints de auth
-// Endpoints de auth são serverless functions do Vercel (mesmo domínio do frontend)
-const API_BASE_URL = getAuthApiBaseUrl();
-// Usar chave diferente para sessionId para evitar conflito
 const AUTH_SERVICE_SESSION_ID_KEY = 'academy_session_id';
 
 /**
@@ -49,7 +34,7 @@ const AUTH_SERVICE_SESSION_ID_KEY = 'academy_session_id';
  */
 async function registerLoginSession(userData) {
     try {
-        const response = await fetch(`${API_BASE_URL}/auth/session/login`, {
+        const response = await fetch(`${getAuthApiBaseUrl()}/auth/session/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -91,7 +76,7 @@ async function registerLogoutSession() {
             return false;
         }
 
-        const response = await fetch(`${API_BASE_URL}/auth/session/logout`, {
+        const response = await fetch(`${getAuthApiBaseUrl()}/auth/session/logout`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -118,42 +103,23 @@ async function registerLogoutSession() {
 }
 
 /**
- * Inicializa o Google Sign-In
+ * Compatibilidade: o login Google na VeloAcademy é configurado em login-page.js
+ * (OAuth2 initTokenClient + userinfo). Não chamar google.accounts.id.initialize aqui —
+ * duplicava o cliente, reativava One Tap / gsi/status e conflitava com o botão "Continuar com Google".
  */
 function initializeGoogleSignIn() {
-    if (typeof window === 'undefined' || !window.google) {
-        console.warn('Google Identity Services não está disponível');
-        return;
-    }
-
-    const clientId = getClientId();
-    
-    if (!clientId) {
-        console.error('Client ID do Google não está definido!');
-        return;
-    }
-
-    try {
-        window.google.accounts.id.initialize({
-            client_id: clientId,
-            callback: handleCredentialResponse,
-            auto_select: false,
-            cancel_on_tap_outside: true
-        });
-        
-        console.log('Google Sign-In inicializado com Client ID:', clientId);
-    } catch (error) {
-        console.error('Erro ao inicializar Google Sign-In:', error);
-    }
+    if (typeof window === 'undefined') return;
+    console.info('[VeloAcademy auth-service] Login Google Web fica no login-page.js (OAuth2 com token). google.accounts.id.initialize não é chamado aqui.');
 }
 
 /**
- * Handler para resposta de credenciais do Google
- * Esta função será sobrescrita pelo componente de login
- * @param {object} response - Resposta do Google OAuth
+ * Legado (ex.: data-callback em HTML antigo). O fluxo ativo é login-page.js.
+ * @param {object} response - resposta GIS (credencial JWT, se algum fluxo antigo a chamar)
  */
 function handleCredentialResponse(response) {
-    console.log('handleCredentialResponse chamado - deve ser implementado pelo componente de login');
+    if (response && response.credential) {
+        console.warn('[VeloAcademy auth-service] handleCredentialResponse recebeu JWT; o fluxo ativo de login é OAuth2 no login-page.js.');
+    }
 }
 
 // Exportar funções para uso global

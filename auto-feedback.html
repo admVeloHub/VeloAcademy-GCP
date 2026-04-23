@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<!-- VeloAcademy auto-feedback.html v1.0.0 | 2026-03-27 | página shell Auto Feedback -->
+<html lang="pt-BR" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Auto Feedback - VeloAcademy</title>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css">
+    <link rel="icon" type="image/png" href="./academy.png">
+    <style>
+        .auto-feedback-lead {
+            color: var(--cor-texto-secundario);
+            line-height: 1.5;
+            margin: 0;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <div class="container header-container">
+            <div class="logo" id="logo-container">
+                <img id="logo-image" class="logo-image" src="./academy.png" alt="VeloAcademy Logo">
+            </div>
+
+            <nav class="nav-menu">
+                <a href="./index.html" class="nav-link">Home</a>
+                <a href="./cursos.html" class="nav-link">Cursos</a>
+                <a href="./conquistas.html" id="nav-conquistas" class="nav-link">Conquistas</a>
+                <a href="./auto-feedback.html" id="nav-feedback" class="nav-link active">Feedback</a>
+                <a href="https://app.velohub.velotax.com.br" class="nav-link" target="_blank" rel="noopener noreferrer">VeloHub</a>
+            </nav>
+
+            <div class="user-info" id="user-info">
+                <img id="user-avatar" class="user-avatar" src="" alt="Avatar" style="display: none;">
+                <span id="user-name" class="user-name"></span>
+                <button type="button" id="logout-btn" class="logout-btn" title="Logout">
+                    <i class="fas fa-sign-out-alt"></i>
+                </button>
+            </div>
+
+            <div class="theme-switch-wrapper" id="theme-toggle">
+                <span class="theme-icon">☀️</span>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <div class="container main-container">
+            <section class="activity-section">
+                <h2>Auto Feedback</h2>
+                <p class="auto-feedback-lead">
+                    Área para avaliações, dicas e revisões. O conteúdo desta página será ampliado nas próximas entregas.
+                </p>
+            </section>
+        </div>
+    </main>
+
+    <script src="./js/config/api-config.js"></script>
+    <script src="./js/auth.js" defer></script>
+    <script src="./js/theme-toggle.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            if (typeof checkAuthenticationState === 'function') {
+                checkAuthenticationState();
+            }
+        });
+    </script>
+</body>
+</html>

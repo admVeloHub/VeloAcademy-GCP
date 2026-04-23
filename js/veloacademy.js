@@ -1,4 +1,4 @@
-// VERSION: v1.4.8 | DATE: 2026-03-12 | AUTHOR: VeloHub Development Team
+// VERSION: v1.5.0 | DATE: 2026-03-27 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
 
 const veloAcademyApp = {
@@ -20,6 +20,15 @@ const veloAcademyApp = {
         return 'https://backend-gcp-278491073220.us-east1.run.app/api/academy';
     },
 
+    /** Base URL da API para quiz (start/submit); alinhado ao ProgressTracker. */
+    getQuizApiBaseUrl() {
+        if (typeof ProgressTracker !== 'undefined') {
+            return ProgressTracker.getApiBaseUrl();
+        }
+        const h = typeof window !== 'undefined' ? window.location.hostname : '';
+        return (h === 'localhost' || h === '127.0.0.1') ? 'http://localhost:3001/api' : '/api';
+    },
+
     logoConfig: {
 
         googleDriveId: null,
@@ -33,11 +42,6 @@ const veloAcademyApp = {
     // Variáveis para armazenar resultado do quiz
     quizResult: null,
     certificateUrl: null,
-
-    // Configuração do Google Apps Script para Quiz
-    appsScriptConfig: {
-        scriptUrl: 'https://script.google.com/macros/s/AKfycbyLR1pyRoBjSivGP5xrDTD7DZeJCCpKF868qlSaKZC1u3srLIMJkwiQ5R8RZpD_tsCqCQ/exec'
-    },
 
     // Função para verificar se o usuário é Lucas Gravina (desenvolvedor)
     isDeveloperUser() {
@@ -103,11 +107,10 @@ const veloAcademyApp = {
             sanitized.passingScore = '[OCULTO]';
         }
         
-        // Remover mapeamento de opções
-        if (sanitized.optionMappings) {
-            sanitized.optionMappings = '[OCULTO]';
+        if (sanitized.attemptId) {
+            sanitized.attemptId = '[OCULTO]';
         }
-        
+
         return sanitized;
     },
 
@@ -120,133 +123,40 @@ const veloAcademyApp = {
         }
     },
 
-    // Função para testar CORS via JSONP
-    testCORS() {
-        return new Promise((resolve, reject) => {
-            console.log('=== TESTANDO CORS VIA JSONP ===');
-            
-            const callbackName = 'corsTestCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            console.log('CORS test callback name:', callbackName);
-            
-            // Criar função de callback global
-            window[callbackName] = (data) => {
-                console.log('Resposta do teste CORS:', data);
-                
-                // Limpar callback e script
-                document.head.removeChild(script);
-                delete window[callbackName];
-                
-                if (data && data.status === 'success') {
-                    console.log('✅ CORS funcionando via JSONP!');
-                    resolve(data);
-                } else {
-                    console.error('❌ Erro no teste CORS:', data?.error);
-                    reject(new Error(data?.error || 'Erro no teste CORS'));
-                }
-            };
-            
-            // Criar script tag para JSONP
-            const script = document.createElement('script');
-            const url = `${this.appsScriptConfig.scriptUrl}?action=testCORS&callback=${callbackName}`;
-            console.log('URL teste CORS:', url);
-            
-            script.src = url;
-            script.onerror = () => {
-                console.error('❌ Erro ao carregar script de teste CORS');
-                document.head.removeChild(script);
-                delete window[callbackName];
-                reject(new Error('Erro ao testar CORS via JSONP'));
-            };
-            
-            document.head.appendChild(script);
-        });
-    },
-
     // Dados do quiz atual
     currentQuiz: null,
 
-    // Função para carregar quiz do Google Apps Script via JSONP
-    loadQuizFromAppsScript(courseId, courseName = null) {
-        return new Promise((resolve, reject) => {
-            console.log('=== INICIANDO CARREGAMENTO DO QUIZ VIA JSONP ===');
-            console.log('Course ID:', courseId);
-            console.log('Apps Script URL:', this.appsScriptConfig.scriptUrl);
-            
-            const callbackName = 'quizCallback_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-            console.log('Callback name:', callbackName);
-            
-            // Criar função de callback global
-            window[callbackName] = (data) => {
-                console.log('Resposta recebida via JSONP:', data);
-                
-                // Limpar callback e script
-                document.head.removeChild(script);
-                delete window[callbackName];
-                
-                if (data && data.success === true && data.quiz) {
-                    this.secureLog('Status de sucesso confirmado via JSONP');
-                    this.secureLog('Quiz recebido:', data.quiz);
-                    this.secureLog('Perguntas recebidas:', data.quiz.questions);
-                    this.secureLog('Nota de aprovação:', data.quiz.passingScore);
-                    
-                    // Verificar se as perguntas têm as respostas corretas válidas
-                    const hasValidAnswers = data.quiz.questions.every(q => 
-                        q.correctAnswer !== undefined && 
-                        q.correctAnswer >= 0 && 
-                        q.correctAnswer <= 3
-                    );
-                    this.secureLog('Perguntas têm respostas corretas válidas:', hasValidAnswers);
-                    
-                    if (!hasValidAnswers) {
-                        console.warn('Apps Script não retornou respostas corretas válidas, usando fallback');
-                        // Usar fallback: assumir que a primeira opção é sempre a correta
-                        data.quiz.questions.forEach(q => {
-                            if (q.correctAnswer === -1 || q.correctAnswer === undefined) {
-                                q.correctAnswer = 0; // Primeira opção como correta
-                                this.secureLog(`Fallback aplicado para questão ${q.id}: resposta correta = 0`);
-                            }
-                        });
-                    }
-                    
-                    this.currentQuiz = {
-                        courseId: courseId, // quizId (academy_registros.cursos_conteudo)
-                        courseName: courseName || null, // temaNome (academy_registros.cursos_conteudo)
-                        questions: data.quiz.questions,
-                        passingScore: data.quiz.passingScore || Math.ceil(data.quiz.questions.length * 0.7), // Fallback: 70% das questões
-                        currentQuestion: 0,
-                        userAnswers: [],
-                        startTime: Date.now(),
-                        optionMappings: data.quiz.optionMappings || {} // Mapeamento de opções randomizadas
-                    };
-                    
-                    this.secureLog('Quiz carregado com sucesso via JSONP:', this.currentQuiz);
-                    this.secureLog('Mapeamento de opções recebido:', this.currentQuiz.optionMappings);
-                    this.showQuizInterface();
-                    resolve(true);
-                } else {
-                    console.error('Status de erro recebido via JSONP:', data?.success);
-                    reject(new Error(data?.error || 'Erro desconhecido no servidor'));
-                }
-            };
-            
-            // Criar script tag para JSONP
-            const script = document.createElement('script');
-            const url = `${this.appsScriptConfig.scriptUrl}?action=getQuizJSONP&courseId=${courseId}&callback=${callbackName}`;
-            console.log('URL JSONP:', url);
-            
-            script.src = url;
-            script.onerror = () => {
-                console.error('Erro ao carregar script JSONP');
-                document.head.removeChild(script);
-                delete window[callbackName];
-                reject(new Error('Erro ao carregar quiz via JSONP'));
-            };
-            
-            document.head.appendChild(script);
+    async loadQuizFromApi(courseId, courseName = null) {
+        const apiBaseUrl = this.getQuizApiBaseUrl();
+        const res = await fetch(`${apiBaseUrl}/quiz/start`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ quizId: courseId })
         });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) {
+            throw new Error(data.error || data.details || res.statusText || 'Erro ao iniciar quiz');
+        }
+        if (!data.success || !data.attemptId || !Array.isArray(data.questions)) {
+            throw new Error(data.error || 'Resposta inválida do servidor');
+        }
+        this.currentQuiz = {
+            attemptId: data.attemptId,
+            courseId,
+            courseName: courseName || null,
+            passingScore: data.passingScore,
+            questions: data.questions.map((q) => ({
+                questionId: q.questionId,
+                question: q.question,
+                options: q.options
+            })),
+            currentQuestion: 0,
+            userAnswers: [],
+            startTime: Date.now()
+        };
+        this.secureLog('Quiz carregado via API:', this.currentQuiz);
+        this.showQuizInterface();
     },
-
-
 
     // Função para iniciar quiz a partir do botão (lê data-quiz-id e data-course-name do DOM)
     // courseId = quizId, courseName = temaNome (academy_registros.cursos_conteudo)
@@ -260,10 +170,14 @@ const veloAcademyApp = {
         this.startQuiz(courseId, courseName);
     },
 
-    // Função para iniciar o quiz
-    startQuiz(courseId, courseName = null) {
+    async startQuiz(courseId, courseName = null) {
         console.log('Iniciando quiz para:', courseId, 'courseName:', courseName);
-        this.loadQuizFromAppsScript(courseId, courseName);
+        try {
+            await this.loadQuizFromApi(courseId, courseName);
+        } catch (e) {
+            console.error(e);
+            alert(e.message || 'Erro ao carregar o quiz. Verifique se há perguntas cadastradas para este módulo.');
+        }
     },
 
     // Função para mostrar a interface do quiz
@@ -290,7 +204,6 @@ const veloAcademyApp = {
         const totalQuestions = this.currentQuiz.questions.length;
 
         this.secureLog(`Renderizando questão ${questionNumber}:`, question);
-        this.secureLog(`Resposta correta da questão ${questionNumber}:`, question.correctAnswer);
 
         quizView.innerHTML = `
             <div class="quiz-header">
@@ -377,59 +290,42 @@ const veloAcademyApp = {
             }
         }
 
-        // Calcular resultado e enviar para MongoDB (curso_certificados ou quiz_reprovas)
         try {
             await this.submitQuizToMongoDB();
             this.showQuizResult();
         } catch (error) {
             console.error('Erro ao enviar quiz:', error);
-            this.showQuizResult();
+            await this.calculateAndShowResult();
         }
     },
 
-    // Função para enviar resultado do quiz para MongoDB (curso_certificados ou quiz_reprovas)
     async submitQuizToMongoDB() {
         try {
             const userData = this.getAuthenticatedUserData();
-            const courseId = this.currentQuiz.courseId;
-            
-            // Calcular pontuação
-            let score = 0;
-            this.currentQuiz.questions.forEach((question, index) => {
-                if (this.currentQuiz.userAnswers[index] === question.correctAnswer) {
-                    score++;
-                }
-            });
-            
-            const totalQuestions = this.currentQuiz.questions.length;
-            const finalGrade = (score / totalQuestions) * 10;
-            const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
-            const isReproved = score < passingScore;
-            const wrongQuestions = this.calculateWrongQuestions();
-            // courseName = temaNome (academy_registros.cursos_conteudo), passado no botão do quiz
-            const courseName = (this.currentQuiz.courseName && this.currentQuiz.courseName.trim()) 
-                ? this.currentQuiz.courseName.trim() 
+            const cq = this.currentQuiz;
+            const courseId = cq.courseId;
+            const courseName = (cq.courseName && cq.courseName.trim())
+                ? cq.courseName.trim()
                 : this.getCourseTitle(courseId);
-            
-            const apiBaseUrl = typeof ProgressTracker !== 'undefined' ? ProgressTracker.getApiBaseUrl() : 
-                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' ? 'http://localhost:3001/api' : '/api');
-            
-            const response = await fetch(`${apiBaseUrl}/quiz/result`, {
+
+            const answers = cq.questions.map((_, i) => {
+                const a = cq.userAnswers[i];
+                return (typeof a === 'number' && a >= 0 && a <= 3) ? a : -1;
+            });
+
+            const apiBaseUrl = this.getQuizApiBaseUrl();
+            const response = await fetch(`${apiBaseUrl}/quiz/submit`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
+                    attemptId: cq.attemptId,
+                    answers,
                     name: userData.name,
                     email: userData.email,
-                    courseId,
-                    courseName,
-                    score,
-                    totalQuestions,
-                    finalGrade,
-                    approved: !isReproved,
-                    wrongQuestions
+                    courseName
                 })
             });
-            
+
             const text = await response.text();
             let result;
             try {
@@ -442,7 +338,17 @@ const veloAcademyApp = {
             if (!response.ok) {
                 throw new Error(result.error || `Erro ${response.status}: ${response.statusText}`);
             }
-            
+            if (!result.success) {
+                throw new Error(result.error || 'Erro ao registrar resultado');
+            }
+
+            const score = result.score;
+            const totalQuestions = result.totalQuestions;
+            const finalGrade = result.finalGrade;
+            const passingScore = result.passingScore;
+            const isReproved = !result.approved;
+            const wrongQuestions = Array.isArray(result.wrongQuestions) ? result.wrongQuestions : [];
+
             this.quizResult = {
                 score,
                 totalQuestions,
@@ -450,13 +356,9 @@ const veloAcademyApp = {
                 passingScore,
                 isReproved,
                 wrongQuestions,
-                response: result
+                response: { collection: result.collection, certificateId: result.certificateId }
             };
-            
-            if (!result.success) {
-                throw new Error(result.error || 'Erro ao registrar resultado');
-            }
-            
+
             return result;
         } catch (error) {
             console.error('Erro ao processar quiz:', error);
@@ -473,25 +375,17 @@ const veloAcademyApp = {
         }
     },
 
-    // Função auxiliar para calcular questões erradas
-    calculateWrongQuestions() {
-        if (!this.currentQuiz) return [];
-        
-        const wrongQuestions = [];
-        this.currentQuiz.questions.forEach((question, index) => {
-            if (this.currentQuiz.userAnswers[index] !== question.correctAnswer) {
-                wrongQuestions.push(index + 1);
-            }
-        });
-        
-        return wrongQuestions;
+    /** Lista 1-based das questões erradas (preenchida após resposta do servidor em quizResult). */
+    getWrongQuestionNumbersForDisplay() {
+        if (this.quizResult && Array.isArray(this.quizResult.wrongQuestions)) {
+            return this.quizResult.wrongQuestions;
+        }
+        return [];
     },
 
-    // Função para mostrar resultado do quiz
     showQuizResult() {
         if (!this.quizResult) {
-            // Se não há resultado armazenado, calcular localmente
-            this.calculateAndShowResult();
+            void this.calculateAndShowResult();
             return;
         }
         
@@ -508,7 +402,7 @@ const veloAcademyApp = {
         // Calcular questões erradas para aprovados
         let wrongQuestionsSection = '';
         if (!isReproved && this.currentQuiz) {
-            const wrongQuestions = this.calculateWrongQuestions();
+            const wrongQuestions = this.getWrongQuestionNumbersForDisplay();
             if (wrongQuestions.length > 0) {
                 const wrongQuestionsList = wrongQuestions.map(qNum => {
                     const question = this.currentQuiz.questions[qNum - 1];
@@ -555,149 +449,25 @@ const veloAcademyApp = {
         this.switchView('quiz-view');
     },
 
-    // Função auxiliar para calcular resultado e tentar enviar ao MongoDB (fallback quando submitQuizToMongoDB falhou)
     async calculateAndShowResult() {
-        if (!this.currentQuiz) return;
-
-        let score = 0;
-        this.currentQuiz.questions.forEach((question, index) => {
-            if (this.currentQuiz.userAnswers[index] === question.correctAnswer) {
-                score++;
-            }
-        });
-
-        const totalQuestions = this.currentQuiz.questions.length;
-        const finalGrade = (score / totalQuestions) * 10;
-        const passingScore = this.currentQuiz.passingScore || Math.ceil(totalQuestions * 0.7);
-        const isReproved = score < passingScore;
-        const wrongQuestions = this.calculateWrongQuestions();
-
-        this.quizResult = {
-            score,
-            totalQuestions,
-            finalGrade,
-            passingScore,
-            isReproved,
-            wrongQuestions
-        };
-
-        // Tentar enviar ao MongoDB (caso o envio inicial tenha falhado)
+        if (!this.currentQuiz || !this.currentQuiz.attemptId) {
+            alert('Não foi possível obter o resultado do quiz.');
+            return;
+        }
         try {
             await this.submitQuizToMongoDB();
         } catch (e) {
             console.warn('Envio ao MongoDB no fallback falhou:', e);
         }
-
+        if (!this.quizResult) {
+            alert('Não foi possível registrar o resultado. Verifique sua conexão e tente novamente.');
+            return;
+        }
         this.showQuizResult();
     },
 
-    // Função para processar quiz localmente (fallback)
     processQuizLocally() {
-        console.log('=== PROCESSANDO QUIZ LOCALMENTE ===');
-        if (!this.currentQuiz) {
-            console.error('Nenhum quiz carregado para processar');
-            return;
-        }
-
-        this.secureLog('Respostas do usuário:', this.currentQuiz.userAnswers);
-        this.secureLog('Perguntas do quiz:', this.currentQuiz.questions);
-
-        // Calcular pontuação
-        let score = 0;
-        this.currentQuiz.questions.forEach((question, index) => {
-            const userAnswer = this.currentQuiz.userAnswers[index];
-            const correctAnswer = question.correctAnswer;
-            
-            this.secureLog(`Questão ${index + 1}:`);
-            this.secureLog(`  - Resposta do usuário: ${userAnswer}`);
-            this.secureLog(`  - Resposta correta: ${correctAnswer}`);
-            this.secureLog(`  - Acertou: ${userAnswer === correctAnswer}`);
-            
-            if (userAnswer === correctAnswer) {
-                score++;
-            }
-        });
-
-        const totalQuestions = this.currentQuiz.questions.length;
-        const finalGrade = (score / totalQuestions) * 10;
-        const passingScore = this.currentQuiz.passingScore;
-
-        this.secureScoreLog('Pontuação calculada:', { score, totalQuestions, finalGrade, passingScore });
-
-        // Mostrar resultado
-        this.showLocalQuizResult(score, finalGrade, passingScore, totalQuestions);
-    },
-
-    // Função para mostrar resultado local
-    showLocalQuizResult(score, finalGrade, passingScore, totalQuestions) {
-        console.log('=== MOSTRANDO RESULTADO LOCAL ===');
-        const quizView = document.getElementById('quiz-view');
-        if (!quizView) {
-            console.error('Elemento quiz-view não encontrado');
-            return;
-        }
-
-        console.log('Elemento quiz-view encontrado, atualizando conteúdo...');
-
-        const isPassed = score >= passingScore;
-        const resultClass = isPassed ? 'passed' : 'failed';
-        const resultText = isPassed ? 'APROVADO' : 'REPROVADO';
-        const resultMessage = isPassed 
-            ? 'Parabéns! Você foi aprovado no quiz.' 
-            : `Você acertou ${score} de ${totalQuestions} questões. É necessário acertar pelo menos ${passingScore} questões para aprovação.`;
-
-        // Calcular questões erradas para aprovados
-        let wrongQuestionsSection = '';
-        if (isPassed && this.currentQuiz) {
-            const wrongQuestions = this.calculateWrongQuestions();
-            if (wrongQuestions.length > 0) {
-                const wrongQuestionsList = wrongQuestions.map(qNum => {
-                    const question = this.currentQuiz.questions[qNum - 1];
-                    return `<li>Questão ${qNum}: ${question.question}</li>`;
-                }).join('');
-                
-                wrongQuestionsSection = `
-                    <div class="wrong-questions-section">
-                        <h3>Questões para Revisão</h3>
-                        <p>Você acertou ${score} de ${totalQuestions} questões. Abaixo estão as questões que você errou para revisão:</p>
-                        <ul class="wrong-questions-list">
-                            ${wrongQuestionsList}
-                        </ul>
-                    </div>
-                `;
-            }
-        }
-
-        const resultHTML = `
-            <div class="quiz-results ${resultClass}">
-                <div class="result-header">
-                    <h2>Resultado</h2>
-                    <div class="result-image">
-                        <img src="./Public/${isPassed ? 'aprovado' : 'reprovado'}.png" alt="${resultText}" class="result-status-image">
-                        <div class="result-subtitle">
-                            <span class="status ${resultClass}">${resultText}</span>
-                        </div>
-                    </div>
-                    <div class="result-score">
-                        <div class="score-circle">
-                            <span class="score-number">${finalGrade.toFixed(1)}</span>
-                            <span class="score-max">/ 10</span>
-                        </div>
-                    </div>
-                </div>
-                ${wrongQuestionsSection}
-                <div class="result-actions">
-                    <button class="btn-primary" onclick="veloAcademyApp.returnToCourse()">Enviar resultado</button>
-                </div>
-            </div>
-        `;
-
-        console.log('HTML do resultado gerado, aplicando ao DOM...');
-        quizView.innerHTML = resultHTML;
-        console.log('Resultado aplicado com sucesso');
-        
-        // Garantir que a view do quiz esteja ativa
-        this.switchView('quiz-view');
+        console.warn('Correção do quiz ocorre apenas no servidor (POST /api/quiz/submit).');
     },
 
     // Função para voltar ao curso
@@ -748,30 +518,12 @@ const veloAcademyApp = {
         return userData;
     },
 
-    // Função para gerar certificado
     async generateCertificate() {
         if (this.certificateUrl) {
-            // Se já temos a URL do certificado, abrir diretamente
             window.open(this.certificateUrl, '_blank');
-        } else {
-            // Se não temos, gerar nova URL
-            try {
-                const userData = this.getAuthenticatedUserData();
-                const { score, totalQuestions, finalGrade } = this.quizResult;
-                
-                const url = `${this.appsScriptConfig.scriptUrl}?action=downloadCertificate&name=${encodeURIComponent(userData.name)}&email=${encodeURIComponent(userData.email)}&courseId=${this.currentQuiz.courseId}&score=${score}&totalQuestions=${totalQuestions}&finalGrade=${finalGrade}`;
-                
-                window.open(url, '_blank');
-            } catch (error) {
-                console.error('Erro ao gerar certificado:', error);
-                alert('Erro ao gerar certificado. Tente novamente.');
-            }
+            return;
         }
-        
-        // Voltar ao curso após gerar certificado
-        setTimeout(() => {
-            this.returnToCourse();
-        }, 2000);
+        alert('A emissão de certificado por download será substituída pela aba Conquistas (badges). Em breve.');
     },
 
 

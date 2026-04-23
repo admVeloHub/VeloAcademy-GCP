@@ -1,4 +1,4 @@
-// VERSION: v1.0.2 | DATE: 2025-01-31 | AUTHOR: VeloHub Development Team
+// VERSION: v1.1.0 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // POST /api/auth/login - Login por email/senha
 
 const bcrypt = require('bcrypt');
@@ -35,7 +35,6 @@ module.exports = async (req, res) => {
             });
         }
 
-        const { connectToDatabase } = require('../../lib/mongodb');
         const { client, db } = await connectToDatabase();
         
         if (!client || !db) {
@@ -80,70 +79,64 @@ module.exports = async (req, res) => {
             });
         }
 
-        // Validar senha
-        let passwordValid = false;
-        
-        console.log('=== DEBUG LOGIN ===');
-        console.log('Email recebido:', email);
-        console.log('Senha recebida (primeiros 3 chars):', password ? password.substring(0, 3) + '...' : 'null');
-        console.log('Senha armazenada (primeiros 3 chars):', funcionario.password ? funcionario.password.substring(0, 3) + '...' : 'null');
-        console.log('Tipo da senha armazenada:', typeof funcionario.password);
-        
-        if (funcionario.password) {
-            // Verificar se a senha armazenada é um hash bcrypt (começa com $2a$, $2b$ ou $2y$)
-            const isBcryptHash = typeof funcionario.password === 'string' && 
-                                 (funcionario.password.startsWith('$2a$') || 
-                                  funcionario.password.startsWith('$2b$') || 
-                                  funcionario.password.startsWith('$2y$'));
-            
-            console.log('É hash bcrypt?', isBcryptHash);
-            
-            if (isBcryptHash) {
-                // Senha está em hash bcrypt - comparar hash
-                passwordValid = await bcrypt.compare(password, funcionario.password);
-                console.log('Comparação bcrypt:', passwordValid);
-            } else {
-                // Senha está em texto plano - comparar diretamente
-                passwordValid = password === funcionario.password;
-                console.log('Comparação texto plano:', passwordValid);
-                console.log('Senha recebida:', password);
-                console.log('Senha armazenada:', funcionario.password);
-                console.log('São iguais?', password === funcionario.password);
-            }
+        const emailLower = email.toLowerCase();
+        const debugLogin = process.env.DEBUG_LOGIN === '1';
+        if (debugLogin) {
+            console.log('[api/auth/login] busca', emailLower);
         }
-        
-        // Se ainda não validou, tentar senha padrão: nome.sobrenomeCPF
-        if (!passwordValid) {
+
+        // Validar senha (alinhado a server-api.js /api/auth/login)
+        let passwordValid = false;
+
+        if (!funcionario.password || funcionario.password === null || funcionario.password === undefined) {
             const nomeCompleto = funcionario.colaboradorNome || '';
             const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
-            
-            console.log('Tentando senha padrão...');
-            console.log('Nome completo:', nomeCompleto);
-            console.log('Partes do nome:', partesNome);
-            console.log('CPF:', funcionario.CPF);
-            
             if (partesNome.length >= 2 && funcionario.CPF) {
                 const primeiroNome = partesNome[0];
                 const ultimoNome = partesNome[partesNome.length - 1];
                 const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
-                
-                console.log('Senha padrão calculada:', senhaPadrao);
-                console.log('Senha recebida:', password);
-                
-                // Comparar senha fornecida com senha padrão
                 passwordValid = password === senhaPadrao;
-                console.log('Comparação senha padrão:', passwordValid);
+                if (debugLogin) {
+                    console.log('[api/auth/login] senha padrão aplicável, match:', passwordValid);
+                }
+            }
+        } else {
+            const isBcryptHash = typeof funcionario.password === 'string' &&
+                (funcionario.password.startsWith('$2a$') ||
+                    funcionario.password.startsWith('$2b$') ||
+                    funcionario.password.startsWith('$2y$'));
+            if (isBcryptHash) {
+                passwordValid = await bcrypt.compare(password, funcionario.password);
+            } else {
+                passwordValid = password === funcionario.password;
+            }
+            if (!passwordValid) {
+                const nomeCompleto = funcionario.colaboradorNome || '';
+                const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
+                if (partesNome.length >= 2 && funcionario.CPF) {
+                    const primeiroNome = partesNome[0];
+                    const ultimoNome = partesNome[partesNome.length - 1];
+                    const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
+                    passwordValid = password === senhaPadrao;
+                    if (debugLogin) {
+                        console.log('[api/auth/login] fallback senha padrão, match:', passwordValid);
+                    }
+                }
             }
         }
-        
-        console.log('Resultado final da validação:', passwordValid);
-        console.log('=== FIM DEBUG ===');
 
         if (!passwordValid) {
+            if (debugLogin) {
+                console.log('[api/auth/login] falha de autenticação', emailLower);
+            }
             return res.status(401).json({
                 success: false,
                 error: 'Email ou senha incorretos'
             });
+        }
+
+        if (debugLogin) {
+            console.log('[api/auth/login] sucesso', emailLower);
         }
 
         // Criar sessão em academy_registros.sessions

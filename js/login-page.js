@@ -1,4 +1,4 @@
-// VERSION: v1.0.5 | DATE: 2026-03-06 | AUTHOR: VeloHub Development Team
+// VERSION: v1.2.2 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // Componente de Login adaptado do React para JavaScript Vanilla
 
 (function() {
@@ -11,7 +11,8 @@
         email: '',
         password: '',
         showPassword: false,
-        capsLockOn: false
+        capsLockOn: false,
+        googleSignInStarted: false
     };
 
     // Referências aos elementos DOM
@@ -52,10 +53,8 @@
         // Configurar detecção de CAPS LOCK
         setupCapsLockDetection();
 
-        // Inicializar Google Sign-In após um pequeno delay para garantir que o DOM está pronto
-        setTimeout(() => {
-            initializeGoogleSignIn(onLoginSuccess);
-        }, 500);
+        // Splash: Google Sign-In só após abrir o painel (iframe precisa de layout visível)
+        setupOpenLoginPanel(onLoginSuccess);
     }
 
     /**
@@ -69,15 +68,21 @@
         }
 
         container.innerHTML = `
-            <div class="login-page-container" style="min-height: 100vh; display: flex; align-items: center; position: relative; background-image: url(./Public/loginpage.jpg); background-size: cover; background-position: center; background-repeat: no-repeat;">
-                <div class="login-card-wrapper" style="max-width: 19.25rem; width: 100%; margin-left: auto; padding-right: 2rem;">
+            <div class="login-page-container" style="background-image: url('/Public/NOVO LOGIN BG.png'); background-size: cover; background-position: center; background-repeat: no-repeat;">
+                <div class="login-entry-stage" id="login-entry-stage">
+                    <button type="button" id="login-open-btn" class="btn btn-primary" aria-expanded="false" aria-controls="login-panel">
+                        ENTRAR
+                    </button>
+                </div>
+                <div class="login-panel" id="login-panel" role="dialog" aria-modal="true" aria-labelledby="login-heading" hidden>
+                <div class="login-card-wrapper" style="max-width: 19.25rem; width: 100%; margin-left: auto;">
                     <div class="login-card" style="background: white; border-radius: 1rem; box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1); padding: 1rem;">
                         <div class="login-header" style="text-align: center; margin-bottom: 0.75rem;">
-                            <h2 style="font-size: 0.9375rem; font-weight: 600; color: #1f2937; margin-bottom: 0.3125rem;">
+                            <h2 id="login-heading" style="font-size: 0.9375rem; font-weight: 600; color: #1f2937; margin-bottom: 0.3125rem;">
                                 Bem-vindo de volta!
                             </h2>
                             <p style="color: #6b7280; font-size: 0.78125rem;">
-                                Faça login para acessar o VeloHub
+                                Entre para acessar o VeloHub
                             </p>
                         </div>
 
@@ -89,6 +94,8 @@
                                 <input
                                     id="login-email"
                                     type="email"
+                                    name="email"
+                                    autocomplete="username"
                                     required
                                     style="width: 100%; padding: 0.46875rem 0.625rem; border: 1px solid #d1d5db; border-radius: 0.46875rem; font-size: 0.625rem; outline: none; transition: all 0.2s;"
                                     placeholder="seu.email@velotax.com.br"
@@ -105,6 +112,8 @@
                                     <input
                                         id="login-password"
                                         type="password"
+                                        name="password"
+                                        autocomplete="current-password"
                                         required
                                         style="width: 100%; padding: 0.46875rem 1.875rem 0.46875rem 0.625rem; border: 1px solid #d1d5db; border-radius: 0.46875rem; font-size: 0.625rem; outline: none; transition: all 0.2s;"
                                         placeholder="Digite sua senha"
@@ -191,8 +200,42 @@
                         </div>
                     </div>
                 </div>
+                </div>
             </div>
         `;
+    }
+
+    /**
+     * Abre o painel de login (mesmo card) ao clicar em ENTRAR no splash
+     */
+    function setupOpenLoginPanel(onLoginSuccess) {
+        const openBtn = document.getElementById('login-open-btn');
+        const entryStage = document.getElementById('login-entry-stage');
+        const panel = document.getElementById('login-panel');
+        if (!openBtn || !entryStage || !panel) {
+            return;
+        }
+
+        openBtn.addEventListener('click', () => {
+            entryStage.setAttribute('hidden', '');
+            panel.removeAttribute('hidden');
+            panel.classList.add('login-panel--visible');
+            openBtn.setAttribute('aria-expanded', 'true');
+
+            if (!state.googleSignInStarted) {
+                state.googleSignInStarted = true;
+                setTimeout(() => {
+                    initializeGoogleSignIn(onLoginSuccess);
+                }, 300);
+            }
+
+            setTimeout(() => {
+                const email = document.getElementById('login-email');
+                if (email) {
+                    email.focus();
+                }
+            }, 0);
+        });
     }
 
     /**
@@ -355,6 +398,111 @@
         checkGoogleScript();
     }
 
+    function resolveApiBaseUrl() {
+        if (typeof window !== 'undefined' && typeof window.getApiBaseUrl === 'function') {
+            return window.getApiBaseUrl();
+        }
+        return '/api';
+    }
+
+    /**
+     * Valida email no backend e conclui sessão (fluxo comum JWT One Tap e OAuth2 token).
+     */
+    async function completeGoogleLoginWithEmailPicture(profile, onLoginSuccess) {
+        var email = profile.email;
+        var picture = profile.picture || null;
+        var nameFallback = profile.name || '';
+
+        if (!email) {
+            setError('Conta Google sem email público. Use outro método de login.');
+            return;
+        }
+
+        var apiBaseUrl = resolveApiBaseUrl();
+        var validateResponse = await fetch(apiBaseUrl + '/auth/validate-access', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: email, picture: picture })
+        });
+
+        var validateResult;
+        try {
+            validateResult = await validateResponse.json();
+        } catch (jsonError) {
+            console.error('Erro ao parsear resposta JSON:', jsonError);
+            setError('Erro ao processar resposta do servidor. Verifique sua conexão.');
+            return;
+        }
+
+        if (!validateResult.success) {
+            var msg = validateResult.error || 'Erro ao validar acesso';
+            if (validateResponse.status === 503) {
+                msg = 'Servidor indisponível (MongoDB). Verifique a variável MONGO_ENV na FONTE DA VERDADE (arquivo .env) e se a API está rodando (npm run api).';
+            }
+            setError(msg);
+            return;
+        }
+
+        var userData = {
+            name: (validateResult.user && validateResult.user.name) || nameFallback || '',
+            email: (validateResult.user && validateResult.user.email) || email,
+            picture: (validateResult.user && validateResult.user.picture) || picture || null
+        };
+
+        if (window.saveUserSession) {
+            window.saveUserSession(userData);
+        }
+        if (window.registerLoginSession) {
+            await window.registerLoginSession(userData);
+        }
+        localStorage.setItem('userEmail', userData.email);
+        localStorage.setItem('userName', userData.name);
+        if (userData.picture) {
+            localStorage.setItem('userPicture', userData.picture);
+        }
+        console.log('Login Google realizado com sucesso');
+        if (onLoginSuccess) {
+            onLoginSuccess(userData);
+        }
+    }
+
+    /**
+     * OAuth2 token (popup) — evita One Tap / FedCM e o pedido a accounts.google.com/gsi/status que falha com 403 em vários browsers.
+     */
+    async function handleGoogleOAuthTokenResponse(tokenResponse, onLoginSuccess) {
+        setError('');
+        try {
+            if (tokenResponse.error) {
+                var desc = tokenResponse.error_description || tokenResponse.error;
+                if (tokenResponse.error === 'popup_closed_by_user' || tokenResponse.error === 'access_denied') {
+                    setError('');
+                } else {
+                    setError('Google: ' + String(desc));
+                }
+                return;
+            }
+            if (!tokenResponse.access_token) {
+                setError('Resposta Google incompleta. Tente novamente.');
+                return;
+            }
+            var ur = await fetch('https://www.googleapis.com/oauth2/v3/userinfo', {
+                headers: { Authorization: 'Bearer ' + tokenResponse.access_token }
+            });
+            if (!ur.ok) {
+                setError('Não foi possível ler o perfil Google (HTTP ' + ur.status + ').');
+                return;
+            }
+            var p = await ur.json();
+            await completeGoogleLoginWithEmailPicture(
+                { email: p.email, picture: p.picture || null, name: p.name || '' },
+                onLoginSuccess
+            );
+        } catch (err) {
+            console.error('OAuth Google:', err);
+            setError('Erro ao concluir login Google. Tente outro navegador ou desative bloqueadores para este site.');
+        }
+    }
+
     /**
      * Configura o Google Sign-In
      */
@@ -366,15 +514,16 @@
             return;
         }
 
-        let clientId = '278491073220-eb4ogvn3aifu0ut9mq3rvu5r9r9l3137.apps.googleusercontent.com';
-        
-        // Tentar obter Client ID da função getClientId se disponível
+        let clientId = '';
         if (typeof window !== 'undefined' && window.getClientId) {
             try {
                 clientId = window.getClientId();
             } catch (error) {
                 console.warn('Erro ao obter Client ID, usando padrão:', error);
             }
+        }
+        if (!clientId || !String(clientId).trim()) {
+            clientId = '278491073220-eb4ogvn3aifu0ut9mq3rvu5r9r9l3137.apps.googleusercontent.com';
         }
         
         // Garantir que temos um Client ID válido
@@ -388,100 +537,49 @@
             return;
         }
 
-        console.log('Configurando Google Sign-In com Client ID:', clientId);
-        
-        // Verificar se estamos em localhost e avisar sobre configuração (apenas se necessário)
-        const currentOrigin = typeof window !== 'undefined' ? window.location.origin : '';
-        // Não mostrar aviso se já estiver configurado (verificado pelos erros anteriores)
-        // O aviso só aparecerá se houver problemas de configuração
-
-        // Configurar callback global
-        window.handleCredentialResponse = async (response) => {
-            await handleGoogleCredentialResponse(response, onLoginSuccess);
-        };
+        console.log('Configurando Google Sign-In (OAuth2 token + popup) com Client ID:', clientId);
 
         try {
-            // Inicializar Google Sign-In
-            window.google.accounts.id.initialize({
+            if (!window.google.accounts.oauth2 || typeof window.google.accounts.oauth2.initTokenClient !== 'function') {
+                console.error('Google OAuth2 (accounts.oauth2) não disponível no script gsi/client');
+                setError('Biblioteca Google incompleta. Recarregue a página.');
+                return;
+            }
+
+            var tokenClient = window.google.accounts.oauth2.initTokenClient({
                 client_id: clientId,
-                callback: window.handleCredentialResponse,
-                auto_select: false,
-                cancel_on_tap_outside: true
+                scope: 'openid https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/userinfo.profile',
+                callback: function (tokenResponse) {
+                    void (async function () {
+                        setLoading(true);
+                        try {
+                            await handleGoogleOAuthTokenResponse(tokenResponse, onLoginSuccess);
+                        } finally {
+                            setLoading(false);
+                        }
+                    })();
+                }
             });
 
-            console.log('Google Sign-In inicializado');
-
-            // Configurar o botão manual para usar o prompt do Google
-            const manualButton = document.getElementById('google-signin-manual-btn');
+            var manualButton = document.getElementById('google-signin-manual-btn');
             if (manualButton) {
-                // Remover onclick inline e adicionar event listener
                 manualButton.removeAttribute('onclick');
                 manualButton.addEventListener('click', function(e) {
                     e.preventDefault();
-                    if (window.google && window.google.accounts && window.google.accounts.id) {
-                        window.google.accounts.id.prompt();
-                    } else {
-                        alert('Google Sign-In ainda está carregando. Aguarde um momento e tente novamente.');
+                    setError('');
+                    try {
+                        tokenClient.requestAccessToken({ prompt: 'select_account' });
+                    } catch (err) {
+                        console.error(err);
+                        setError('Não foi possível iniciar o login Google.');
                     }
                 });
             }
 
-            // Tentar substituir pelo botão oficial do Google se disponível
-            const renderGoogleButton = (attempts = 0) => {
-                googleSignInButton = document.getElementById('google-signin-button');
-                
-                if (!googleSignInButton) {
-                    if (attempts < 5) {
-                        setTimeout(() => renderGoogleButton(attempts + 1), 200);
-                    }
-                    return;
-                }
-
-                if (!window.google.accounts.id) {
-                    if (attempts < 5) {
-                        setTimeout(() => renderGoogleButton(attempts + 1), 200);
-                    }
-                    return;
-                }
-
-                try {
-                    // Tentar renderizar o botão oficial do Google
-                    window.google.accounts.id.renderButton(googleSignInButton, {
-                        theme: 'outline',
-                        size: 'large',
-                        width: googleSignInButton.offsetWidth || 280, // Usar largura do container
-                        text: 'continue_with',
-                        shape: 'rectangular',
-                        logo_alignment: 'center'
-                    });
-                    
-                    console.log('Botão oficial do Google renderizado');
-                    
-                    // Se o botão oficial foi renderizado, ocultar o botão manual e ajustar tamanho do iframe
-                    setTimeout(() => {
-                        const iframe = googleSignInButton.querySelector('iframe');
-                        if (iframe) {
-                            // Ajustar tamanho do iframe para ocupar toda a largura e altura adequada
-                            iframe.style.width = '100%';
-                            iframe.style.minHeight = '40px';
-                            iframe.style.height = 'auto';
-                            
-                            const manualBtn = document.getElementById('google-signin-manual-btn');
-                            if (manualBtn) {
-                                manualBtn.style.display = 'none';
-                            }
-                        }
-                    }, 500);
-                } catch (error) {
-                    console.error('Erro ao renderizar botão oficial do Google:', error);
-                    // Manter o botão manual visível
-                }
-            };
-
-            // Tentar renderizar o botão oficial após um delay
-            setTimeout(() => renderGoogleButton(), 500);
+            console.log('Google Sign-In: cliente OAuth2 de token pronto (popup; sem One Tap / gsi/status).');
         } catch (error) {
             console.error('Erro ao configurar Google Sign-In:', error);
+            setError('Erro ao configurar login Google.');
         }
     }
 
@@ -491,94 +589,17 @@
     async function handleGoogleCredentialResponse(response, onLoginSuccess) {
         setLoading(true);
         setError('');
-
         try {
-            // Decodificar JWT
-            const payload = window.decodeJWT ? window.decodeJWT(response.credential) : decodeJWT(response.credential);
-            
+            var payload = window.decodeJWT ? window.decodeJWT(response.credential) : decodeJWT(response.credential);
             if (!payload || !payload.email) {
                 setError('Erro ao processar dados do Google. Tente novamente.');
-                setLoading(false);
                 return;
             }
-
-            // Validar acesso no backend
-            let apiBaseUrl = '/api';
-            
-            // Tentar obter URL da API da função getApiBaseUrl se disponível
-            if (typeof window !== 'undefined' && window.getApiBaseUrl) {
-                try {
-                    apiBaseUrl = window.getApiBaseUrl();
-                } catch (error) {
-                    console.warn('Erro ao obter API base URL, usando padrão:', error);
-                }
-            }
-            
-            // Fallback: se estiver em localhost, sempre usar localhost:3001
-            if (typeof window !== 'undefined' && 
-                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-                if (apiBaseUrl === '/api') {
-                    apiBaseUrl = 'http://localhost:3001/api';
-                }
-            }
-            
-            console.log('Usando API Base URL para validação:', apiBaseUrl);
-            
-            const validateResponse = await fetch(`${apiBaseUrl}/auth/validate-access`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    email: payload.email,
-                    picture: payload.picture || null
-                })
-            });
-
-            let validateResult;
-            try {
-                validateResult = await validateResponse.json();
-            } catch (jsonError) {
-                console.error('Erro ao parsear resposta JSON:', jsonError);
-                setError('Erro ao processar resposta do servidor. Verifique sua conexão.');
-                setLoading(false);
-                return;
-            }
-
-            if (!validateResult.success) {
-                setError(validateResult.error || 'Erro ao validar acesso');
-                setLoading(false);
-                return;
-            }
-
-            // Usar dados validados do backend
-            const userData = {
-                name: validateResult.user?.name || payload.name,
-                email: validateResult.user?.email || payload.email,
-                picture: validateResult.user?.picture || null
-            };
-
-            // Salvar sessão
-            if (window.saveUserSession) {
-                window.saveUserSession(userData);
-            }
-
-            // Registrar login no backend (cria sessão em academy_registros.sessions)
-            if (window.registerLoginSession) {
-                await window.registerLoginSession(userData);
-            }
-
-            // Salvar userEmail para progresso/quiz (compatibilidade)
-            localStorage.setItem('userEmail', userData.email);
-            localStorage.setItem('userName', userData.name);
-            if (userData.picture) {
-                localStorage.setItem('userPicture', userData.picture);
-            }
-
-            console.log('Login realizado com sucesso');
-            if (onLoginSuccess) {
-                onLoginSuccess(userData);
-            }
+            console.log('Usando API Base URL para validação:', resolveApiBaseUrl());
+            await completeGoogleLoginWithEmailPicture(
+                { email: payload.email, picture: payload.picture || null, name: payload.name || '' },
+                onLoginSuccess
+            );
         } catch (error) {
             console.error('Erro no login:', error);
             setError('Erro ao processar login. Tente novamente.');
@@ -595,25 +616,7 @@
         setError('');
 
         try {
-            let apiBaseUrl = '/api';
-            
-            // Tentar obter URL da API da função getApiBaseUrl se disponível
-            if (typeof window !== 'undefined' && window.getApiBaseUrl) {
-                try {
-                    apiBaseUrl = window.getApiBaseUrl();
-                } catch (error) {
-                    console.warn('Erro ao obter API base URL, usando padrão:', error);
-                }
-            }
-            
-            // Fallback: se estiver em localhost, sempre usar localhost:3001
-            if (typeof window !== 'undefined' && 
-                (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
-                if (apiBaseUrl === '/api') {
-                    apiBaseUrl = 'http://localhost:3001/api';
-                }
-            }
-            
+            const apiBaseUrl = resolveApiBaseUrl();
             console.log('Usando API Base URL para login:', apiBaseUrl);
             
             const response = await fetch(`${apiBaseUrl}/auth/login`, {
@@ -630,7 +633,11 @@
             const result = await response.json();
 
             if (!result.success) {
-                setError(result.error || 'Email ou senha incorretos');
+                let msg = result.error || 'Email ou senha incorretos';
+                if (response.status === 503) {
+                    msg = 'Servidor indisponível (MongoDB). Verifique a variável MONGO_ENV na FONTE DA VERDADE (arquivo .env) e se a API está rodando (npm run api).';
+                }
+                setError(msg);
                 setLoading(false);
                 return;
             }

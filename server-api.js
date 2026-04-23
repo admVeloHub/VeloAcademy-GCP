@@ -1,20 +1,31 @@
-// VERSION: v1.4.0 | DATE: 2026-03-12 | AUTHOR: VeloHub Development Team
-// Servidor API Express para gerenciamento de progresso de cursos com MongoDB
+// VERSION: v1.7.2 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
+// Servidor API Express para progresso de cursos com MongoDB (textos em pt-BR).
 
-// Carregar variáveis de ambiente do arquivo .env
-require('dotenv').config();
+// Segredos (ex.: MongoDB): arquivo .env na FONTE DA VERDADE (pasta ao lado do ecossistema).
+// Exemplo Windows: C:\DEV - Ecosistema Velohub\FONTE DA VERDADE\.env
+// Carregamento: ver lib/load-fonte-env.cjs (mesma lógica que lib/mongodb.js para Vercel/api).
+
+const { loadFrom: loadFonteEnv } = require('./lib/load-fonte-env.cjs');
+loadFonteEnv(__dirname);
 
 const express = require('express');
 const { MongoClient } = require('mongodb');
+const { fetchRecentTemas } = require('./lib/recent-temas');
+const { fetchTutoriasPlaylistVideos } = require('./lib/youtube-tutorias-playlist');
+const { fetchConquistasTemas, fetchConquistasModulos, ensureCertIndex } = require('./lib/conquistas-badges');
+const { fetchConquistasExcelencia, ensureExcelenciaIndex } = require('./lib/conquistas-excelencia');
+const { ensureModuloCertIndex } = require('./lib/modulo-certificados');
+const { registerTemaVisualizacaoIfNeeded } = require('./lib/tema-visual-certificado');
 const cors = require('cors');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
+const { getGoogleClientIdInjectScript } = require('./lib/google-client-inject.cjs');
 
 const app = express();
 const PORT = process.env.PORT || 3001; // Cloud Run usa PORT do ambiente
 
-// Middleware
-app.use(cors());
+// Middleware — refletir origem (localhost, IP da LAN, etc.) para o navegador em dev
+app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 
 // Middleware de logging para debug
@@ -30,9 +41,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Configuração MongoDB
-// URI obtida das variáveis de ambiente (.env local ou Vercel em produção)
-const MONGODB_URI = process.env.MONGODB_URI || process.env.VERCEL_MONGODB_URI || 'mongodb://localhost:27017';
+// Configuração MongoDB: apenas MONGO_ENV (FONTE DA VERDADE / ecossistema VeloHub)
+// Consideramos "não configurado" só quando a variável está ausente; URI local explícita deve conectar.
+const MONGODB_URI_FROM_ENV = (process.env.MONGO_ENV || '').trim();
 const DB_NAME = process.env.DB_NAME_ACADEMY || 'academy_registros';
 const COLLECTION_NAME = 'course_progress';
 
@@ -42,12 +53,12 @@ let client = null;
 // Conectar ao MongoDB
 async function connectMongoDB() {
     try {
-        if (!MONGODB_URI || MONGODB_URI === 'mongodb://localhost:27017') {
-            console.warn('⚠️ MONGODB_URI não configurada. Usando modo desenvolvimento sem MongoDB.');
+        if (!MONGODB_URI_FROM_ENV) {
+            console.warn('⚠️ MONGO_ENV não definida no ambiente (ex.: arquivo .env na FONTE DA VERDADE). API sem MongoDB — validate-access e auth retornarão 503.');
             return;
         }
-        
-        client = new MongoClient(MONGODB_URI);
+
+        client = new MongoClient(MONGODB_URI_FROM_ENV);
         await client.connect();
         db = client.db(DB_NAME);
         console.log('✅ Conectado ao MongoDB:', DB_NAME);
@@ -55,7 +66,7 @@ async function connectMongoDB() {
     } catch (error) {
         console.error('❌ Erro ao conectar ao MongoDB:', error.message);
         // Continuar mesmo sem MongoDB para desenvolvimento
-        console.warn('⚠️ Continuando sem conexão MongoDB. Endpoints retornarão erro 503.');
+        console.warn('⚠️ Continuando sem conexão com o MongoDB. Os endpoints retornarão erro 503.');
     }
 }
 
@@ -67,7 +78,7 @@ connectMongoDB();
 // POST /api/progress/save - Salvar progresso de aula
 app.post('/api/progress/save', async (req, res) => {
     try {
-        const { userEmail, subtitle, lessonTitle, allLessonTitles } = req.body;
+        const { userEmail, subtitle, lessonTitle, allLessonTitles, colaboradorNome } = req.body;
 
         if (!userEmail || !subtitle || !lessonTitle) {
             return res.status(400).json({ 
@@ -79,7 +90,7 @@ app.post('/api/progress/save', async (req, res) => {
         if (!db) {
             return res.status(503).json({ 
                 success: false, 
-                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.' 
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).' 
             });
         }
 
@@ -143,6 +154,19 @@ app.post('/api/progress/save', async (req, res) => {
             await collection.insertOne(progressData);
         }
 
+        if (quizUnlocked) {
+            try {
+                await registerTemaVisualizacaoIfNeeded(db, {
+                    userEmail,
+                    colaboradorNome: colaboradorNome || '',
+                    subtitle,
+                    quizUnlocked: true
+                });
+            } catch (certErr) {
+                console.error('Registro tema visualização (conquistas):', certErr && certErr.message);
+            }
+        }
+
         res.json({ 
             success: true, 
             message: 'Progresso salvo com sucesso',
@@ -170,7 +194,7 @@ app.get('/api/progress/:userEmail/:subtitle', async (req, res) => {
             return res.json({ 
                 success: false, 
                 progress: null,
-                message: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.' 
+                message: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).' 
             });
         }
 
@@ -227,7 +251,7 @@ app.post('/api/progress/unlock-quiz', async (req, res) => {
         if (!db) {
             return res.status(503).json({ 
                 success: false, 
-                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.' 
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).' 
             });
         }
 
@@ -297,72 +321,89 @@ app.get('/api/progress/user/:userEmail', async (req, res) => {
     }
 });
 
-// POST /api/quiz/result - Registrar resultado do quiz (aprovado -> curso_certificados, reprovado -> quiz_reprovas)
-app.post('/api/quiz/result', async (req, res) => {
+// POST /api/quiz/start — conteúdo e randomização no MongoDB (quiz_conteudo + quiz_attempts)
+app.post('/api/quiz/start', require('./api/quiz/start'));
+// POST /api/quiz/submit — correção no servidor e registro tema_certificados / quiz_reprovas
+app.post('/api/quiz/submit', require('./api/quiz/submit'));
+// POST /api/conquistas/quiz-approved — stub para futura política de badges
+app.post('/api/conquistas/quiz-approved', require('./api/conquistas/quiz-approved'));
+
+// GET /api/conquistas/temas/:userEmail — badges por tema (certificado aprovado + ícone em quiz_conteudo)
+app.get('/api/conquistas/temas/:userEmail', async (req, res) => {
     try {
-        const { name, email, courseId, courseName, score, totalQuestions, finalGrade, approved, wrongQuestions } = req.body;
-
-        if (!name || !email || !courseId) {
-            return res.status(400).json({ 
-                success: false, 
-                error: 'Campos obrigatórios: name, email, courseId' 
-            });
-        }
-
         if (!db) {
-            return res.status(503).json({ 
-                success: false, 
-                error: 'MongoDB não disponível' 
+            return res.status(503).json({
+                success: false,
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).'
             });
         }
-
-        const now = new Date();
-        const wrongQuestionsStr = wrongQuestions && Array.isArray(wrongQuestions) 
-            ? JSON.stringify(wrongQuestions) 
-            : (wrongQuestions || '[]');
-        const wrongQuestionsDisplay = wrongQuestionsStr !== '[]' ? wrongQuestionsStr : 'Sem Erros';
-
-        if (approved) {
-            const certificadosCollection = db.collection('curso_certificados');
-            const certificateId = uuidv4();
-            const doc = {
-                date: now,
-                name: name.trim(),
-                email: email.toLowerCase().trim(),
-                courseId: courseId,
-                courseName: courseName || courseId,
-                score: score != null ? parseInt(score) : null,
-                totalQuestions: totalQuestions != null ? parseInt(totalQuestions) : null,
-                finalGrade: finalGrade != null ? parseFloat(finalGrade) : null,
-                wrongQuestions: wrongQuestionsDisplay,
-                status: 'Aprovado',
-                certificateUrl: '',
-                certificateId: certificateId
-            };
-            await certificadosCollection.insertOne(doc);
-            console.log('Certificado registrado:', { email: doc.email, courseId: doc.courseId });
-            return res.json({ success: true, collection: 'curso_certificados', certificateId });
-        } else {
-            const reprovasCollection = db.collection('quiz_reprovas');
-            const doc = {
-                date: now,
-                name: name.trim(),
-                email: email.toLowerCase().trim(),
-                courseId: courseId,
-                courseName: courseName || courseId,
-                finalGrade: finalGrade != null ? parseFloat(finalGrade) : null,
-                wrongQuestions: wrongQuestionsDisplay
-            };
-            await reprovasCollection.insertOne(doc);
-            console.log('Reprovação registrada:', { email: doc.email, courseId: doc.courseId });
-            return res.json({ success: true, collection: 'quiz_reprovas' });
+        const userEmail = decodeURIComponent(String(req.params.userEmail || '').trim());
+        if (!userEmail) {
+            return res.status(400).json({ success: false, error: 'Parâmetro userEmail é obrigatório' });
         }
+        await ensureCertIndex(db);
+        await ensureModuloCertIndex(db);
+        const temas = await fetchConquistasTemas(db, userEmail);
+        res.json({ success: true, temas });
     } catch (error) {
-        console.error('Erro ao registrar resultado do quiz:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erro ao registrar resultado',
-            details: error.message 
+        console.error('Erro em GET /api/conquistas/temas:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao listar temas concluídos',
+            details: error.message
+        });
+    }
+});
+
+// GET /api/conquistas/modulos/:userEmail — badges por módulo (todos os quizzes do módulo aprovados)
+app.get('/api/conquistas/modulos/:userEmail', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({
+                success: false,
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).'
+            });
+        }
+        const userEmail = decodeURIComponent(String(req.params.userEmail || '').trim());
+        if (!userEmail) {
+            return res.status(400).json({ success: false, error: 'Parâmetro userEmail é obrigatório' });
+        }
+        await ensureCertIndex(db);
+        await ensureModuloCertIndex(db);
+        const modulos = await fetchConquistasModulos(db, userEmail);
+        res.json({ success: true, modulos });
+    } catch (error) {
+        console.error('Erro em GET /api/conquistas/modulos:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao listar módulos concluídos',
+            details: error.message
+        });
+    }
+});
+
+// GET /api/conquistas/excelencia/:userEmail — Excelência do Atendimento (atendimento_trophies)
+app.get('/api/conquistas/excelencia/:userEmail', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({
+                success: false,
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).'
+            });
+        }
+        const userEmail = decodeURIComponent(String(req.params.userEmail || '').trim());
+        if (!userEmail) {
+            return res.status(400).json({ success: false, error: 'Parâmetro userEmail é obrigatório' });
+        }
+        await ensureExcelenciaIndex(db);
+        const trophies = await fetchConquistasExcelencia(db, userEmail);
+        res.json({ success: true, trophies });
+    } catch (error) {
+        console.error('Erro em GET /api/conquistas/excelencia:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao listar conquistas de excelência',
+            details: error.message
         });
     }
 });
@@ -373,7 +414,7 @@ app.get('/api/courses', async (req, res) => {
         if (!db) {
             return res.status(503).json({ 
                 success: false, 
-                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.' 
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).' 
             });
         }
 
@@ -431,6 +472,53 @@ app.get('/api/courses', async (req, res) => {
     }
 });
 
+// GET /api/temas/recent — temas (seções) mais recentes por updatedAt (home “Novo pra você”)
+app.get('/api/temas/recent', async (req, res) => {
+    try {
+        if (!db) {
+            return res.status(503).json({
+                success: false,
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).'
+            });
+        }
+
+        const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 4, 1), 10);
+        const temas = await fetchRecentTemas(db, limit);
+        res.json({ success: true, temas });
+    } catch (error) {
+        console.error('Erro ao listar temas recentes:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao listar temas recentes',
+            details: error.message
+        });
+    }
+});
+
+// GET /api/youtube/tutorias — vídeos da playlist “Dicas rápidas” (YOUTUBE_* na FONTE DA VERDADE)
+app.get('/api/youtube/tutorias', async (req, res) => {
+    try {
+        const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 6, 1), 15);
+        const { videos } = await fetchTutoriasPlaylistVideos({ maxResults: limit });
+        res.json({ success: true, videos });
+    } catch (error) {
+        if (error.code === 'YOUTUBE_ENV_MISSING') {
+            return res.status(503).json({
+                success: false,
+                error: 'Integração YouTube não configurada no ambiente.',
+                videos: []
+            });
+        }
+        console.error('Erro ao listar tutoriais YouTube:', error);
+        res.status(502).json({
+            success: false,
+            error: 'Não foi possível carregar os vídeos da playlist.',
+            details: error.message,
+            videos: []
+        });
+    }
+});
+
 // GET /api/courses/:cursoNome - Obter curso específico
 app.get('/api/courses/:cursoNome', async (req, res) => {
     try {
@@ -439,7 +527,7 @@ app.get('/api/courses/:cursoNome', async (req, res) => {
         if (!db) {
             return res.status(503).json({ 
                 success: false, 
-                error: 'MongoDB não disponível. Verifique a variável de ambiente MONGODB_URI no Vercel.' 
+                error: 'MongoDB não disponível. Verifique a variável MONGO_ENV no arquivo .env (FONTE DA VERDADE).' 
             });
         }
 
@@ -545,27 +633,13 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const emailLower = email.toLowerCase();
-        console.log('=== BUSCA USUÁRIO ===');
-        console.log('Email recebido:', email);
-        console.log('Email normalizado:', emailLower);
-        console.log('Buscando usuário no MongoDB...');
+        const debugLogin = process.env.DEBUG_LOGIN === '1';
+        if (debugLogin) {
+            console.log('[auth/login] busca', emailLower);
+        }
 
         const funcionario = await qualidadeDb.collection('qualidade_funcionarios')
             .findOne({ userMail: emailLower });
-
-        console.log('Usuário encontrado?', !!funcionario);
-        if (funcionario) {
-            console.log('Email do usuário encontrado:', funcionario.userMail);
-            console.log('Nome:', funcionario.colaboradorNome);
-        } else {
-            console.log('Usuário não encontrado com email:', emailLower);
-            // Tentar buscar todos os emails para debug
-            const todosUsuarios = await qualidadeDb.collection('qualidade_funcionarios')
-                .find({}, { projection: { userMail: 1, colaboradorNome: 1 } })
-                .limit(5)
-                .toArray();
-            console.log('Primeiros 5 usuários no banco:', todosUsuarios.map(u => ({ email: u.userMail, nome: u.colaboradorNome })));
-        }
 
         if (!funcionario) {
             return res.status(401).json({
@@ -596,87 +670,63 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         let passwordValid = false;
-        
-        console.log('=== DEBUG LOGIN (server-api.js) ===');
-        console.log('Email recebido:', email);
-        console.log('Senha recebida:', password);
-        console.log('Senha armazenada:', funcionario.password);
-        console.log('Tipo da senha armazenada:', typeof funcionario.password);
-        console.log('Password é null?', funcionario.password === null || funcionario.password === undefined);
-        
+
         // Se password é null ou undefined, usar senha padrão diretamente
         if (!funcionario.password || funcionario.password === null || funcionario.password === undefined) {
-            console.log('Password não definido, usando senha padrão...');
             const nomeCompleto = funcionario.colaboradorNome || '';
             const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
-            
-            console.log('Nome completo:', nomeCompleto);
-            console.log('Partes do nome:', partesNome);
-            console.log('CPF:', funcionario.CPF);
-            
+
             if (partesNome.length >= 2 && funcionario.CPF) {
                 const primeiroNome = partesNome[0];
                 const ultimoNome = partesNome[partesNome.length - 1];
                 const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
-                
-                console.log('Senha padrão calculada:', senhaPadrao);
-                console.log('Senha recebida:', password);
-                console.log('Comparação exata:', password === senhaPadrao);
-                console.log('Tamanho senha recebida:', password ? password.length : 0);
-                console.log('Tamanho senha padrão:', senhaPadrao.length);
-                
                 passwordValid = password === senhaPadrao;
-                console.log('Resultado validação senha padrão:', passwordValid);
-            } else {
-                console.log('Não foi possível calcular senha padrão - partesNome.length:', partesNome.length, 'CPF:', !!funcionario.CPF);
+                if (debugLogin) {
+                    console.log('[auth/login] senha padrão aplicável, match:', passwordValid);
+                }
             }
         } else {
             // Verificar se a senha armazenada é um hash bcrypt (começa com $2a$, $2b$ ou $2y$)
-            const isBcryptHash = typeof funcionario.password === 'string' && 
-                                 (funcionario.password.startsWith('$2a$') || 
-                                  funcionario.password.startsWith('$2b$') || 
+            const isBcryptHash = typeof funcionario.password === 'string' &&
+                                 (funcionario.password.startsWith('$2a$') ||
+                                  funcionario.password.startsWith('$2b$') ||
                                   funcionario.password.startsWith('$2y$'));
-            
-            console.log('É hash bcrypt?', isBcryptHash);
-            
+
             if (isBcryptHash) {
-                // Senha está em hash bcrypt - comparar hash
                 passwordValid = await bcrypt.compare(password, funcionario.password);
-                console.log('Comparação bcrypt:', passwordValid);
             } else {
-                // Senha está em texto plano - comparar diretamente
                 passwordValid = password === funcionario.password;
-                console.log('Comparação texto plano:', passwordValid);
-                console.log('Senha recebida:', password);
-                console.log('Senha armazenada:', funcionario.password);
             }
-            
+
             // Se ainda não validou, tentar senha padrão como fallback
             if (!passwordValid) {
-                console.log('Senha armazenada não corresponde, tentando senha padrão como fallback...');
                 const nomeCompleto = funcionario.colaboradorNome || '';
                 const partesNome = nomeCompleto.toLowerCase().trim().split(/\s+/);
-                
+
                 if (partesNome.length >= 2 && funcionario.CPF) {
                     const primeiroNome = partesNome[0];
                     const ultimoNome = partesNome[partesNome.length - 1];
                     const senhaPadrao = `${primeiroNome}.${ultimoNome}${funcionario.CPF}`;
-                    
-                    console.log('Senha padrão calculada (fallback):', senhaPadrao);
                     passwordValid = password === senhaPadrao;
-                    console.log('Comparação senha padrão (fallback):', passwordValid);
+                    if (debugLogin) {
+                        console.log('[auth/login] fallback senha padrão, match:', passwordValid);
+                    }
                 }
             }
         }
-        
-        console.log('Resultado final da validação:', passwordValid);
-        console.log('=== FIM DEBUG ===');
 
         if (!passwordValid) {
+            if (debugLogin) {
+                console.log('[auth/login] falha de autenticação', emailLower);
+            }
             return res.status(401).json({
                 success: false,
                 error: 'Email ou senha incorretos'
             });
+        }
+
+        if (debugLogin) {
+            console.log('[auth/login] sucesso', emailLower);
         }
 
         const academyDb = await getAcademyDb();
@@ -933,9 +983,16 @@ app.get('/api/health', (req, res) => {
     res.json({ 
         status: 'ok', 
         mongodb: db ? 'connected' : 'disconnected',
-        mongodb_uri_configured: !!MONGODB_URI && MONGODB_URI !== 'mongodb://localhost:27017',
+        mongodb_uri_configured: !!MONGODB_URI_FROM_ENV,
         timestamp: new Date().toISOString()
     });
+});
+
+// OAuth: Client ID a partir de GOOGLE_CLIENT_ID (env do container / FONTE DA VERDADE)
+app.get('/api/config/google-client.js', (req, res) => {
+    res.setHeader('Content-Type', 'application/javascript; charset=utf-8');
+    res.setHeader('Cache-Control', 'no-store');
+    res.send(getGoogleClientIdInjectScript());
 });
 
 // Servir arquivos estáticos (HTML, CSS, JS) - para deploy GCP Cloud Run
@@ -953,9 +1010,17 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   POST /api/progress/save`);
     console.log(`   GET  /api/progress/:userEmail/:subtitle`);
     console.log(`   POST /api/progress/unlock-quiz`);
-    console.log(`   POST /api/quiz/result`);
+    console.log(`   POST /api/quiz/start`);
+    console.log(`   POST /api/quiz/submit`);
+    console.log(`   POST /api/conquistas/quiz-approved`);
+    console.log(`   GET  /api/conquistas/temas/:userEmail`);
+    console.log(`   GET  /api/conquistas/modulos/:userEmail`);
+    console.log(`   GET  /api/conquistas/excelencia/:userEmail`);
     console.log(`   GET  /api/progress/user/:userEmail`);
     console.log(`   GET  /api/courses`);
+    console.log(`   GET  /api/temas/recent`);
+    console.log(`   GET  /api/youtube/tutorias`);
+    console.log(`   GET  /api/config/google-client.js`);
     console.log(`   GET  /api/courses/:cursoNome`);
     console.log(`   POST /api/auth/login`);
     console.log(`   POST /api/auth/validate-access`);
@@ -963,13 +1028,12 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   POST /api/auth/session/logout`);
     console.log(`   GET  /api/health`);
     console.log(`\n🔧 Configuração MongoDB:`);
-    console.log(`   URI configurada: ${!!MONGODB_URI && MONGODB_URI !== 'mongodb://localhost:27017' ? '✅ Sim' : '❌ Não'}`);
+    console.log(`   URI configurada: ${MONGODB_URI_FROM_ENV ? 'Sim' : 'Não'}`);
     console.log(`   Database: ${DB_NAME} (variável: DB_NAME_ACADEMY)`);
     console.log(`   Collection: ${COLLECTION_NAME}`);
-    if (!MONGODB_URI || MONGODB_URI === 'mongodb://localhost:27017') {
-        console.log(`\n⚠️  ATENÇÃO: Configure as variáveis de ambiente no Vercel:`);
-        console.log(`   - MONGODB_URI: Connection string do MongoDB`);
-        console.log(`   - DB_NAME_ACADEMY: Nome do banco (padrão: academy_registros)`);
+    if (!MONGODB_URI_FROM_ENV) {
+        console.log(`\n⚠️  Atenção: defina MONGO_ENV no arquivo .env da FONTE DA VERDADE (string de conexão Atlas ou mongodb://localhost:27017 para Mongo local).`);
+        console.log(`   - DB_NAME_ACADEMY: nome do banco (padrão: academy_registros)`);
     }
 });
 
