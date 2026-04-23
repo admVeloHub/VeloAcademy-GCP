@@ -22,7 +22,7 @@
 - server-api.js, server.js, index.html, js/config/google-config.js, js/home.js, js/login-page.js, .env.example, package.json, DEPLOY_LOG.md
 ### Descrição:
 - `GOOGLE_CLIENT_ID` lido do ambiente (FONTE DA VERDADE / Cloud Run) e servido em `GET /api/config/google-client.js` para o browser; `index.html` carrega o script antes de `google-config.js`. Fallback no JS mantido se env ausente. Front estático (server.js) repete a mesma rota para `npm run dev` na porta 3000.
-### Commit Hash: (preencher no push)
+### Commit Hash: 4dd887c
 
 ---
 
@@ -38,8 +38,8 @@
 - Segurança: `api/auth/login` sem logs de senha/PII; alinhado a `server-api.js` e `DEBUG_LOGIN`.
 - `MONGO_ENV`: mesmo fluxo de `FONTE DA VERDADE` / `.env` local em `lib/mongodb` (Vercel/api).
 - Docker: reforçado para não copiar `FONTE DA VERDADE` se existir no contexto de build.
-- Scanner: `gitleaks` via npx indisponível no ambiente; inspeção `git log` sem ficheiros `.env` no histórico deste repositório. Rotação de credenciais e `git filter-repo` + `git push --force` ficam a cargo operacional se surgirem confirmações de segredos no histórico (instalar `git-filter-repo`; fazer `git clone --mirror` de backup antes).
-### Commit Hash: (preencher no push)
+- Scanner: `gitleaks` via npx indisponível no ambiente; inspeção `git log` sem ficheiros `.env` no histórico. **Histórico reescrito com `git filter-repo`:** remoção de blobs dos caminhos `Untitled-1.js`, `2.md`, `google-signin-config.js` de todos os commits. Rotação de credenciais se algum segredo tiver existido nesses ficheiros no passado.
+### Commit Hash: 4dd887c (inclui sync 3c00e94 + reescrita de histórico filter-repo; tip do push)
 
 ---
 
