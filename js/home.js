@@ -1,4 +1,4 @@
-// VERSION: v1.0.9 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
+// VERSION: v1.0.10 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // JavaScript para a página Home da VeloAcademy (Landing Page)
 const homeApp = {
     // ================== CONFIGURAÇÕES GLOBAIS ==================
@@ -239,7 +239,7 @@ const homeApp = {
         this.initGoogleSignIn();
     },
 
-    updateConnectivityStatus(isOnline, isVercel = false) {
+    updateConnectivityStatus(isOnline) {
         const statusIcon = document.getElementById('status-icon');
         const statusText = document.getElementById('status-text');
         const connectivityStatus = document.getElementById('connectivity-status');

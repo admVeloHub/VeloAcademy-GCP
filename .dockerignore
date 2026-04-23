@@ -38,6 +38,3 @@ Thumbs.db
 scripts/
 api-disabled/
 
-# Vercel (não usado no GCP)
-vercel.json
-.vercel

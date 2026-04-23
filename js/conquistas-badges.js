@@ -1,18 +1,93 @@
-// VERSION: v1.2.0 | DATE: 2026-04-23 | Conquistas: temas, módulos e Excelência do Atendimento (API + grids)
+// VERSION: v1.2.8 | DATE: 2026-04-23 | Proxy GCS (allowlist mediabank_academy | mediabank_velohub); b64 no path = só codificação do texto do URL, não da imagem
 
 (function () {
     'use strict';
 
-    function readSessionEmail() {
+    function getConquistasApiBase() {
+        if (typeof window === 'undefined') return '/api';
+        const h = window.location.hostname;
+        const p = window.location.protocol;
+        const port = window.location.port;
+        const isLocal =
+            h === 'localhost' ||
+            h === '127.0.0.1' ||
+            /^192\.168\.\d{1,3}\.\d{1,3}$/.test(h) ||
+            /^10\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(h) ||
+            /^172\.(1[6-9]|2\d|3[01])\.\d{1,3}\.\d{1,3}$/.test(h);
+        if (isLocal) {
+            const hostPart = p + '//' + h;
+            if (port === '3001') return (hostPart + '/api').replace(/\/$/, '');
+            return (hostPart + ':3001/api').replace(/\/$/, '');
+        }
+        if (typeof window.getApiBaseUrl === 'function') {
+            const b = String(window.getApiBaseUrl()).replace(/\/$/, '');
+            if (/^https?:\/\//i.test(b)) return b;
+        }
+        return (p + '//' + h + (port ? ':' + port : '') + '/api').replace(/\/$/, '');
+    }
+
+    function utf8ToB64Url(s) {
         try {
-            const raw = localStorage.getItem('veloacademy_user_session');
-            if (!raw) return '';
-            const data = JSON.parse(raw);
-            const u = data && data.user;
-            return u && u.email ? String(u.email).trim() : '';
+            const bin = unescape(encodeURIComponent(s));
+            return btoa(bin)
+                .replace(/\+/g, '-')
+                .replace(/\//g, '_')
+                .replace(/=+$/, '');
         } catch (e) {
             return '';
         }
+    }
+
+    var GCS_PROXY_PATH_PREFIXES = ['/mediabank_academy/', '/mediabank_velohub/'];
+
+    function gcsPublicUrlPathAllowed(pathname) {
+        var p = String(pathname || '');
+        for (var i = 0; i < GCS_PROXY_PATH_PREFIXES.length; i++) {
+            var pref = GCS_PROXY_PATH_PREFIXES[i];
+            if (p === pref.slice(0, -1) || p.indexOf(pref) === 0) return true;
+        }
+        return false;
+    }
+
+    /**
+     * A imagem continua no GCS. O proxy no Express pede o ficheiro ao URL HTTPS guardado no doc.
+     * base64url no path só embala o texto desse URL no endereço do GET (evita ?u= perdido em dev).
+     */
+    function badgeImageSrcForDisplay(rawUrl) {
+        const url = (rawUrl || '').trim();
+        if (!url) return '';
+        try {
+            const u = new URL(url);
+            if (u.protocol !== 'https:') return url;
+            if (u.hostname !== 'storage.googleapis.com') return url;
+            if (!gcsPublicUrlPathAllowed(u.pathname)) return url;
+            const b64 = utf8ToB64Url(url);
+            if (!b64) return url;
+            const base = getConquistasApiBase();
+            return base + '/conquistas/badge-image/b64/' + b64;
+        } catch (_) {
+            return url;
+        }
+    }
+
+    function readSessionEmail() {
+        try {
+            const raw = localStorage.getItem('veloacademy_user_session');
+            if (raw) {
+                const data = JSON.parse(raw);
+                const u = data && data.user;
+                if (u && u.email) return String(u.email).trim().toLowerCase();
+            }
+        } catch (e) {
+            /* ignora */
+        }
+        try {
+            const legacy = localStorage.getItem('userEmail');
+            if (legacy) return String(legacy).trim().toLowerCase();
+        } catch (e2) {
+            /* ignora */
+        }
+        return '';
     }
 
     function formatDate(iso) {
@@ -38,7 +113,7 @@
     }
 
     function renderTemaCard(item) {
-        const url = (item.badgeIconUrl || '').trim();
+        const url = badgeImageSrcForDisplay((item.badgeIconUrl || item.temaTrophyIconUrl || '').trim());
         const title = (item.temaNome || item.quizID || 'Tema').trim();
         const labelDate = formatDate(item.approvedAt);
         const tier = (item.badgeCategoria && String(item.badgeCategoria).trim()) || '';
@@ -53,7 +128,6 @@
             img.className = 'conquistas-badge-img';
             img.src = url;
             img.alt = title;
-            img.referrerPolicy = 'no-referrer';
             img.loading = 'lazy';
             visual.appendChild(img);
         } else {
@@ -87,7 +161,7 @@
     }
 
     function renderModuloCard(item) {
-        const url = (item.badgeIconUrl || '').trim();
+        const url = badgeImageSrcForDisplay((item.badgeIconUrl || '').trim());
         const title = (item.moduleNome || item.moduleId || 'Módulo').trim();
         const curso = (item.cursoNome || '').trim();
         const labelDate = formatDate(item.completedAt);
@@ -102,7 +176,6 @@
             img.className = 'conquistas-badge-img';
             img.src = url;
             img.alt = title;
-            img.referrerPolicy = 'no-referrer';
             img.loading = 'lazy';
             visual.appendChild(img);
         } else {
@@ -136,7 +209,7 @@
     }
 
     function renderExcelenciaCard(item) {
-        const url = (item.trophy_url || '').trim();
+        const url = badgeImageSrcForDisplay((item.trophy_url || '').trim());
         const title = (item.conquista_titulo || 'Conquista').trim();
         const xpRaw = item.xpClass;
         const xpLabel =
@@ -154,7 +227,6 @@
             img.className = 'conquistas-badge-img';
             img.src = url;
             img.alt = title;
-            img.referrerPolicy = 'no-referrer';
             img.loading = 'lazy';
             visual.appendChild(img);
         } else {
@@ -210,7 +282,7 @@
             return;
         }
 
-        const base = typeof getApiBaseUrl === 'function' ? getApiBaseUrl() : '/api';
+        const base = getConquistasApiBase();
         const enc = encodeURIComponent(email);
 
         setHint(hintT, '');

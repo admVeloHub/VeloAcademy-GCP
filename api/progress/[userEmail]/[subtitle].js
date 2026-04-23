@@ -25,7 +25,7 @@ module.exports = async (req, res) => {
     }
 
     try {
-        // Vercel passa parâmetros dinâmicos via req.query
+        // Parâmetros dinâmicos expostos em req.query neste handler
         // Tentar pegar de req.query primeiro, depois da URL como fallback
         let userEmail = req.query.userEmail || '';
         let subtitle = req.query.subtitle || '';

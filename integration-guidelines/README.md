@@ -96,7 +96,7 @@ O projeto possui uma navegação consistente com as seguintes abas:
             <a href="./cursos.html" class="nav-link">Cursos</a>
             <a href="./conquistas.html" class="nav-link">Conquistas</a>
             <a href="./auto-feedback.html" class="nav-link">Auto Feedback</a>
-            <a href="https://velohub.vercel.app" class="nav-link" target="_blank">VeloHub</a>
+            <a href="https://app.velohub.velotax.com.br" class="nav-link" target="_blank">VeloHub</a>
         </nav>
 
         <div class="theme-switch-wrapper" id="theme-toggle">

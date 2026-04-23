@@ -1,4 +1,4 @@
-// VERSION: v1.1.0 | DATE: 2026-04-23 | GET /api/conquistas/modulos/:userEmail
+// VERSION: v1.1.1 | DATE: 2026-04-23 | GET /api/conquistas/modulos/:userEmail — fonte: modulo_certificados (não course_progress)
 
 const { getDatabase } = require('../../../lib/mongodb');
 const { fetchConquistasModulos, ensureCertIndex } = require('../../../lib/conquistas-badges');

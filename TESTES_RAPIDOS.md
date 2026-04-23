@@ -19,7 +19,7 @@ ls -la api/courses/index.js
 ls -la api/courses/[cursoNome].js
 ls -la api/health.js
 ls -la lib/mongodb.js
-ls -la vercel.json
+ls -la server-api.js
 ```
 **✅ Esperado:** Todos os arquivos listados
 
@@ -66,7 +66,7 @@ grep -r "Access-Control-Allow-Origin" api/
 - [ ] ✅ POST /api/progress/save funciona localmente
 - [ ] ✅ Imports corretos
 - [ ] ✅ CORS configurado
-- [ ] ✅ `vercel.json` existe e está correto
+- [ ] ✅ `server-api.js` presente (API local / GCP)
 
 ## 🚀 Pronto para Commit!
 
@@ -74,14 +74,13 @@ Se todos os testes acima passaram, você pode fazer commit:
 
 ```bash
 git add .
-git commit -m "feat: implementar serverless functions para API no Vercel"
+git commit -m "feat: descrição da alteração"
 git push
 ```
 
 ## 📋 Testes Completos (Opcional)
 
 Para testes mais completos, veja `TESTES_API.md` que inclui:
-- Testes com Vercel CLI (`vercel dev`)
 - Testes de todas as rotas
 - Testes de validação
 - Testes de encoding

@@ -1,36 +1,24 @@
-# API Serverless Functions - VeloAcademy
+# API — módulos VeloAcademy
 
-## Estrutura de Rotas
+## Execução local e GCP
 
-O Vercel detecta automaticamente as rotas baseado na estrutura de pastas:
+A API em produção e em desenvolvimento alvo é o **`server-api.js`** (Express), iniciado com:
 
-- `api/progress/save.js` → `POST /api/progress/save`
-- `api/progress/unlock-quiz.js` → `POST /api/progress/unlock-quiz`
-- `api/progress/[userEmail]/[subtitle].js` → `GET /api/progress/:userEmail/:subtitle`
-- `api/progress/user/[userEmail].js` → `GET /api/progress/user/:userEmail`
-- `api/courses/index.js` → `GET /api/courses`
-- `api/courses/[cursoNome].js` → `GET /api/courses/:cursoNome`
-- `api/health.js` → `GET /api/health`
-
-## Parâmetros Dinâmicos
-
-Para rotas dinâmicas, o Vercel passa os parâmetros via `req.query`:
-- `[userEmail].js` → `req.query.userEmail`
-- `[subtitle].js` → `req.query.subtitle`
-- `[cursoNome].js` → `req.query.cursoNome`
-
-## Variáveis de Ambiente
-
-Configure no Vercel:
-- `MONGODB_URI`: Connection string do MongoDB
-- `DB_NAME_ACADEMY`: Nome do banco (padrão: `academy_registros`)
-
-## Desenvolvimento Local
-
-Para testar localmente, use o `server-api.js`:
 ```bash
 npm run api
 ```
 
-O servidor rodará em `http://localhost:3001`
+Servidor em `http://localhost:3001`. O Cloud Run usa o mesmo processo (`npm run start:gcp`).
 
+## Pasta `api/`
+
+Os ficheiros em `api/**/*.js` são **handlers** reutilizáveis: parte das rotas é registada no `server-api.js` com `app.get` / `app.post` e `require('./api/...')`; outros módulos mantêm a mesma assinatura `(req, res)` para consistência e para `node -c` na pipeline de sintaxe.
+
+Rotas dinâmicas nestes handlers expõem parâmetros em **`req.query`** (ex.: `[userEmail].js` → `req.query.userEmail`), conforme o contrato esperado pelo Express ao montar a rota.
+
+## Variáveis de ambiente
+
+- `MONGODB_URI`
+- `DB_NAME_ACADEMY` (padrão: `academy_registros`)
+
+Configurar no `.env` local e nos secrets do Cloud Run.

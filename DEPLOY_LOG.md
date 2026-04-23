@@ -14,6 +14,44 @@
 
 ## Deploys Realizados
 
+### Data/Hora: 2026-04-23 18:40:59
+### Tipo: GitHub Push
+### Versão: server-api v1.7.9, lib/conquistas-badge-image-proxy v1.0.5, js/conquistas-badges v1.2.8
+### Arquivos Modificados:
+- `lib/conquistas-badge-image-proxy.js` (novo), `server-api.js`, `package.json`, `package-lock.json`, `js/conquistas-badges.js`, `js/config/api-config.js`, `js/home.js`, `js/veloacademy.js`, `lib/conquistas-badges.js`, APIs `api/progress/save.js`, conquistas/modulos/temas/excelencia, `conquistas.html`, `cursos.html`, `css/styles.css`, `config.json`
+- Removido: `vercel.json`; docs (`DEPLOY_GCP.md`, `TESTES_*`, `api/README.md`, `scripts/test-api.sh`, integração), `.dockerignore`, `.env.example`
+### Descrição:
+- Push para teste no GCP: proxy de ícones Conquistas com fallback Storage SDK em bucket privado; fluxo sem Vercel; restantes alterações de progresso, certificados e UI em conjunto com o commit.
+### Commit Hash: ver `git log -1 --format=%H` na `main` após pull (este ficheiro entra no mesmo commit)
+
+---
+
+### Data/Hora: 2026-04-23
+### Tipo: Alteração local (proxy Conquistas — GCS privado)
+### Versão: server-api v1.7.9, lib/conquistas-badge-image-proxy v1.0.5
+### Arquivos Modificados:
+- `lib/conquistas-badge-image-proxy.js`, `server-api.js`, `package.json`, `package-lock.json`, `.env.example`
+### Descrição:
+- `GET /api/conquistas/badge-image/*`: após 403/401 no GET HTTPS anónimo ao `storage.googleapis.com`, leitura via `@google-cloud/storage` (ADC). Permite ícones em buckets não públicos. Local: `gcloud auth application-default login` ou `GOOGLE_APPLICATION_CREDENTIALS`. Cloud Run: IAM `roles/storage.objectViewer` (ou equivalente) na conta do serviço para `mediabank_academy` / `mediabank_velohub`.
+### Commit Hash: ver `git log -1 --format=%H` na `main` após pull (mesmo push)
+
+---
+
+### Data/Hora: 2026-04-23
+### Tipo: Alteração local (remoção de artefactos Vercel)
+### Versão: server-api v1.7.8, js/home v1.0.10, js/config/api-config v1.1.2, scripts/test-api v1.0.1
+### Arquivos Modificados:
+- Removidos: `vercel.json`, `api/conquistas/badge-image/` (handlers só serverless)
+- `package.json` (test:syntax), `server-api.js`, `.dockerignore`, `api/README.md`, `scripts/test-api.sh`
+- `js/config/api-config.js`, `js/home.js`, `api/progress/*`, `api/courses/[cursoNome].js`
+- Documentação: `TESTES_RAPIDOS.md`, `TESTES_API.md`, `RESULTADO_TESTES.md`, `DEPLOY_GCP.md`
+- Links VeloHub: `integration-guidelines/*`, `integração visual/template-page.html`
+### Descrição:
+- Alinhamento ao fluxo **local + GCP Cloud Run** (`server-api.js`). Proxy de ícones de conquistas permanece só no Express. Pasta `api/` continua com handlers partilhados; sem `vercel.json`.
+### Commit Hash: ver `git log -1 --format=%H` na `main` após pull (mesmo push)
+
+---
+
 ### Data/Hora: 2026-04-23 (Client ID no container)
 ### Tipo: Alteração local
 ### Versão: server-api v1.7.2, server.js v1.0.6, index v1.1.5, google-config v1.1.0, home v1.0.9, login-page v1.2.2, lib/google-client-inject v1.0.0, .env.example v1.1.0
@@ -36,7 +74,7 @@
 - Removidos: Untitled-1.js, 2.md, google-signin-config.js
 ### Descrição:
 - Segurança: `api/auth/login` sem logs de senha/PII; alinhado a `server-api.js` e `DEBUG_LOGIN`.
-- `MONGO_ENV`: mesmo fluxo de `FONTE DA VERDADE` / `.env` local em `lib/mongodb` (Vercel/api).
+- `MONGO_ENV`: mesmo fluxo de `FONTE DA VERDADE` / `.env` local em `lib/mongodb` (handlers em `api/`).
 - Docker: reforçado para não copiar `FONTE DA VERDADE` se existir no contexto de build.
 - Scanner: `gitleaks` via npx indisponível no ambiente; inspeção `git log` sem ficheiros `.env` no histórico. **Histórico reescrito com `git filter-repo`:** remoção de blobs dos caminhos `Untitled-1.js`, `2.md`, `google-signin-config.js` de todos os commits. Rotação de credenciais se algum segredo tiver existido nesses ficheiros no passado.
 ### Commit Hash: 4dd887c (inclui sync 3c00e94 + reescrita de histórico filter-repo; tip do push)

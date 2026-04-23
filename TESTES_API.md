@@ -1,4 +1,4 @@
-# 🧪 Guia de Testes - API Serverless Functions
+# 🧪 Guia de Testes — API (`server-api.js`, GCP / local)
 
 ## 📋 Checklist de Testes Antes do Deploy
 
@@ -46,25 +46,20 @@ node -c api/health.js
 
 **Resultado esperado:** Nenhum erro de sintaxe
 
-### ✅ 3. Teste Local com Vercel CLI (Recomendado)
+### ✅ 3. Teste local com Express (`server-api.js`)
 
-#### Instalar Vercel CLI (se não tiver)
+#### Subir a API
 ```bash
-npm install -g vercel
+npm run api
 ```
 
-#### Executar servidor local
-```bash
-vercel dev
-```
-
-Isso iniciará um servidor local que simula o ambiente do Vercel.
+Servidor em `http://localhost:3001` (front estático, se usado, costuma ser `http://localhost:3000`).
 
 #### Testar rotas manualmente:
 
 **3.1. Health Check**
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 ```
 
 **Resposta esperada:**
@@ -79,7 +74,7 @@ curl http://localhost:3000/api/health
 
 **3.2. Salvar Progresso (POST)**
 ```bash
-curl -X POST http://localhost:3000/api/progress/save \
+curl -X POST http://localhost:3001/api/progress/save \
   -H "Content-Type: application/json" \
   -d '{
     "userEmail": "teste@example.com",
@@ -106,7 +101,7 @@ curl -X POST http://localhost:3000/api/progress/save \
 
 **3.3. Obter Progresso (GET)**
 ```bash
-curl "http://localhost:3000/api/progress/teste@example.com/Chaves%20PIX"
+curl "http://localhost:3001/api/progress/teste@example.com/Chaves%20PIX"
 ```
 
 **Resposta esperada:**
@@ -123,7 +118,7 @@ curl "http://localhost:3000/api/progress/teste@example.com/Chaves%20PIX"
 
 **3.4. Listar Cursos (GET)**
 ```bash
-curl http://localhost:3000/api/courses
+curl http://localhost:3001/api/courses
 ```
 
 **Resposta esperada:**
@@ -136,7 +131,7 @@ curl http://localhost:3000/api/courses
 
 **3.5. Obter Curso Específico (GET)**
 ```bash
-curl "http://localhost:3000/api/courses/produtos"
+curl "http://localhost:3001/api/courses/produtos"
 ```
 
 **Resposta esperada:**
@@ -152,7 +147,7 @@ curl "http://localhost:3000/api/courses/produtos"
 Verificar se as rotas respondem corretamente a requisições CORS:
 
 ```bash
-curl -X OPTIONS http://localhost:3000/api/progress/save \
+curl -X OPTIONS http://localhost:3001/api/progress/save \
   -H "Origin: http://localhost:8080" \
   -H "Access-Control-Request-Method: POST" \
   -v
@@ -167,7 +162,7 @@ curl -X OPTIONS http://localhost:3000/api/progress/save \
 
 **5.1. Teste sem parâmetros obrigatórios:**
 ```bash
-curl -X POST http://localhost:3000/api/progress/save \
+curl -X POST http://localhost:3001/api/progress/save \
   -H "Content-Type: application/json" \
   -d '{}'
 ```
@@ -176,7 +171,7 @@ curl -X POST http://localhost:3000/api/progress/save \
 
 **5.2. Teste com método incorreto:**
 ```bash
-curl -X GET http://localhost:3000/api/progress/save
+curl -X GET http://localhost:3001/api/progress/save
 ```
 
 **Resposta esperada:** Status 405 (Method Not Allowed)
@@ -187,10 +182,10 @@ Testar se caracteres especiais são tratados corretamente:
 
 ```bash
 # Email com @
-curl "http://localhost:3000/api/progress/lucas.gravina%40velotax.com.br/Chaves%20PIX"
+curl "http://localhost:3001/api/progress/lucas.gravina%40velotax.com.br/Chaves%20PIX"
 
 # Subtítulo com espaços e caracteres especiais
-curl "http://localhost:3000/api/progress/teste@example.com/Cr%C3%A9dito%20do%20Trabalhador"
+curl "http://localhost:3001/api/progress/teste@example.com/Cr%C3%A9dito%20do%20Trabalhador"
 ```
 
 ### ✅ 7. Verificação de Variáveis de Ambiente
@@ -214,7 +209,7 @@ DB_NAME_ACADEMY=academy_registros
 Verificar se a conexão MongoDB funciona:
 
 ```bash
-curl http://localhost:3000/api/health
+curl http://localhost:3001/api/health
 ```
 
 **Se MongoDB não estiver configurado:**
@@ -231,10 +226,10 @@ Verificar tempo de resposta das rotas:
 
 ```bash
 # Health check deve ser rápido (< 100ms)
-time curl http://localhost:3000/api/health
+time curl http://localhost:3001/api/health
 
 # Rotas com MongoDB podem ser mais lentas (< 500ms)
-time curl http://localhost:3000/api/courses
+time curl http://localhost:3001/api/courses
 ```
 
 ### ✅ 10. Teste no Frontend
@@ -253,10 +248,10 @@ Após deploy, testar no navegador:
 **Solução:** Verificar se o caminho relativo está correto na estrutura de pastas
 
 ### Problema: "MongoDB não disponível"
-**Solução:** Verificar variáveis de ambiente no Vercel
+**Solução:** Verificar variáveis de ambiente (`.env` local ou secrets no Cloud Run)
 
 ### Problema: "404 Not Found" nas rotas
-**Solução:** Verificar se `vercel.json` está configurado corretamente
+**Solução:** Confirmar que a rota está registada em `server-api.js` e que o processo correto está a correr (`npm run api`)
 
 ### Problema: "CORS error"
 **Solução:** Verificar se headers CORS estão sendo enviados corretamente
@@ -277,8 +272,8 @@ Após deploy, testar no navegador:
 
 1. ✅ Fazer commit das alterações
 2. ✅ Push para GitHub
-3. ✅ Deploy automático no Vercel
-4. ✅ Verificar logs do Vercel após deploy
+3. ✅ Deploy no GCP Cloud Run (ver `DEPLOY_GCP.md`)
+4. ✅ Verificar logs do serviço após deploy
 5. ✅ Testar rotas em produção
 6. ✅ Monitorar erros no console do navegador
 

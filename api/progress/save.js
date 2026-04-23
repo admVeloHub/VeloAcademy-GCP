@@ -1,8 +1,10 @@
-// VERSION: v1.1.0 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
-// POST /api/progress/save - Salvar progresso de aula
+// VERSION: v1.2.0 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
+// course_progress: trilha do tema + quizUnlocked. Sem quiz → ao concluir todas as aulas (1 ou N), tema_certificados.
+// Lista esperada de aulas: prioridade cursos_conteudo (paridade front); fallback body.allLessonTitles; último recurso completedVideos.
 
 const { getDatabase } = require('../../lib/mongodb');
 const { registerTemaVisualizacaoIfNeeded } = require('../../lib/tema-visual-certificado');
+const { findExpectedLessonTitlesBySubtitle } = require('../../lib/cursos-conteudo-lookup');
 
 const COLLECTION_NAME = 'course_progress';
 
@@ -60,24 +62,30 @@ module.exports = async (req, res) => {
         // Marcar aula como completa
         completedVideos[lessonTitle] = true;
 
-        // Calcular quizUnlocked: verificar se TODAS as aulas esperadas estão completas
+        let expectedTitles = await findExpectedLessonTitlesBySubtitle(db, subtitle);
+        let trilhaFonte = 'cursos_conteudo';
+        if (!expectedTitles || expectedTitles.length === 0) {
+            trilhaFonte = 'fallback';
+            if (allLessonTitles && Array.isArray(allLessonTitles) && allLessonTitles.length > 0) {
+                expectedTitles = allLessonTitles.map((t) => String(t).trim()).filter(Boolean);
+                trilhaFonte = 'body';
+            }
+        }
+
         let quizUnlocked = false;
-        if (allLessonTitles && Array.isArray(allLessonTitles) && allLessonTitles.length > 0) {
-            // Verificar se todas as aulas esperadas estão completas
-            const allCompleted = allLessonTitles.every(lesson => completedVideos[lesson] === true);
-            quizUnlocked = allCompleted;
-            
-            console.log('📊 Validação de quizUnlocked:', {
-                allLessonTitles,
+        if (expectedTitles && expectedTitles.length > 0) {
+            quizUnlocked = expectedTitles.every((lesson) => completedVideos[lesson] === true);
+            console.log('📊 quizUnlocked (trilha esperada):', {
+                subtitle,
+                expectedTitles,
                 completedVideos,
-                allCompleted,
-                quizUnlocked
+                quizUnlocked,
+                trilhaFonte
             });
         } else {
-            // Fallback: verificar se todas as aulas salvas estão completas (comportamento antigo)
             const allLessons = Object.values(completedVideos);
-            quizUnlocked = allLessons.length > 0 && allLessons.every(completed => completed === true);
-            console.log('⚠️ Usando fallback para quizUnlocked (allLessonTitles não fornecido)');
+            quizUnlocked = allLessons.length > 0 && allLessons.every((completed) => completed === true);
+            console.log('⚠️ quizUnlocked fallback (sem trilha em cursos_conteudo nem allLessonTitles)');
         }
 
         console.log('💾 Salvando progresso:', { userEmail, subtitle, lessonTitle, quizUnlocked, completedVideos });

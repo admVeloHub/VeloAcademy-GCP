@@ -1,25 +1,13 @@
 #!/bin/bash
-# VERSION: v1.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team
-# Script de teste para API Serverless Functions
+# VERSION: v1.0.1 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
+# Testes básicos de sintaxe e ficheiros (API servida por server-api.js / GCP)
 
 echo "🧪 Iniciando testes da API..."
 echo ""
 
-# Cores para output
 GREEN='\033[0;32m'
 RED='\033[0;31m'
-YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
-
-# Verificar se Vercel CLI está instalado
-if ! command -v vercel &> /dev/null; then
-    echo -e "${YELLOW}⚠️  Vercel CLI não encontrado. Instalando...${NC}"
-    npm install -g vercel
-fi
-
-# Verificar sintaxe dos arquivos
-echo "📝 Verificando sintaxe dos arquivos..."
-echo ""
+NC='\033[0m'
 
 ERRORS=0
 
@@ -31,6 +19,9 @@ check_syntax() {
         ERRORS=$((ERRORS + 1))
     fi
 }
+
+echo "📝 Verificando sintaxe dos arquivos..."
+echo ""
 
 check_syntax "lib/mongodb.js"
 check_syntax "api/progress/save.js"
@@ -53,7 +44,6 @@ echo ""
 echo "📦 Verificando estrutura de arquivos..."
 echo ""
 
-# Verificar se todos os arquivos existem
 FILES=(
     "lib/mongodb.js"
     "api/progress/save.js"
@@ -63,7 +53,7 @@ FILES=(
     "api/courses/index.js"
     "api/courses/[cursoNome].js"
     "api/health.js"
-    "vercel.json"
+    "server-api.js"
 )
 
 MISSING=0
@@ -88,9 +78,7 @@ echo ""
 echo -e "${GREEN}✅ Testes básicos concluídos!${NC}"
 echo ""
 echo "📋 Próximos passos:"
-echo "   1. Execute 'vercel dev' para testar localmente"
-echo "   2. Teste as rotas manualmente (veja TESTES_API.md)"
-echo "   3. Faça commit e push para GitHub"
-echo "   4. Verifique o deploy no Vercel"
+echo "   1. npm run api  — subir API em http://localhost:3001"
+echo "   2. curl http://localhost:3001/api/health"
+echo "   3. Documentação adicional: TESTES_API.md, DEPLOY_GCP.md"
 echo ""
-

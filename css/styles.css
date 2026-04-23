@@ -1,5 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
-/* VERSION (global): v1.0.25 | DATE: 2026-04-23 | conquistas: Excelência XP (tipografia secundária) */
+/* VERSION (global): v1.0.33 | DATE: 2026-04-23 | Barra progresso modal Aula mais visível */
 
 :root {
     /* PALETA OFICIAL VELOHUB */
@@ -1128,6 +1128,27 @@ body:has(.home-remainder-frame) .hero-section {
     transform: none;
     box-shadow: none;
     opacity: 0.6;
+}
+
+/* Modais: Finalizar indisponível deve parecer claramente desativado (vence .btn:hover) */
+#youtube-btn-finish:disabled,
+#pdf-btn-finish:disabled,
+#aula-btn-finish:disabled,
+#googledrive-video-btn-finish:disabled {
+    opacity: 0.4 !important;
+    cursor: not-allowed !important;
+    pointer-events: none;
+    filter: grayscale(0.35);
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+#youtube-btn-finish:disabled:hover,
+#pdf-btn-finish:disabled:hover,
+#aula-btn-finish:disabled:hover,
+#googledrive-video-btn-finish:disabled:hover {
+    opacity: 0.4 !important;
+    transform: none !important;
 }
 
 /* Hero Section — título centralizado; subtítulo abaixo do título */
@@ -3821,7 +3842,7 @@ footer {
 
 /* ============================================= */
 /* == MODAL YOUTUBE == */
-/* VERSION: v1.0.0 | DATE: 2025-01-30 | AUTHOR: VeloHub Development Team */
+/* VERSION: v1.1.1 | DATE: 2026-04-23 | container com height = max viewport para flex-grow do body */
 /* ============================================= */
 
 /* Overlay do Modal */
@@ -3831,6 +3852,8 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
+    max-height: 100vh;
+    max-height: 100dvh;
     background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(5px);
     display: flex;
@@ -3840,6 +3863,9 @@ footer {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    box-sizing: border-box;
+    padding: 12px;
+    overflow: auto;
 }
 
 .youtube-modal-overlay.active {
@@ -3847,19 +3873,24 @@ footer {
     visibility: visible;
 }
 
-/* Container do Modal */
+/* Container do Modal — altura definida para o .youtube-modal-body com flex:1 receber espaço real */
 .youtube-modal-container {
     background-color: var(--cor-container);
     border-radius: var(--borda-raio);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    max-width: 720px;
-    width: 90%;
-    max-height: 90vh;
+    width: min(720px, calc(100vw - 24px));
+    max-width: min(720px, calc(100vw - 24px));
+    height: calc(100vh - 24px);
+    height: min(92dvh, calc(100vh - 24px));
+    max-height: calc(100vh - 24px);
+    max-height: min(92dvh, calc(100vh - 24px));
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     transform: scale(0.9);
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .youtube-modal-overlay.active .youtube-modal-container {
@@ -3868,6 +3899,7 @@ footer {
 
 /* Header do Modal */
 .youtube-modal-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -3913,13 +3945,14 @@ footer {
     transform: rotate(90deg);
 }
 
-/* Body do Modal */
+/* Body: ocupa só o espaço entre header e footer (evita empurrar controles para fora da tela) */
 .youtube-modal-body {
+    flex: 1 1 0;
+    min-height: 0;
     position: relative;
     width: 100%;
-    padding-bottom: 56.25%; /* Aspect ratio 16:9 */
-    height: 0;
     overflow: hidden;
+    background: #000;
 }
 
 .youtube-modal-body iframe {
@@ -3931,184 +3964,64 @@ footer {
     border: none;
 }
 
-/* Estilo para YouTube Shorts - Formato Vertical 9:16 */
+/* Shorts: modal mais estreito; o corpo continua flexível entre header e footer */
 .youtube-shorts-container {
-    max-width: 400px !important; /* Largura menor para Shorts */
-    width: 90% !important;
-    max-height: 90vh !important; /* Garantir que cabe na tela com footer */
+    width: min(400px, calc(100vw - 24px)) !important;
+    max-width: min(400px, calc(100vw - 24px)) !important;
+    height: calc(100vh - 24px) !important;
+    height: min(92dvh, calc(100vh - 24px)) !important;
+    max-height: calc(100vh - 24px) !important;
+    max-height: min(92dvh, calc(100vh - 24px)) !important;
+    min-height: 0 !important;
     display: flex !important;
     flex-direction: column !important;
     overflow: hidden !important;
 }
 
-/* Header fixo para Shorts */
 .youtube-shorts-container .youtube-modal-header {
     flex-shrink: 0 !important;
-    height: auto !important;
-    min-height: 60px !important;
 }
 
-/* Body do modal para Shorts - usar aspect-ratio com altura máxima limitada */
 .youtube-shorts-container .youtube-modal-body {
-    flex: 1 1 auto !important;
+    flex: 1 1 0 !important;
     min-height: 0 !important;
-    width: 100% !important;
-    /* Usar aspect-ratio moderno se disponível, senão usar padding-bottom */
-    aspect-ratio: 9 / 16 !important;
-    max-height: calc(90vh - 132px) !important; /* Limitar altura máxima */
-    position: relative !important;
-    overflow: hidden !important;
-    /* Fallback para navegadores sem suporte a aspect-ratio */
-    padding-bottom: 177.78% !important;
-    height: 0 !important;
+    padding-bottom: 0 !important;
+    aspect-ratio: unset !important;
 }
 
-/* Se aspect-ratio for suportado, remover padding-bottom */
-@supports (aspect-ratio: 9 / 16) {
-    .youtube-shorts-container .youtube-modal-body {
-        padding-bottom: 0 !important;
-        height: auto !important;
-    }
-}
-
-.youtube-shorts-container .youtube-modal-body iframe {
-    position: absolute !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    border: none !important;
-}
-
-/* Garantir que o footer sempre seja visível para Shorts */
 .youtube-shorts-container .youtube-modal-footer {
-    display: flex !important;
     flex-shrink: 0 !important;
-    visibility: visible !important;
-    opacity: 1 !important;
-    height: 72px !important;
-    min-height: 72px !important;
-    padding: 12px 16px !important; /* Reduzir padding para dar mais espaço */
-    gap: 8px !important; /* Reduzir gap entre elementos */
+    padding: 12px 16px !important;
+    gap: 8px !important;
 }
 
-/* Ajustar botões para Shorts - tamanho menor */
 .youtube-shorts-container .youtube-btn-prev,
 .youtube-shorts-container .youtube-btn-next,
 .youtube-shorts-container .youtube-btn-finish {
     padding: 8px 12px !important;
     font-size: 0.75rem !important;
     min-width: 70px !important;
-    height: 36px !important;
+    min-height: 36px !important;
 }
 
-/* Ajustar área de progresso para Shorts */
 .youtube-shorts-container .youtube-modal-progress {
     gap: 8px !important;
     min-width: 0 !important;
-    flex: 1 1 auto !important;
-    overflow: hidden !important;
 }
 
-/* Reduzir tamanho da barra de progresso para Shorts */
 .youtube-shorts-container .youtube-progress-bar {
-    width: 100px !important;
+    width: min(100px, 25vw) !important;
     max-width: 100px !important;
-    flex-shrink: 1 !important;
 }
 
-/* Reduzir tamanho do contador para Shorts */
 .youtube-shorts-container .youtube-modal-progress span {
     font-size: 0.7rem !important;
-    white-space: nowrap !important;
-    flex-shrink: 0 !important;
-}
-
-/* Em telas menores, ajustar Shorts */
-@media (max-width: 768px) {
-    .youtube-shorts-container {
-        max-width: 90vw !important;
-        width: 90vw !important;
-        max-height: 90vh !important; /* Garantir espaço para footer */
-    }
-    
-    .youtube-shorts-container .youtube-modal-body {
-        max-height: calc(90vh - 132px) !important; /* Altura máxima considerando header + footer */
-    }
-    
-    /* Garantir footer visível em mobile */
-    .youtube-shorts-container .youtube-modal-footer {
-        display: flex !important;
-        flex-shrink: 0 !important;
-        height: 72px !important;
-        min-height: 72px !important;
-        padding: 12px 16px !important;
-        gap: 8px !important;
-    }
-    
-    /* Ajustar botões em mobile para Shorts */
-    .youtube-shorts-container .youtube-btn-prev,
-    .youtube-shorts-container .youtube-btn-next,
-    .youtube-shorts-container .youtube-btn-finish {
-        padding: 8px 12px !important;
-        font-size: 0.75rem !important;
-        min-width: 70px !important;
-        height: 36px !important;
-    }
-    
-    /* Ajustar barra de progresso em mobile para Shorts */
-    .youtube-shorts-container .youtube-progress-bar {
-        width: 80px !important;
-        max-width: 80px !important;
-    }
-}
-
-@media (max-width: 480px) {
-    .youtube-shorts-container {
-        max-width: 100vw !important;
-        width: 100vw !important;
-        max-height: 100vh !important;
-    }
-    
-    .youtube-shorts-container .youtube-modal-body {
-        max-height: calc(100vh - 132px) !important; /* Altura máxima considerando header + footer */
-    }
-    
-    /* Garantir footer visível em mobile pequeno */
-    .youtube-shorts-container .youtube-modal-footer {
-        display: flex !important;
-        flex-shrink: 0 !important;
-        height: 72px !important;
-        min-height: 72px !important;
-        padding: 10px 12px !important;
-        gap: 6px !important;
-    }
-    
-    /* Ajustar botões em mobile pequeno para Shorts */
-    .youtube-shorts-container .youtube-btn-prev,
-    .youtube-shorts-container .youtube-btn-next,
-    .youtube-shorts-container .youtube-btn-finish {
-        padding: 6px 10px !important;
-        font-size: 0.7rem !important;
-        min-width: 60px !important;
-        height: 32px !important;
-    }
-    
-    /* Ajustar barra de progresso em mobile pequeno para Shorts */
-    .youtube-shorts-container .youtube-progress-bar {
-        width: 60px !important;
-        max-width: 60px !important;
-    }
-    
-    /* Ajustar contador em mobile pequeno para Shorts */
-    .youtube-shorts-container .youtube-modal-progress span {
-        font-size: 0.65rem !important;
-    }
 }
 
 /* Footer do Modal com Controles */
 /* Estrutura: [Voltar] [Progresso Centralizado] [Próximo/Finalizar] */
 .youtube-modal-footer {
+    flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -4116,7 +4029,7 @@ footer {
     border-top: 1px solid var(--cor-borda);
     background-color: var(--cor-container);
     gap: 16px;
-    height: 72px;
+    min-height: 72px;
     box-sizing: border-box;
 }
 
@@ -4242,10 +4155,7 @@ footer {
     margin: 0;
 }
 
-.youtube-btn-finish:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
+/* Estado disabled do Finalizar: ver regra global #youtube-btn-finish:disabled */
 
 /* Estilos específicos para botões do modal YouTube */
 .youtube-btn-prev.btn-secondary {
@@ -4328,8 +4238,8 @@ footer {
 /* Responsividade - Tablet */
 @media (max-width: 1024px) {
     .youtube-modal-container {
-        width: 80vw;
-        max-width: 640px;
+        width: min(640px, calc(100vw - 24px));
+        max-width: min(640px, calc(100vw - 24px));
     }
     
     .youtube-modal-header h3 {
@@ -4339,11 +4249,20 @@ footer {
 
 /* Responsividade - Mobile */
 @media (max-width: 768px) {
+    .youtube-modal-overlay {
+        padding: 8px;
+        align-items: stretch;
+    }
+    
     .youtube-modal-container {
-        width: 95vw;
-        max-width: none;
-        border-radius: 10px 10px 0 0;
-        max-height: 85vh;
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: calc(100vh - 16px);
+        height: min(92dvh, calc(100vh - 16px));
+        max-height: calc(100vh - 16px);
+        max-height: min(92dvh, calc(100vh - 16px));
+        border-radius: 10px;
+        margin: auto;
     }
     
     .youtube-modal-header {
@@ -4360,18 +4279,17 @@ footer {
         height: 26px;
         font-size: 1rem;
     }
-    
-    .youtube-modal-body {
-        padding-bottom: 56.25%; /* Mantém aspect ratio 16:9 */
-    }
 }
 
 @media (max-width: 480px) {
     .youtube-modal-container {
-        width: 100vw;
-        height: 100vh;
-        max-height: 100vh;
-        border-radius: 0;
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: calc(100vh - 16px);
+        height: min(94dvh, calc(100vh - 16px));
+        max-height: calc(100vh - 16px);
+        max-height: min(94dvh, calc(100vh - 16px));
+        border-radius: 8px;
     }
     
     .youtube-modal-header {
@@ -4393,6 +4311,7 @@ footer {
     height: 100vh;
     max-width: 100vw;
     max-height: 100vh;
+    max-height: 100dvh;
     background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
@@ -4418,8 +4337,10 @@ footer {
     max-width: 800px;
     width: 85%;
     max-width: calc(100vw - 40px);
+    height: calc(100vh - 40px);
+    height: min(calc(100dvh - 40px), calc(100vh - 40px));
     max-height: calc(100vh - 40px);
-    height: auto;
+    max-height: min(calc(100dvh - 40px), calc(100vh - 40px));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -4427,6 +4348,7 @@ footer {
     box-sizing: border-box;
     position: relative;
     align-self: center;
+    min-height: 0;
 }
 
 .pdf-modal-header {
@@ -4470,7 +4392,7 @@ footer {
 }
 
 .pdf-modal-body {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-height: 0;
     overflow-y: auto;
     overflow-x: hidden;
@@ -4630,6 +4552,8 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
+    max-height: 100vh;
+    max-height: 100dvh;
     background-color: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(5px);
     display: flex;
@@ -4639,6 +4563,9 @@ footer {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    box-sizing: border-box;
+    padding: 12px;
+    overflow: auto;
 }
 
 .googledrive-video-modal-overlay.active {
@@ -4651,14 +4578,19 @@ footer {
     background-color: var(--cor-container);
     border-radius: var(--borda-raio);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    max-width: 90%;
-    width: 90%;
-    max-height: 90vh;
+    width: min(90%, calc(100vw - 24px));
+    max-width: min(960px, calc(100vw - 24px));
+    height: calc(100vh - 24px);
+    height: min(92dvh, calc(100vh - 24px));
+    max-height: calc(100vh - 24px);
+    max-height: min(92dvh, calc(100vh - 24px));
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
     transform: scale(0.9);
     transition: transform 0.3s ease;
+    flex-shrink: 0;
 }
 
 .googledrive-video-modal-overlay.active .googledrive-video-modal-container {
@@ -4667,6 +4599,7 @@ footer {
 
 /* Header do Modal */
 .googledrive-video-modal-header {
+    flex-shrink: 0;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -4712,35 +4645,73 @@ footer {
     transform: rotate(90deg);
 }
 
-/* Body do Modal */
+/* Body do Modal — vídeo incorporado (preview drive.google.com) */
 .googledrive-video-modal-body {
+    flex: 1 1 0;
+    min-height: 0;
     position: relative;
     width: 100%;
-    padding-bottom: 56.25%; /* Aspect ratio 16:9 */
-    height: 0;
     overflow: hidden;
-    flex: 1;
-    min-height: 0;
+    background: #0d0d0d;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: stretch;
 }
 
-.googledrive-video-modal-body iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
+.googledrive-video-modal-body iframe.googledrive-video-iframe {
+    flex: 1 1 0;
     width: 100%;
-    height: 100%;
-    border: none;
+    min-height: 200px;
+    border: 0;
+    background: #000;
+}
+
+/* Painel quando o Google bloqueia iframe (drive.google.com) */
+.velo-drive-external-panel {
+    flex: 1;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 24px 20px;
+    text-align: center;
+    max-width: 440px;
+    margin: 0 auto;
+    box-sizing: border-box;
+    color: var(--cor-texto-principal);
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.45;
+}
+
+.velo-drive-external-panel p {
+    margin: 0;
+}
+
+.aula-modal-body .velo-drive-external-panel {
+    flex: 1 1 0;
+    min-height: 0;
+    width: 100%;
+    max-width: none;
+    margin: 0;
+    align-self: stretch;
+}
+
+.pdf-modal-body .velo-drive-external-panel {
+    min-height: 160px;
 }
 
 /* Footer do Modal */
 .googledrive-video-modal-footer {
+    flex-shrink: 0;
     display: flex;
     justify-content: center;
     align-items: center;
     padding: 16px 20px;
     border-top: 1px solid var(--cor-borda);
     background-color: var(--cor-container);
-    flex-shrink: 0;
 }
 
 .googledrive-video-modal-footer .btn {
@@ -4758,9 +4729,18 @@ footer {
     color: white;
 }
 
-.googledrive-video-modal-footer .btn-success:hover {
+.googledrive-video-modal-footer .btn-success:hover:not(:disabled) {
     background: linear-gradient(135deg, #0d8e2a, #1aa179);
     transform: translateY(-1px);
+}
+
+.googledrive-video-modal-footer .btn-success:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    pointer-events: none;
+    filter: grayscale(0.35);
+    transform: none;
+    box-shadow: none;
 }
 
 /* Tema Escuro */
@@ -4801,6 +4781,10 @@ footer {
     .googledrive-video-modal-container {
         width: 95%;
         max-width: 95%;
+        height: calc(100vh - 16px);
+        height: min(92dvh, calc(100vh - 16px));
+        max-height: calc(100vh - 16px);
+        max-height: min(92dvh, calc(100vh - 16px));
     }
 }
 
@@ -4875,6 +4859,7 @@ footer {
 }
 
 /* ==================== MODAL AULA (GOOGLE SLIDES) ==================== */
+/* v1.1.2 | 2026-04-23 | iframe 100%×100% (igual YouTube); evita width/height auto + padding que encolhiam a área */
 
 .aula-modal-overlay {
     position: fixed;
@@ -4882,6 +4867,8 @@ footer {
     left: 0;
     width: 100%;
     height: 100%;
+    max-height: 100vh;
+    max-height: 100dvh;
     background-color: rgba(0, 0, 0, 0.75);
     display: flex;
     justify-content: center;
@@ -4890,6 +4877,9 @@ footer {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
+    box-sizing: border-box;
+    padding: 12px;
+    overflow: auto;
 }
 
 .aula-modal-overlay.active {
@@ -4901,12 +4891,17 @@ footer {
     background-color: var(--cor-container);
     border-radius: var(--borda-raio);
     box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-    max-width: 1200px;
-    width: 90%;
-    max-height: 90vh;
+    width: min(1200px, calc(100vw - 24px));
+    max-width: min(1200px, calc(100vw - 24px));
+    height: calc(100vh - 24px);
+    height: min(92dvh, calc(100vh - 24px));
+    max-height: calc(100vh - 24px);
+    max-height: min(92dvh, calc(100vh - 24px));
+    min-height: 0;
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    flex-shrink: 0;
 }
 
 .aula-modal-header {
@@ -4948,18 +4943,18 @@ footer {
 }
 
 .aula-modal-body {
-    flex: 1 1 auto;
+    flex: 1 1 0;
     min-height: 0;
-    padding: 19px;
+    padding: 0;
     overflow: hidden;
     position: relative;
-    padding-bottom: 56.25%;
-    height: 0;
-    /* Limitar altura para não ocultar o footer */
-    max-height: calc(90vh - 132px);
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
 }
 
-.aula-modal-body iframe {
+/* Mesmo padrão do .youtube-modal-body iframe — ocupa todo o corpo do modal */
+.aula-modal-body iframe#aula-slides-iframe {
     position: absolute;
     top: 0;
     left: 0;
@@ -4986,16 +4981,24 @@ footer {
     align-items: center;
     justify-content: center;
     gap: 10px;
-    font-size: 0.8rem;
+    font-size: 0.78rem;
     color: var(--cor-texto-secundario);
     font-weight: 500;
+    min-width: 0;
+    text-align: center;
+}
+
+.aula-modal-progress #aula-slide-counter {
+    max-width: 100%;
+    line-height: 1.35;
 }
 
 .aula-progress-bar {
-    width: 200px;
-    height: 6px;
+    width: min(320px, 42vw);
+    min-width: 120px;
+    height: 8px;
     background-color: var(--cor-borda);
-    border-radius: 3px;
+    border-radius: 4px;
     overflow: hidden;
 }
 
@@ -5093,24 +5096,37 @@ footer {
 }
 
 @media (max-width: 768px) {
+    .aula-modal-overlay {
+        padding: 8px;
+        align-items: stretch;
+    }
+    
     .aula-modal-container {
-        width: 95vw;
-        max-width: none;
-        border-radius: 10px 10px 0 0;
-        max-height: 85vh;
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: calc(100vh - 16px);
+        height: min(92dvh, calc(100vh - 16px));
+        max-height: calc(100vh - 16px);
+        max-height: min(92dvh, calc(100vh - 16px));
+        border-radius: 10px;
+        margin: auto;
     }
 }
 
 @media (max-width: 480px) {
     .aula-modal-container {
-        width: 100vw;
-        height: 100vh;
-        max-height: 100vh;
-        border-radius: 0;
+        width: calc(100vw - 16px);
+        max-width: calc(100vw - 16px);
+        height: calc(100vh - 16px);
+        height: min(94dvh, calc(100vh - 16px));
+        max-height: calc(100vh - 16px);
+        max-height: min(94dvh, calc(100vh - 16px));
+        border-radius: 8px;
     }
     
     .aula-progress-bar {
-        width: 120px;
+        width: min(260px, 72vw);
+        min-width: 100px;
     }
     
     .aula-modal-progress {

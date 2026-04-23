@@ -1,4 +1,4 @@
-// VERSION: v1.1.1 | DATE: 2026-04-13 | AUTHOR: VeloHub Development Team
+// VERSION: v1.1.2 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // URL base da API — deve coincidir com o host da máquina em dev (LAN, localhost, porta 3001).
 
 /**
@@ -24,7 +24,7 @@ function getApiBaseUrl() {
 
     const { protocol, hostname, port } = window.location;
 
-    // Produção: mesmo domínio (Vercel, GCP com reverse proxy, etc.)
+    // Produção: mesmo domínio (ex.: GCP Cloud Run com reverse proxy)
     if (!isLocalOrPrivateHost(hostname)) {
         return '/api';
     }

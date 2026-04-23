@@ -60,7 +60,7 @@ Olá! Você está trabalhando em uma página que será integrada ao projeto Velo
                    <a href="./cursos.html" class="nav-link">Cursos</a>
                    <a href="./conquistas.html" class="nav-link">Conquistas</a>
                    <a href="./auto-feedback.html" class="nav-link active">Auto Feedback</a>
-                   <a href="https://velohub.vercel.app" class="nav-link" target="_blank">VeloHub</a>
+                   <a href="https://app.velohub.velotax.com.br" class="nav-link" target="_blank">VeloHub</a>
                </nav>
 
                <div class="theme-switch-wrapper" id="theme-toggle">

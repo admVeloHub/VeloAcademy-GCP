@@ -1,9 +1,16 @@
-// VERSION: v1.7.2 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
+// VERSION: v1.7.9 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
+// v1.7.9: Proxy badge-image — fallback @google-cloud/storage quando GCS público 403 (bucket privado; ADC local / SA no Cloud Run)
+// v1.7.8: Remoção de artefactos Vercel (vercel.json, api/conquistas/badge-image serverless); proxy de badges só no Express
+// v1.7.7: GET /api/conquistas/badge-image/b64/:data — proxy sem query (dev front :3000 + server.js não encaminha ?u= ao :3001)
+// v1.7.6: GET /api/conquistas/badge-image — proxy restrito GCS mediabank_academy (ícones quebrados no browser)
+// v1.7.5: Comentários GET /api/conquistas/* — fontes tema_certificados, modulo_certificados, atendimento_trophies (não course_progress)
+// v1.7.4: POST /api/progress/save — quizUnlocked com trilha de cursos_conteudo (1 ou N aulas; paridade front)
+// v1.7.3: GET /api/progress/user/:email antes de /api/progress/:email/:subtitle (evita userEmail='user')
 // Servidor API Express para progresso de cursos com MongoDB (textos em pt-BR).
 
 // Segredos (ex.: MongoDB): arquivo .env na FONTE DA VERDADE (pasta ao lado do ecossistema).
 // Exemplo Windows: C:\DEV - Ecosistema Velohub\FONTE DA VERDADE\.env
-// Carregamento: ver lib/load-fonte-env.cjs (mesma lógica que lib/mongodb.js para Vercel/api).
+// Carregamento: ver lib/load-fonte-env.cjs (mesma lógica que lib/mongodb.js para handlers em api/).
 
 const { loadFrom: loadFonteEnv } = require('./lib/load-fonte-env.cjs');
 loadFonteEnv(__dirname);
@@ -16,6 +23,8 @@ const { fetchConquistasTemas, fetchConquistasModulos, ensureCertIndex } = requir
 const { fetchConquistasExcelencia, ensureExcelenciaIndex } = require('./lib/conquistas-excelencia');
 const { ensureModuloCertIndex } = require('./lib/modulo-certificados');
 const { registerTemaVisualizacaoIfNeeded } = require('./lib/tema-visual-certificado');
+const { findExpectedLessonTitlesBySubtitle } = require('./lib/cursos-conteudo-lookup');
+const { readUrlQuery, sendProxiedBadgeImage, decodeBadgeUrlFromB64Param } = require('./lib/conquistas-badge-image-proxy');
 const cors = require('cors');
 const path = require('path');
 const { v4: uuidv4 } = require('uuid');
@@ -110,18 +119,25 @@ app.post('/api/progress/save', async (req, res) => {
         // Marcar aula como completa
         completedVideos[lessonTitle] = true;
 
-        // Calcular quizUnlocked: verificar se TODAS as aulas esperadas estão completas
-        let quizUnlocked = false;
-        if (allLessonTitles && Array.isArray(allLessonTitles) && allLessonTitles.length > 0) {
-            // Verificar se todas as aulas esperadas estão completas
-            quizUnlocked = allLessonTitles.every(lesson => completedVideos[lesson] === true);
-        } else {
-            // Fallback: verificar se todas as aulas salvas estão completas (comportamento antigo)
-            const allLessons = Object.values(completedVideos);
-            quizUnlocked = allLessons.length > 0 && allLessons.every(completed => completed === true);
+        let expectedTitles = await findExpectedLessonTitlesBySubtitle(db, subtitle);
+        let trilhaFonte = 'cursos_conteudo';
+        if (!expectedTitles || expectedTitles.length === 0) {
+            trilhaFonte = 'fallback';
+            if (allLessonTitles && Array.isArray(allLessonTitles) && allLessonTitles.length > 0) {
+                expectedTitles = allLessonTitles.map((t) => String(t).trim()).filter(Boolean);
+                trilhaFonte = 'body';
+            }
         }
-        
-        console.log('Salvando progresso:', { userEmail, subtitle, lessonTitle, quizUnlocked });
+
+        let quizUnlocked = false;
+        if (expectedTitles && expectedTitles.length > 0) {
+            quizUnlocked = expectedTitles.every((lesson) => completedVideos[lesson] === true);
+        } else {
+            const allLessons = Object.values(completedVideos);
+            quizUnlocked = allLessons.length > 0 && allLessons.every((completed) => completed === true);
+        }
+
+        console.log('Salvando progresso:', { userEmail, subtitle, lessonTitle, quizUnlocked, trilhaFonte });
 
         const progressData = {
             userEmail,
@@ -179,6 +195,42 @@ app.post('/api/progress/save', async (req, res) => {
             success: false, 
             error: 'Erro ao salvar progresso',
             details: error.message 
+        });
+    }
+});
+
+// GET /api/progress/user/:userEmail — listar todo o progresso (registar ANTES da rota genérica :userEmail/:subtitle)
+app.get('/api/progress/user/:userEmail', async (req, res) => {
+    try {
+        const userEmail = decodeURIComponent(String(req.params.userEmail || '').trim());
+
+        if (!db) {
+            return res.json({
+                success: false,
+                progress: [],
+                message: 'MongoDB não disponível'
+            });
+        }
+
+        const collection = db.collection(COLLECTION_NAME);
+
+        const allProgress = await collection.find({ userEmail }).toArray();
+
+        res.json({
+            success: true,
+            progress: allProgress.map(p => ({
+                subtitle: p.subtitle,
+                completedVideos: p.completedVideos || {},
+                quizUnlocked: p.quizUnlocked || false,
+                completedAt: p.completedAt
+            }))
+        });
+    } catch (error) {
+        console.error('Erro ao obter progresso do usuário:', error);
+        res.status(500).json({
+            success: false,
+            error: 'Erro ao obter progresso',
+            details: error.message
         });
     }
 });
@@ -284,43 +336,6 @@ app.post('/api/progress/unlock-quiz', async (req, res) => {
     }
 });
 
-// GET /api/progress/user/:userEmail - Obter todo progresso do usuário
-app.get('/api/progress/user/:userEmail', async (req, res) => {
-    try {
-        const { userEmail } = req.params;
-
-        if (!db) {
-            return res.json({ 
-                success: false, 
-                progress: [],
-                message: 'MongoDB não disponível' 
-            });
-        }
-
-        const collection = db.collection(COLLECTION_NAME);
-        
-        const allProgress = await collection.find({ userEmail }).toArray();
-
-        res.json({ 
-            success: true, 
-            progress: allProgress.map(p => ({
-                subtitle: p.subtitle,
-                completedVideos: p.completedVideos || {},
-                quizUnlocked: p.quizUnlocked || false,
-                completedAt: p.completedAt
-            }))
-        });
-
-    } catch (error) {
-        console.error('Erro ao obter progresso do usuário:', error);
-        res.status(500).json({ 
-            success: false, 
-            error: 'Erro ao obter progresso',
-            details: error.message 
-        });
-    }
-});
-
 // POST /api/quiz/start — conteúdo e randomização no MongoDB (quiz_conteudo + quiz_attempts)
 app.post('/api/quiz/start', require('./api/quiz/start'));
 // POST /api/quiz/submit — correção no servidor e registro tema_certificados / quiz_reprovas
@@ -328,7 +343,7 @@ app.post('/api/quiz/submit', require('./api/quiz/submit'));
 // POST /api/conquistas/quiz-approved — stub para futura política de badges
 app.post('/api/conquistas/quiz-approved', require('./api/conquistas/quiz-approved'));
 
-// GET /api/conquistas/temas/:userEmail — badges por tema (certificado aprovado + ícone em quiz_conteudo)
+// GET /api/conquistas/temas/:userEmail — tema_certificados apenas (não course_progress; ícone vazio pode usar cursos_conteudo)
 app.get('/api/conquistas/temas/:userEmail', async (req, res) => {
     try {
         if (!db) {
@@ -355,7 +370,7 @@ app.get('/api/conquistas/temas/:userEmail', async (req, res) => {
     }
 });
 
-// GET /api/conquistas/modulos/:userEmail — badges por módulo (todos os quizzes do módulo aprovados)
+// GET /api/conquistas/modulos/:userEmail — modulo_certificados apenas (não course_progress)
 app.get('/api/conquistas/modulos/:userEmail', async (req, res) => {
     try {
         if (!db) {
@@ -382,7 +397,7 @@ app.get('/api/conquistas/modulos/:userEmail', async (req, res) => {
     }
 });
 
-// GET /api/conquistas/excelencia/:userEmail — Excelência do Atendimento (atendimento_trophies)
+// GET /api/conquistas/excelencia/:userEmail — atendimento_trophies apenas (não course_progress)
 app.get('/api/conquistas/excelencia/:userEmail', async (req, res) => {
     try {
         if (!db) {
@@ -405,6 +420,39 @@ app.get('/api/conquistas/excelencia/:userEmail', async (req, res) => {
             error: 'Erro ao listar conquistas de excelência',
             details: error.message
         });
+    }
+});
+
+// GET /api/conquistas/badge-image/b64/:data — preferido (URL da imagem em base64url no path)
+app.get('/api/conquistas/badge-image/b64/:data', async (req, res) => {
+    try {
+        const urlString = decodeBadgeUrlFromB64Param(String(req.params.data || ''));
+        if (!urlString) {
+            return res.status(400).send('Parâmetro data (base64url) inválido');
+        }
+        await sendProxiedBadgeImage(urlString, res);
+    } catch (error) {
+        console.error('Erro em GET /api/conquistas/badge-image/b64:', error);
+        if (!res.headersSent) res.status(500).send('Erro interno');
+    }
+});
+
+// GET /api/conquistas/badge-image?u= — legado (query por vezes perdida em dev)
+app.get('/api/conquistas/badge-image', async (req, res) => {
+    try {
+        const urlString = readUrlQuery(req);
+        if (!urlString) {
+            console.warn('badge-image query vazia', {
+                url: req.url,
+                originalUrl: req.originalUrl,
+                query: req.query
+            });
+            return res.status(400).send('Parâmetro u ou url é obrigatório');
+        }
+        await sendProxiedBadgeImage(urlString, res);
+    } catch (error) {
+        console.error('Erro em GET /api/conquistas/badge-image:', error);
+        if (!res.headersSent) res.status(500).send('Erro interno');
     }
 });
 
@@ -1016,6 +1064,8 @@ app.listen(PORT, '0.0.0.0', () => {
     console.log(`   GET  /api/conquistas/temas/:userEmail`);
     console.log(`   GET  /api/conquistas/modulos/:userEmail`);
     console.log(`   GET  /api/conquistas/excelencia/:userEmail`);
+    console.log(`   GET  /api/conquistas/badge-image/b64/:data`);
+    console.log(`   GET  /api/conquistas/badge-image?u= (legado)`);
     console.log(`   GET  /api/progress/user/:userEmail`);
     console.log(`   GET  /api/courses`);
     console.log(`   GET  /api/temas/recent`);

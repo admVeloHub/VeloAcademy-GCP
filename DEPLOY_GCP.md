@@ -2,7 +2,7 @@
 
 ## Visão Geral
 
-O VeloAcademy foi configurado para deploy no **Google Cloud Run** em substituição ao Vercel. O servidor unificado (`server-api.js`) serve tanto a API quanto os arquivos estáticos (HTML, CSS, JS).
+O VeloAcademy usa deploy no **Google Cloud Run**. O servidor unificado (`server-api.js`) serve a API e, conforme a imagem, também os ficheiros estáticos (HTML, CSS, JS).
 
 ## Pré-requisitos
 
@@ -110,11 +110,10 @@ docker run -p 8080:8080 -e MONGODB_URI="sua_uri" veloacademy:local
 - `cloudbuild.yaml` - Pipeline de build e deploy
 - `server-api.js` - Servidor unificado (API + estáticos)
 
-## Migração do Vercel
+## Deploy atual
 
-Após o primeiro deploy no GCP:
+O fluxo oficial é **GCP Cloud Run** com `server-api.js`. Após o deploy:
 
 1. Obtenha a URL do serviço no Cloud Run
 2. Atualize o domínio customizado (se aplicável)
-3. Desative o deploy automático do Vercel para este repositório
-4. Mantenha `vercel.json` no repositório apenas se houver necessidade de rollback
+3. Configure secrets / variáveis de ambiente no serviço

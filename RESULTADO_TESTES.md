@@ -1,7 +1,9 @@
-# ✅ Resultado dos Testes - API Serverless Functions
+# ✅ Resultado dos Testes — API (histórico + nota 2026)
 
-**Data:** 2025-01-30  
-**Status:** ✅ TODOS OS TESTES PASSARAM
+**Data original:** 2025-01-30  
+**Nota (2026-04-23):** `vercel.json` e rotas serverless dedicadas ao Vercel para badge-image foram **removidos**. Deploy alvo: **GCP Cloud Run** com `server-api.js`. Para procedimento atual, ver `TESTES_RAPIDOS.md` e `DEPLOY_GCP.md`.
+
+**Status (snapshot 2025):** ✅ TODOS OS TESTES PASSARAM
 
 ## 📋 Testes Executados
 
@@ -26,7 +28,7 @@
 - ✅ `api/progress/user/[userEmail].js`
 - ✅ `api/progress/[userEmail]/[subtitle].js`
 - ✅ `lib/mongodb.js`
-- ✅ `vercel.json`
+- ✅ `server-api.js`
 
 ### ✅ 3. Verificação de Imports/Requires
 **Resultado:** ✅ TODOS OS IMPORTS CORRETOS
@@ -58,8 +60,8 @@
 
 Todas as funções serverless exportam corretamente via `module.exports = async (req, res) => {...}`
 
-### ✅ 6. Verificação de vercel.json
-**Resultado:** ✅ ARQUIVO PRESENTE E CONFIGURADO
+### ✅ 6. Servidor unificado (atual: `server-api.js`)
+**Resultado (2026):** ✅ API local e GCP usam `npm run api` / `start:gcp`
 
 ### ✅ 7. Teste de Carregamento de Módulos
 **Resultado:** ✅ MÓDULOS CARREGAM SEM ERROS
@@ -73,21 +75,21 @@ Todas as funções serverless exportam corretamente via `module.exports = async 
 | Imports/Requires | ✅ PASSOU | Caminhos corretos |
 | CORS Headers | ✅ PASSOU | Todas as rotas configuradas |
 | Module Exports | ✅ PASSOU | Formato correto |
-| vercel.json | ✅ PASSOU | Arquivo presente |
+| server-api.js | ✅ (2026) | Express unificado local / GCP |
 | Carregamento | ✅ PASSOU | Módulos carregam sem erros |
 
 ## 🎯 Conclusão
 
 **✅ TODOS OS TESTES PASSARAM COM SUCESSO!**
 
-A estrutura de serverless functions está pronta para deploy no Vercel. Todos os arquivos foram criados corretamente, a sintaxe está válida, os imports estão corretos e as configurações de CORS estão presentes.
+No período do snapshot, a estrutura em `api/` foi validada para handlers reutilizáveis. O deploy atual é **GCP** com `server-api.js`; ver nota no topo deste ficheiro.
 
 ## 🚀 Próximos Passos
 
 1. ✅ **Commit das alterações**
    ```bash
    git add .
-   git commit -m "feat: implementar serverless functions para API no Vercel"
+   git commit -m "feat: descrição da alteração"
    ```
 
 2. ✅ **Push para GitHub**
@@ -95,23 +97,20 @@ A estrutura de serverless functions está pronta para deploy no Vercel. Todos os
    git push
    ```
 
-3. ⏳ **Deploy automático no Vercel**
-   - O Vercel detectará automaticamente as serverless functions
-   - As rotas `/api/*` estarão disponíveis após o deploy
+3. ⏳ **Deploy no GCP Cloud Run** (ver `DEPLOY_GCP.md`)
 
-4. ⏳ **Configurar variáveis de ambiente no Vercel**
+4. ⏳ **Configurar variáveis de ambiente** no serviço
    - `MONGODB_URI`: Connection string do MongoDB
    - `DB_NAME_ACADEMY`: Nome do banco (padrão: `academy_registros`)
 
 5. ⏳ **Testar rotas em produção**
-   - Verificar logs no dashboard do Vercel
+   - Verificar logs do Cloud Run
    - Testar endpoints em produção
    - Verificar console do navegador
 
 ## 📝 Notas
 
-- O `server-api.js` continua funcionando para desenvolvimento local
-- As serverless functions serão usadas automaticamente no Vercel
+- O `server-api.js` é o servidor oficial em desenvolvimento local e no GCP
 - As rotas devem retornar JSON em vez de HTML após o deploy
 - O código mantém compatibilidade total com o frontend existente
 

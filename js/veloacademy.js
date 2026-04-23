@@ -1,5 +1,18 @@
-// VERSION: v1.5.0 | DATE: 2026-03-27 | AUTHOR: VeloHub Development Team
+// VERSION: v1.5.15 | DATE: 2026-04-23 | AUTHOR: VeloHub Development Team
 // Sistema principal de gerenciamento de cursos VeloAcademy
+// v1.5.15: Logo só via ficheiro local (Public / config); removido carregamento por Google Drive
+// v1.5.13: Google Drive Finalizar — allLessonTitles por subtitle em todos os módulos (paridade PDF/Aula; 1 ou N aulas)
+// v1.5.12: config.json válido (sem vírgula final); retry/forceReload respeitam #courses-grid
+// v1.5.11: init/renderCourses só pintam grelha se existir #courses-grid (ex. conquistas.html)
+// v1.5.10: Modal Aula — contador “restam X · mínimo Y”; tick imediato; duration só número = minutos
+// v1.5.9: Modal Aula — barra avança no tempo estimado; updateAulaProgress não apaga o countdown
+// v1.5.8: Vídeo Google Drive — iframe de novo no modal (reverte painel só “abrir fora”)
+// v1.5.7: (revertido) Slides type=video → Aula; copy painel Drive
+// v1.5.6: Modal vídeo Google Drive — painel externo visível
+// v1.5.5: Google Drive — sem iframe (CSP frame-ancestors); abrir em nova aba + painel no modal
+// v1.5.4: YouTube vídeo único — Finalizar até ENDED
+// v1.5.3: Finalizar após ENDED YouTube; slides/Drive por duration; PDF última página
+// v1.5.2: Modal YouTube — layout no CSS flex/dvh
 
 const veloAcademyApp = {
 
@@ -30,11 +43,8 @@ const veloAcademyApp = {
     },
 
     logoConfig: {
-
-        googleDriveId: null,
-
+        localPath: './academy.png',
         fallbackIcon: 'bx-book-bookmark'
-
     },
 
     appConfig: {},
@@ -563,11 +573,12 @@ const veloAcademyApp = {
             console.log('User progress loaded');
         }
 
-        // Renderizar cursos apenas se houver cursos carregados
-        // Se houver erro, showMongoDBError() já definiu o conteúdo
+        // Renderizar cursos apenas na página que tem a grelha (cursos.html)
         if (Object.keys(this.courseDatabase).length > 0) {
-            this.renderCourses();
-            console.log('Courses rendered');
+            if (document.getElementById('courses-grid')) {
+                this.renderCourses();
+                console.log('Courses rendered');
+            }
         } else {
             console.log('No courses loaded - error message should be displayed');
         }
@@ -623,6 +634,184 @@ const veloAcademyApp = {
     
     // Variáveis para controle de vídeo Google Drive
     googleDriveVideoMetadata: null, // { subtitle, lessonTitle, videoUrl, courseId, moduleId }
+
+    youtubeModalPlayer: null,
+    _aulaFinishUnlockTimer: null,
+    _aulaFinishUnlockInterval: null,
+    _gdriveFinishUnlockTimer: null,
+    _gdriveModalKeydownBound: false,
+    _pdfExternalUnlockTimer: null,
+
+    /** Segundos até liberar Finalizar em aulas sem API de slide (usa carga horária do conteúdo). */
+    parseLessonDurationToUnlockSeconds(durationStr) {
+        const minFallback = 120;
+        const maxCap = 7200;
+        if (!durationStr || !String(durationStr).trim()) return minFallback;
+        const s = String(durationStr).toLowerCase().trim();
+        let sec = minFallback;
+        const hora = s.match(/(\d+)\s*(?:h|hora|horas)\b/);
+        const min = s.match(/(\d+)\s*(?:min|mins|min\.?|minuto|minutos)\b/);
+        if (hora) sec = parseInt(hora[1], 10) * 3600;
+        else if (min) sec = parseInt(min[1], 10) * 60;
+        else {
+            const bare = s.match(/^\s*(\d+)\s*$/);
+            if (bare) {
+                const n = parseInt(bare[1], 10);
+                if (n >= 1 && n <= 180) sec = n * 60;
+            }
+        }
+        if (!Number.isFinite(sec) || sec < 60) sec = minFallback;
+        return Math.min(sec, maxCap);
+    },
+
+    /** Texto legível de segundos para o rodapé do modal de aula. */
+    formatAulaCountdownSeconds(totalSec) {
+        const t = Math.max(0, Math.ceil(totalSec));
+        if (t >= 3600) {
+            const h = Math.floor(t / 3600);
+            const m = Math.ceil((t % 3600) / 60);
+            return `${h}h ${m}m`;
+        }
+        if (t >= 60) {
+            const m = Math.floor(t / 60);
+            const s = t % 60;
+            return s > 0 ? `${m}m ${s}s` : `${m}m`;
+        }
+        return `${t}s`;
+    },
+
+    clearAulaFinishUnlockTimer() {
+        if (this._aulaFinishUnlockTimer) {
+            clearTimeout(this._aulaFinishUnlockTimer);
+            this._aulaFinishUnlockTimer = null;
+        }
+        if (this._aulaFinishUnlockInterval) {
+            clearInterval(this._aulaFinishUnlockInterval);
+            this._aulaFinishUnlockInterval = null;
+        }
+    },
+
+    clearGdriveFinishUnlockTimer() {
+        if (this._gdriveFinishUnlockTimer) {
+            clearTimeout(this._gdriveFinishUnlockTimer);
+            this._gdriveFinishUnlockTimer = null;
+        }
+    },
+
+    scheduleAulaFinishUnlock(seconds) {
+        this.clearAulaFinishUnlockTimer();
+        let sec = Number(seconds);
+        if (!Number.isFinite(sec)) sec = 120;
+        sec = Math.max(1, Math.min(7200, sec));
+        const finishBtn = document.getElementById('aula-btn-finish');
+        const slideCounter = document.getElementById('aula-slide-counter');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.setAttribute('title', 'Disponível após o tempo estimado da aula. Percorra todos os slides antes de finalizar.');
+        }
+        const setCounterRemaining = (remSec) => {
+            const sc = document.getElementById('aula-slide-counter');
+            if (!sc) return;
+            const r = Math.max(0, remSec);
+            const rest = this.formatAulaCountdownSeconds(r);
+            const total = this.formatAulaCountdownSeconds(sec);
+            sc.textContent = `Restam ${rest} · tempo mínimo ${total}`;
+            sc.setAttribute('title', 'O Google Slides não informa em que slide está; o portal usa o tempo da aula nos dados.');
+        };
+        setCounterRemaining(sec);
+        this.updateAulaProgress(0);
+        const t0 = Date.now();
+        const tick = () => {
+            const ov = document.getElementById('aula-modal-overlay');
+            if (!ov || !ov.classList.contains('active')) {
+                return;
+            }
+            const elapsed = (Date.now() - t0) / 1000;
+            const pct = Math.min(99, (elapsed / sec) * 100);
+            this.updateAulaProgress(pct);
+            setCounterRemaining(sec - elapsed);
+        };
+        tick();
+        this._aulaFinishUnlockInterval = setInterval(tick, 400);
+        this._aulaFinishUnlockTimer = setTimeout(() => {
+            if (this._aulaFinishUnlockInterval) {
+                clearInterval(this._aulaFinishUnlockInterval);
+                this._aulaFinishUnlockInterval = null;
+            }
+            this._aulaFinishUnlockTimer = null;
+            const btn = document.getElementById('aula-btn-finish');
+            const ov = document.getElementById('aula-modal-overlay');
+            if (btn && ov && ov.classList.contains('active')) {
+                btn.disabled = false;
+                btn.removeAttribute('title');
+                this.updateAulaProgress(100);
+                const sc = document.getElementById('aula-slide-counter');
+                if (sc) {
+                    sc.textContent = 'Pode finalizar';
+                    sc.removeAttribute('title');
+                }
+            }
+        }, Math.round(sec * 1000));
+    },
+
+    scheduleGdriveFinishUnlock(seconds) {
+        this.clearGdriveFinishUnlockTimer();
+        const finishBtn = document.getElementById('googledrive-video-btn-finish');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.setAttribute('title', 'Disponível após o tempo estimado do vídeo.');
+        }
+        this._gdriveFinishUnlockTimer = setTimeout(() => {
+            this._gdriveFinishUnlockTimer = null;
+            const btn = document.getElementById('googledrive-video-btn-finish');
+            const ov = document.getElementById('googledrive-video-modal-overlay');
+            if (btn && ov && ov.classList.contains('active')) {
+                btn.disabled = false;
+                btn.removeAttribute('title');
+            }
+        }, Math.round(seconds * 1000));
+    },
+
+    clearPdfExternalUnlockTimer() {
+        if (this._pdfExternalUnlockTimer) {
+            clearTimeout(this._pdfExternalUnlockTimer);
+            this._pdfExternalUnlockTimer = null;
+        }
+    },
+
+    schedulePdfExternalFinishUnlock(seconds) {
+        this.clearPdfExternalUnlockTimer();
+        const finishBtn = document.getElementById('pdf-btn-finish');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.style.display = 'inline-block';
+            finishBtn.setAttribute('title', 'Disponível após o tempo estimado da leitura.');
+        }
+        this._pdfExternalUnlockTimer = setTimeout(() => {
+            this._pdfExternalUnlockTimer = null;
+            const btn = document.getElementById('pdf-btn-finish');
+            const ov = document.getElementById('pdf-modal-overlay');
+            if (btn && ov && ov.classList.contains('active')) {
+                btn.disabled = false;
+                btn.removeAttribute('title');
+            }
+        }, Math.round(seconds * 1000));
+    },
+
+    resetPdfModalInternalView() {
+        this.clearPdfExternalUnlockTimer();
+        const panel = document.getElementById('pdf-external-drive-panel');
+        const canvas = document.getElementById('pdf-canvas');
+        if (panel) {
+            panel.style.display = 'none';
+            panel.setAttribute('aria-hidden', 'true');
+        }
+        if (canvas) canvas.style.display = 'block';
+        const prevBtn = document.getElementById('pdf-btn-prev');
+        const nextBtn = document.getElementById('pdf-btn-next');
+        if (prevBtn) prevBtn.style.display = '';
+        if (nextBtn) nextBtn.style.display = '';
+    },
 
     // Função para criar estrutura HTML do modal YouTube dinamicamente
     createYouTubeModal() {
@@ -712,25 +901,35 @@ const veloAcademyApp = {
     
     // Criar player YouTube para detecção de eventos
     createYouTubePlayer(videoId) {
+        if (!window.YT || !window.YT.Player) {
+            return null;
+        }
+        if (this.youtubeModalPlayer && typeof this.youtubeModalPlayer.loadVideoById === 'function') {
+            try {
+                this.youtubeModalPlayer.loadVideoById(videoId);
+                return this.youtubeModalPlayer;
+            } catch (e) {
+                console.warn('YouTube loadVideoById:', e);
+            }
+        }
         const iframe = document.getElementById('youtube-player');
         if (!iframe) return null;
-        
-        // Usar YouTube IFrame API se disponível
-        if (window.YT && window.YT.Player) {
-            return new window.YT.Player('youtube-player', {
+        try {
+            this.youtubeModalPlayer = new window.YT.Player('youtube-player', {
                 videoId: videoId,
                 events: {
-                    'onStateChange': (event) => {
-                        // 0 = ENDED (vídeo terminou)
+                    onStateChange: (event) => {
                         if (event.data === 0) {
                             this.onVideoEnded();
                         }
                     }
                 }
             });
+        } catch (e) {
+            console.warn('YouTube Player init:', e);
+            this.youtubeModalPlayer = null;
         }
-        
-        return null;
+        return this.youtubeModalPlayer;
     },
     
     // Callback quando vídeo termina
@@ -748,6 +947,7 @@ const veloAcademyApp = {
             console.log('Último vídeo terminou, habilitando botão Finalizar');
             if (finishBtn) {
                 finishBtn.disabled = false;
+                finishBtn.removeAttribute('title');
             }
             if (nextBtn) {
                 nextBtn.style.display = 'none';
@@ -790,17 +990,9 @@ const veloAcademyApp = {
     },
 
     initLogo() {
-
         if (this.logoConfig.localPath) {
-
             this.loadLocalLogo();
-
-        } else if (this.logoConfig.googleDriveId && this.logoConfig.googleDriveId !== '1ABC123DEF456') {
-
-            this.loadLogoFromGoogleDrive();
-
         }
-
     },
 
     loadLocalLogo() {
@@ -809,13 +1001,13 @@ const veloAcademyApp = {
 
         const logoIcon = document.getElementById('logo-icon');
 
-        
+        if (!logoImage) {
+            return;
+        }
 
         // Criar nova imagem para testar se carrega
 
         const testImage = new Image();
-
-        
 
         testImage.onload = () => {
 
@@ -825,9 +1017,9 @@ const veloAcademyApp = {
 
             logoImage.style.display = 'block';
 
-            logoIcon.style.display = 'none';
-
-            
+            if (logoIcon) {
+                logoIcon.style.display = 'none';
+            }
 
             // Aplicar dimensões personalizadas se configuradas
 
@@ -845,91 +1037,21 @@ const veloAcademyApp = {
 
         };
 
-        
-
         testImage.onerror = () => {
 
-            // Se falhou, manter o ícone
+            // Se falhou, manter o ícone (se existir no DOM)
 
             console.warn('Falha ao carregar logo local, usando ícone de fallback');
 
             logoImage.style.display = 'none';
 
-            logoIcon.style.display = 'block';
+            if (logoIcon) {
+                logoIcon.style.display = 'block';
+            }
 
         };
-
-        
 
         testImage.src = this.logoConfig.localPath;
-
-    },
-
-    loadLogoFromGoogleDrive() {
-
-        const logoImage = document.getElementById('logo-image');
-
-        const logoIcon = document.getElementById('logo-icon');
-
-        
-
-        // URL do Google Drive para visualização direta
-
-        const googleDriveUrl = `https://drive.google.com/uc?export=view&id=${this.logoConfig.googleDriveId}`;
-
-        
-
-        // Criar nova imagem para testar se carrega
-
-        const testImage = new Image();
-
-        
-
-        testImage.onload = () => {
-
-            // Se a imagem carregou com sucesso, mostrar ela
-
-            logoImage.src = googleDriveUrl;
-
-            logoImage.style.display = 'block';
-
-            logoIcon.style.display = 'none';
-
-            
-
-            // Aplicar dimensões personalizadas se configuradas
-
-            if (this.logoConfig.width) {
-
-                logoImage.style.width = this.logoConfig.width;
-
-            }
-
-            if (this.logoConfig.height) {
-
-                logoImage.style.height = this.logoConfig.height;
-
-            }
-
-        };
-
-        
-
-        testImage.onerror = () => {
-
-            // Se falhou, manter o ícone
-
-            console.warn('Falha ao carregar logo do Google Drive, usando ícone de fallback');
-
-            logoImage.style.display = 'none';
-
-            logoIcon.style.display = 'block';
-
-        };
-
-        
-
-        testImage.src = googleDriveUrl;
 
     },
 
@@ -1129,8 +1251,7 @@ const veloAcademyApp = {
         // Tentar carregar novamente
         await this.loadCourses();
         
-        // Se carregou com sucesso, renderizar cursos
-        if (Object.keys(this.courseDatabase).length > 0) {
+        if (Object.keys(this.courseDatabase).length > 0 && document.getElementById('courses-grid')) {
             this.renderCourses();
         }
     },
@@ -1157,10 +1278,9 @@ const veloAcademyApp = {
         console.log('📊 Cursos carregados:', Object.keys(this.courseDatabase));
         console.log('📊 Detalhes dos cursos:', this.courseDatabase);
         
-        // Se carregou com sucesso, renderizar cursos
-        if (Object.keys(this.courseDatabase).length > 0) {
+        if (Object.keys(this.courseDatabase).length > 0 && document.getElementById('courses-grid')) {
             this.renderCourses();
-        } else {
+        } else if (Object.keys(this.courseDatabase).length === 0) {
             console.warn('⚠️ Nenhum curso carregado. Verifique:');
             console.warn('   1. Se o servidor API está rodando (npm run api)');
             console.warn('   2. Se a conexão MongoDB está configurada');
@@ -1177,11 +1297,7 @@ const veloAcademyApp = {
         this.renderClassFilter();
         
         const coursesGrid = document.getElementById('courses-grid');
-        console.log('Courses grid element:', coursesGrid);
-        console.log('Course database:', this.courseDatabase);
-        
         if (!coursesGrid) {
-            console.error('Courses grid element not found!');
             return;
         }
         
@@ -1767,6 +1883,8 @@ const veloAcademyApp = {
                             id: lesson.id
                         });
 
+                        const durationEsc = (lesson.duration || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
                         const isLinkValid = this.validateLink(lesson.filePath);
 
                         const isGoogleDrive = this.isGoogleDriveLink(lesson.filePath);
@@ -1818,7 +1936,7 @@ const veloAcademyApp = {
                             const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
                             const courseIdEscaped = courseId.replace(/'/g, "\\'");
                             const moduleIndexEscaped = moduleIndex;
-                            linkAction = `href="#" onclick="veloAcademyApp.openPDFModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;"`;
+                            linkAction = `href="#" onclick="veloAcademyApp.openPDFModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}, '${durationEsc}'); return false;"`;
                             
                             // Verificar se há link de slides disponível (pode estar em lesson.slidesUrl ou ser o mesmo link)
                             slidesUrl = lesson.slidesUrl || (this.isGoogleSlidesLink(finalUrl) ? finalUrl : null);
@@ -1835,7 +1953,7 @@ const veloAcademyApp = {
                             const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
                             const courseIdEscaped = courseId.replace(/'/g, "\\'");
                             const moduleIndexEscaped = moduleIndex;
-                            linkAction = `href="#" onclick="veloAcademyApp.openAulaModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;"`;
+                            linkAction = `href="#" onclick="veloAcademyApp.openAulaModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}, '${durationEsc}'); return false;"`;
 
                         } else if (lesson.type === 'audio') {
 
@@ -1864,7 +1982,7 @@ const veloAcademyApp = {
                             const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
                             const courseIdEscaped = courseId.replace(/'/g, "\\'");
                             const moduleIndexEscaped = moduleIndex;
-                            linkAction = `href="#" onclick="veloAcademyApp.openGoogleDriveVideoModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;"`;
+                            linkAction = `href="#" onclick="veloAcademyApp.openGoogleDriveVideoModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}, '${durationEsc}'); return false;"`;
                         } else {
                             // Para outros conteúdos, abrir em nova aba
                             linkClass = 'btn';
@@ -1905,7 +2023,7 @@ const veloAcademyApp = {
                             const courseIdEscaped = courseId.replace(/'/g, "\\'");
                             const moduleIndexEscaped = moduleIndex;
                             buttonsHtml += `
-                                <a href="#" onclick="veloAcademyApp.openAulaModal('${aulaUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}); return false;" class="btn" style="margin-right: 8px;">
+                                <a href="#" onclick="veloAcademyApp.openAulaModal('${aulaUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', '${courseIdEscaped}', ${moduleIndexEscaped}, '${durationEsc}'); return false;" class="btn" style="margin-right: 8px;">
                                     <i class="fas fa-chalkboard-teacher" style="margin-right: 5px;"></i>Aula
                                 </a>
                             `;
@@ -2051,6 +2169,8 @@ const veloAcademyApp = {
 
                 module.lessons.forEach((lesson, lessonIndex) => {
 
+                    const durationEsc = (lesson.duration || '').replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+
                     const isLinkValid = this.validateLink(lesson.filePath);
 
                     const isGoogleDrive = this.isGoogleDriveLink(lesson.filePath);
@@ -2111,7 +2231,7 @@ const veloAcademyApp = {
 
                         const subtitleEscaped = module.title.replace(/'/g, "\\'");
                         const lessonTitleEscaped = lesson.title.replace(/'/g, "\\'");
-                        linkAction = `href="#" onclick="veloAcademyApp.openAulaModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}'); return false;"`;
+                        linkAction = `href="#" onclick="veloAcademyApp.openAulaModal('${finalUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', null, null, '${durationEsc}'); return false;"`;
 
                     } else if (lesson.type === 'audio') {
 
@@ -2171,7 +2291,7 @@ const veloAcademyApp = {
                         const aulaUrl = slidesUrl || finalUrl;
                         
                         buttonsHtml += `
-                            <a href="#" onclick="veloAcademyApp.openAulaModal('${aulaUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}'); return false;" class="btn" style="margin-right: 8px;">
+                            <a href="#" onclick="veloAcademyApp.openAulaModal('${aulaUrl}', '${subtitleEscaped}', '${lessonTitleEscaped}', null, null, '${durationEsc}'); return false;" class="btn" style="margin-right: 8px;">
                                 <i class="fas fa-chalkboard-teacher" style="margin-right: 5px;"></i>Aula
                             </a>
                         `;
@@ -2334,6 +2454,27 @@ const veloAcademyApp = {
 
         return link && link.includes('drive.google.com');
 
+    },
+
+    /**
+     * O Google Drive define CSP (frame-ancestors) que impede incorporar /preview em sites externos.
+     * Conteúdo nesses URLs deve abrir numa nova aba, não em iframe.
+     */
+    requiresExternalGoogleView(url) {
+        if (!url || typeof url !== 'string') return false;
+        const u = url.toLowerCase();
+        return u.includes('drive.google.com') && !u.includes('docs.google.com');
+    },
+
+    /** Texto do painel quando o ficheiro só abre fora do portal (ex.: vídeo/PDF em drive.google.com no browser). */
+    googleDriveExternalPanelCopy(kind) {
+        if (kind === 'pdf') {
+            return 'Este PDF está no Google Drive. Abra-o numa nova aba para ler; depois volte e use Finalizar para registar.';
+        }
+        if (kind === 'aula') {
+            return 'Este ficheiro está no Google Drive. Abra-o numa nova aba; depois volte e use Finalizar para registar.';
+        }
+        return 'Abra o conteúdo numa nova aba; depois volte e use Finalizar para registar.';
     },
 
     getGoogleDriveViewUrl(filePath) {
@@ -2516,24 +2657,22 @@ const veloAcademyApp = {
             counterElement.textContent = `1 / ${videos.length}`;
         }
         
-        // Configurar controles de navegação
+        // Controles: com 1 vídeo, Finalizar visível e indisponível até o fim da reprodução (onVideoEnded)
         if (prevBtn) {
-            prevBtn.disabled = true; // Primeiro vídeo: botão visível mas desabilitado
+            prevBtn.disabled = true;
         }
-        
         if (nextBtn) {
-            nextBtn.disabled = true; // Desabilitado até vídeo terminar
+            nextBtn.disabled = true;
+            nextBtn.style.display = videos.length === 1 ? 'none' : 'inline-flex';
+        }
+        if (finishBtn) {
+            finishBtn.disabled = true;
             if (videos.length === 1) {
-                nextBtn.style.display = 'none';
-                if (finishBtn) {
-                    finishBtn.style.display = 'inline-flex';
-                    finishBtn.disabled = true;
-                }
+                finishBtn.style.display = 'inline-flex';
+                finishBtn.setAttribute('title', 'Disponível quando o vídeo terminar.');
             } else {
-                nextBtn.style.display = 'inline-flex';
-                if (finishBtn) {
-                    finishBtn.style.display = 'none';
-                }
+                finishBtn.style.display = 'none';
+                finishBtn.removeAttribute('title');
             }
         }
         
@@ -2546,35 +2685,14 @@ const veloAcademyApp = {
         const modalContainer = document.querySelector('.youtube-modal-container');
         
         if (isShorts) {
-            // Adicionar classe para Shorts (formato vertical 9:16)
             if (modalBody) {
                 modalBody.classList.add('youtube-shorts');
             }
             if (modalContainer) {
                 modalContainer.classList.add('youtube-shorts-container');
             }
-            console.log('📱 Vídeo detectado como YouTube Shorts - aplicando formato vertical 9:16');
-            
-            // Ajustar altura do body após renderização para garantir que o footer fique visível
-            setTimeout(() => {
-                if (modalContainer && modalBody) {
-                    const containerHeight = modalContainer.offsetHeight;
-                    const header = document.querySelector('.youtube-modal-header');
-                    const footer = document.querySelector('.youtube-modal-footer');
-                    const headerHeight = header ? header.offsetHeight : 60;
-                    const footerHeight = footer ? footer.offsetHeight : 72;
-                    const maxBodyHeight = containerHeight - headerHeight - footerHeight;
-                    
-                    // Limitar altura do body para não ultrapassar o espaço disponível
-                    if (modalBody.offsetHeight > maxBodyHeight) {
-                        modalBody.style.maxHeight = `${maxBodyHeight}px`;
-                        modalBody.style.overflow = 'hidden';
-                        console.log(`📏 Altura do body limitada para ${maxBodyHeight}px para garantir footer visível`);
-                    }
-                }
-            }, 200);
+            console.log('📱 Vídeo detectado como YouTube Shorts — layout estreito (CSS)');
         } else {
-            // Remover classe de Shorts se existir
             if (modalBody) {
                 modalBody.classList.remove('youtube-shorts');
                 modalBody.style.maxHeight = '';
@@ -2585,10 +2703,10 @@ const veloAcademyApp = {
             }
         }
         
-        // Definir src do iframe
-        iframe.src = embedUrl;
+        if (!(this.youtubeModalPlayer && typeof this.youtubeModalPlayer.loadVideoById === 'function')) {
+            iframe.src = embedUrl;
+        }
         
-        // Criar player para detecção de eventos (se API disponível)
         setTimeout(() => {
             this.createYouTubePlayer(videoId);
         }, 500);
@@ -2678,7 +2796,12 @@ const veloAcademyApp = {
             }
             if (finishBtn) {
                 finishBtn.style.display = 'inline-flex';
-                finishBtn.disabled = true; // Desabilitado até vídeo terminar
+                finishBtn.disabled = true;
+                if (this.currentVideoSequence && this.currentVideoSequence.length === 1) {
+                    finishBtn.setAttribute('title', 'Disponível quando o vídeo terminar.');
+                } else {
+                    finishBtn.setAttribute('title', 'Disponível quando este vídeo terminar.');
+                }
             }
         } else {
             if (nextBtn) {
@@ -2687,6 +2810,7 @@ const veloAcademyApp = {
             }
             if (finishBtn) {
                 finishBtn.style.display = 'none';
+                finishBtn.removeAttribute('title');
             }
         }
         
@@ -2697,35 +2821,14 @@ const veloAcademyApp = {
         const modalContainer = document.querySelector('.youtube-modal-container');
         
         if (isShorts) {
-            // Adicionar classe para Shorts (formato vertical 9:16)
             if (modalBody) {
                 modalBody.classList.add('youtube-shorts');
             }
             if (modalContainer) {
                 modalContainer.classList.add('youtube-shorts-container');
             }
-            console.log('📱 Vídeo detectado como YouTube Shorts - aplicando formato vertical 9:16');
-            
-            // Ajustar altura do body após renderização para garantir que o footer fique visível
-            setTimeout(() => {
-                if (modalContainer && modalBody) {
-                    const containerHeight = modalContainer.offsetHeight;
-                    const header = document.querySelector('.youtube-modal-header');
-                    const footer = document.querySelector('.youtube-modal-footer');
-                    const headerHeight = header ? header.offsetHeight : 60;
-                    const footerHeight = footer ? footer.offsetHeight : 72;
-                    const maxBodyHeight = containerHeight - headerHeight - footerHeight;
-                    
-                    // Limitar altura do body para não ultrapassar o espaço disponível
-                    if (modalBody.offsetHeight > maxBodyHeight) {
-                        modalBody.style.maxHeight = `${maxBodyHeight}px`;
-                        modalBody.style.overflow = 'hidden';
-                        console.log(`📏 Altura do body limitada para ${maxBodyHeight}px para garantir footer visível`);
-                    }
-                }
-            }, 200);
+            console.log('📱 Vídeo Shorts — layout estreito (CSS)');
         } else {
-            // Remover classe de Shorts se existir
             if (modalBody) {
                 modalBody.classList.remove('youtube-shorts');
                 modalBody.style.maxHeight = '';
@@ -2736,13 +2839,13 @@ const veloAcademyApp = {
             }
         }
         
-        // Carregar vídeo no iframe
         const embedUrl = `https://www.youtube.com/embed/${videoId}?autoplay=1&rel=0&enablejsapi=1&origin=${window.location.origin}`;
         if (iframe) {
-            iframe.src = embedUrl;
+            if (!(this.youtubeModalPlayer && typeof this.youtubeModalPlayer.loadVideoById === 'function')) {
+                iframe.src = embedUrl;
+            }
         }
         
-        // Criar player para detecção de eventos
         setTimeout(() => {
             this.createYouTubePlayer(videoId);
         }, 500);
@@ -2752,6 +2855,10 @@ const veloAcademyApp = {
     
     // Finalizar sequência de vídeos
     async finishVideoSequence() {
+        const finishBtn = document.getElementById('youtube-btn-finish');
+        if (finishBtn && finishBtn.disabled) {
+            return;
+        }
         if (!this.currentVideoSequence || !this.videoSequenceMetadata) {
             this.closeYouTubeModal();
             return;
@@ -3053,20 +3160,30 @@ const veloAcademyApp = {
     // Função para fechar modal do YouTube
     closeYouTubeModal() {
         const overlay = document.getElementById('youtube-modal-overlay');
-        const iframe = document.getElementById('youtube-player');
         const modalBody = document.querySelector('.youtube-modal-body');
         const modalContainer = document.querySelector('.youtube-modal-container');
         
-        if (!overlay || !iframe) {
+        if (!overlay) {
             return;
         }
         
-        // Pausar vídeo removendo src do iframe
-        iframe.src = '';
+        if (this.youtubeModalPlayer && typeof this.youtubeModalPlayer.destroy === 'function') {
+            try {
+                this.youtubeModalPlayer.destroy();
+            } catch (e) {
+                console.warn('YouTube player destroy:', e);
+            }
+            this.youtubeModalPlayer = null;
+        }
+        if (modalBody) {
+            modalBody.innerHTML = '<iframe id="youtube-player" src="" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>';
+        }
         
         // Remover classes de Shorts ao fechar
         if (modalBody) {
             modalBody.classList.remove('youtube-shorts');
+            modalBody.style.maxHeight = '';
+            modalBody.style.overflow = '';
         }
         if (modalContainer) {
             modalContainer.classList.remove('youtube-shorts-container');
@@ -3091,6 +3208,7 @@ const veloAcademyApp = {
         }
         if (finishBtn) {
             finishBtn.style.display = 'none';
+            finishBtn.removeAttribute('title');
         }
         
         // Ocultar modal
@@ -3119,6 +3237,12 @@ const veloAcademyApp = {
                         </button>
                     </div>
                     <div class="pdf-modal-body">
+                        <div id="pdf-external-drive-panel" class="velo-drive-external-panel" style="display: none;" aria-hidden="true">
+                            <p id="pdf-external-drive-text"></p>
+                            <button type="button" class="btn btn-primary" id="pdf-open-drive-external-btn">
+                                <i class="fab fa-google-drive" style="margin-right: 8px;"></i>Abrir PDF no Google Drive
+                            </button>
+                        </div>
                         <canvas id="pdf-canvas"></canvas>
                     </div>
                     <div class="pdf-modal-footer">
@@ -3135,7 +3259,7 @@ const veloAcademyApp = {
                             <button class="btn btn-primary" id="pdf-btn-next" onclick="veloAcademyApp.nextPDFPage()">
                                 Próxima <i class="fas fa-arrow-right"></i>
                             </button>
-                            <button class="btn btn-success" id="pdf-btn-finish" onclick="veloAcademyApp.finishPDFViewing()" style="display: none;">
+                            <button class="btn btn-success" id="pdf-btn-finish" onclick="veloAcademyApp.finishPDFViewing()" style="display: none;" disabled>
                                 Finalizar <i class="fas fa-check"></i>
                             </button>
                         </div>
@@ -3161,23 +3285,67 @@ const veloAcademyApp = {
         });
     },
     
+    openPDFModalExternal(pdfUrl, directUrl, subtitle, lessonTitle, courseId, moduleId, durationHint) {
+        const overlay = document.getElementById('pdf-modal-overlay');
+        const titleElement = document.getElementById('pdf-modal-title');
+        if (!overlay || !titleElement) return;
+        
+        this.resetPdfModalInternalView();
+        
+        const panel = document.getElementById('pdf-external-drive-panel');
+        const txt = document.getElementById('pdf-external-drive-text');
+        const openBtn = document.getElementById('pdf-open-drive-external-btn');
+        const canvas = document.getElementById('pdf-canvas');
+        const prevBtn = document.getElementById('pdf-btn-prev');
+        const nextBtn = document.getElementById('pdf-btn-next');
+        const finishBtn = document.getElementById('pdf-btn-finish');
+        const pageInfo = document.getElementById('pdf-page-info');
+        
+        const viewUrl = this.getGoogleDriveViewUrl(pdfUrl);
+        this.pdfMetadata = { subtitle, lessonTitle, pdfUrl: directUrl || pdfUrl, courseId, moduleId };
+        this.currentPDF = null;
+        this.totalPDFPages = 0;
+        this.currentPDFPage = 1;
+        
+        titleElement.textContent = lessonTitle || 'PDF';
+        if (txt) txt.textContent = this.googleDriveExternalPanelCopy('pdf');
+        if (canvas) canvas.style.display = 'none';
+        if (panel) {
+            panel.style.display = 'flex';
+            panel.setAttribute('aria-hidden', 'false');
+        }
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        if (pageInfo) pageInfo.textContent = 'Conteúdo no Google Drive';
+        if (openBtn) {
+            openBtn.onclick = () => {
+                window.open(viewUrl, '_blank', 'noopener,noreferrer');
+            };
+        }
+        if (finishBtn) {
+            finishBtn.style.display = 'inline-block';
+            finishBtn.disabled = true;
+        }
+        const sec = this.parseLessonDurationToUnlockSeconds(durationHint);
+        this.schedulePdfExternalFinishUnlock(sec);
+        overlay.classList.add('active');
+        document.body.style.overflow = 'hidden';
+    },
+    
     // Abrir modal PDF
-    async openPDFModal(pdfUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
+    async openPDFModal(pdfUrl, subtitle, lessonTitle, courseId = null, moduleId = null, durationHint = '') {
         const overlay = document.getElementById('pdf-modal-overlay');
         const titleElement = document.getElementById('pdf-modal-title');
         const canvas = document.getElementById('pdf-canvas');
         
         if (!overlay || !titleElement || !canvas) {
             this.createPDFModal();
-            // Aguardar criação e tentar novamente
-            setTimeout(() => this.openPDFModal(pdfUrl, subtitle, lessonTitle, courseId, moduleId), 100);
+            setTimeout(() => this.openPDFModal(pdfUrl, subtitle, lessonTitle, courseId, moduleId, durationHint), 100);
             return;
         }
         
-        // Converter URL do Google Drive para URL direta
         let directUrl = this.convertGoogleDriveToDirect(pdfUrl);
         
-        // Tentar obter courseId e moduleId do contexto atual se não fornecidos
         if (!courseId) {
             const courseView = document.getElementById('course-view');
             if (courseView && courseView.dataset.courseId) {
@@ -3185,7 +3353,13 @@ const veloAcademyApp = {
             }
         }
         
-        // Salvar metadata
+        if (this.requiresExternalGoogleView(pdfUrl) || this.requiresExternalGoogleView(directUrl)) {
+            this.openPDFModalExternal(pdfUrl, directUrl, subtitle, lessonTitle, courseId, moduleId, durationHint);
+            return;
+        }
+        
+        this.resetPdfModalInternalView();
+        
         this.pdfMetadata = { subtitle, lessonTitle, pdfUrl: directUrl, courseId, moduleId };
         
         // Configurar PDF.js
@@ -3444,6 +3618,7 @@ const veloAcademyApp = {
             const isLastPage = this.currentPDFPage >= this.totalPDFPages;
             nextBtn.style.display = isLastPage ? 'none' : 'inline-block';
             finishBtn.style.display = isLastPage ? 'inline-block' : 'none';
+            finishBtn.disabled = !isLastPage;
         }
     },
     
@@ -3465,6 +3640,10 @@ const veloAcademyApp = {
     
     // Finalizar visualização do PDF (marca como completo apenas aqui)
     async finishPDFViewing() {
+        const pdfFinish = document.getElementById('pdf-btn-finish');
+        if (pdfFinish && (pdfFinish.disabled || pdfFinish.style.display === 'none')) {
+            return;
+        }
         if (this.pdfMetadata) {
             // Obter lista completa de aulas do subtítulo para validação
             let allLessonTitles = null;
@@ -3499,7 +3678,7 @@ const veloAcademyApp = {
                             // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, etc)
                             section.lessons?.forEach(lesson => {
                                 if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
-                                    (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
+                                    lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
                                     allLessonTitles.push(lesson.title);
                                 }
                             });
@@ -3591,6 +3770,8 @@ const veloAcademyApp = {
             overlay.classList.remove('active');
         }
         
+        this.resetPdfModalInternalView();
+        
         // Restaurar scroll do body
         document.body.style.overflow = '';
         
@@ -3609,8 +3790,8 @@ const veloAcademyApp = {
     },
     
     // Função para abrir PDF no modal (substitui downloadFile para PDFs)
-    openPDFInModal(pdfUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
-        this.openPDFModal(pdfUrl, subtitle, lessonTitle, courseId, moduleId);
+    openPDFInModal(pdfUrl, subtitle, lessonTitle, courseId = null, moduleId = null, durationHint = '') {
+        this.openPDFModal(pdfUrl, subtitle, lessonTitle, courseId, moduleId, durationHint);
     },
     
     // ==================== MODAL DE AULA (GOOGLE SLIDES) ====================
@@ -3632,6 +3813,12 @@ const veloAcademyApp = {
                         </button>
                     </div>
                     <div class="aula-modal-body">
+                        <div id="aula-drive-external-panel" class="velo-drive-external-panel" style="display: none;" aria-hidden="true">
+                            <p id="aula-drive-external-text"></p>
+                            <button type="button" class="btn btn-primary" id="aula-open-drive-external-btn">
+                                <i class="fab fa-google-drive" style="margin-right: 8px;"></i>Abrir no Google Drive
+                            </button>
+                        </div>
                         <iframe 
                             id="aula-slides-iframe" 
                             src="" 
@@ -3652,7 +3839,7 @@ const veloAcademyApp = {
                         <button class="btn btn-primary" id="aula-btn-next" onclick="veloAcademyApp.nextAulaSlide()" style="display: none;">
                             Próximo <i class="fas fa-arrow-right"></i>
                         </button>
-                        <button class="btn btn-success" id="aula-btn-finish" onclick="veloAcademyApp.finishAulaViewing()" style="display: none;">
+                        <button class="btn btn-success" id="aula-btn-finish" onclick="veloAcademyApp.finishAulaViewing()" style="display: none;" disabled>
                             Finalizar <i class="fas fa-check"></i>
                         </button>
                     </div>
@@ -3682,7 +3869,7 @@ const veloAcademyApp = {
     },
     
     // Abrir modal de Aula com Google Slides
-    openAulaModal(slidesUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
+    openAulaModal(slidesUrl, subtitle, lessonTitle, courseId = null, moduleId = null, durationHint = '') {
         // Criar modal se não existir
         this.createAulaModal();
         
@@ -3691,7 +3878,7 @@ const veloAcademyApp = {
         const iframe = document.getElementById('aula-slides-iframe');
         
         if (!overlay || !titleElement || !iframe) {
-            setTimeout(() => this.openAulaModal(slidesUrl, subtitle, lessonTitle, courseId, moduleId), 100);
+            setTimeout(() => this.openAulaModal(slidesUrl, subtitle, lessonTitle, courseId, moduleId, durationHint), 100);
             return;
         }
         
@@ -3729,8 +3916,31 @@ const veloAcademyApp = {
         }
         // Se já for embed URL (/pub ou /pubembed), usar diretamente
         
-        // Configurar iframe
-        iframe.src = embedUrl;
+        const extPanel = document.getElementById('aula-drive-external-panel');
+        const extText = document.getElementById('aula-drive-external-text');
+        const extOpenBtn = document.getElementById('aula-open-drive-external-btn');
+        
+        if (this.requiresExternalGoogleView(embedUrl)) {
+            iframe.src = '';
+            iframe.style.display = 'none';
+            if (extPanel) {
+                extPanel.style.display = 'flex';
+                extPanel.setAttribute('aria-hidden', 'false');
+            }
+            if (extText) extText.textContent = this.googleDriveExternalPanelCopy('aula');
+            if (extOpenBtn) {
+                extOpenBtn.onclick = () => {
+                    window.open(embedUrl, '_blank', 'noopener,noreferrer');
+                };
+            }
+        } else {
+            if (extPanel) {
+                extPanel.style.display = 'none';
+                extPanel.setAttribute('aria-hidden', 'true');
+            }
+            iframe.style.display = '';
+            iframe.src = embedUrl;
+        }
         
         // Atualizar título
         titleElement.textContent = lessonTitle || 'Aula';
@@ -3743,27 +3953,23 @@ const veloAcademyApp = {
         
         if (prevBtn) prevBtn.style.display = 'none';
         if (nextBtn) nextBtn.style.display = 'none';
-        if (finishBtn) finishBtn.style.display = 'inline-block';
+        if (finishBtn) {
+            finishBtn.style.display = 'inline-block';
+        }
         
-        // Atualizar progresso (100% quando visualizando)
-        this.updateAulaProgress(100);
+        const unlockSec = this.parseLessonDurationToUnlockSeconds(durationHint);
+        this.scheduleAulaFinishUnlock(unlockSec);
         
         // Mostrar modal
         overlay.classList.add('active');
         document.body.style.overflow = 'hidden';
     },
     
-    // Atualizar barra de progresso da Aula
+    // Atualizar barra de progresso da Aula (sem API de slide no embed: só largura; texto do contador fica com scheduleAulaFinishUnlock)
     updateAulaProgress(percentage) {
         const progressFill = document.getElementById('aula-progress-fill');
-        const slideCounter = document.getElementById('aula-slide-counter');
-        
         if (progressFill) {
-            progressFill.style.width = `${percentage}%`;
-        }
-        
-        if (slideCounter) {
-            slideCounter.textContent = 'Visualizando';
+            progressFill.style.width = `${Math.max(0, Math.min(100, percentage))}%`;
         }
     },
     
@@ -3781,6 +3987,10 @@ const veloAcademyApp = {
     
     // Finalizar visualização da Aula
     async finishAulaViewing() {
+        const finishBtn = document.getElementById('aula-btn-finish');
+        if (finishBtn && finishBtn.disabled) {
+            return;
+        }
         if (this.currentAulaMetadata) {
             // Obter lista completa de aulas do subtítulo para validação
             let allLessonTitles = null;
@@ -3791,23 +4001,21 @@ const veloAcademyApp = {
             if (courseId && subtitle) {
                 const course = this.courseDatabase[courseId];
                 if (course) {
-                    const module = course.modules?.find(m => m.id === moduleId || m.title === moduleId);
-                    if (module) {
-                        const section = module.sections?.find(s => s.subtitle === subtitle);
+                    for (const mod of course.modules || []) {
+                        const section = mod.sections?.find(s => s.subtitle === subtitle);
                         if (section) {
                             allLessonTitles = [];
-                            // SEMPRE adicionar cada título individualmente (nunca usar "Aula em vídeo")
                             const sectionVideos = section.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
                             sectionVideos.forEach(video => {
                                 allLessonTitles.push(video.title);
                             });
-                            // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, slides, etc)
                             section.lessons?.forEach(lesson => {
                                 if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
                                     lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
                                     allLessonTitles.push(lesson.title);
                                 }
                             });
+                            break;
                         }
                     }
                 }
@@ -3892,9 +4100,12 @@ const veloAcademyApp = {
     
     // Criar estrutura HTML do modal de vídeo Google Drive dinamicamente
     createGoogleDriveVideoModal() {
-        // Verificar se o modal já existe
-        if (document.getElementById('googledrive-video-modal-overlay')) {
+        const existing = document.getElementById('googledrive-video-modal-overlay');
+        if (existing && document.getElementById('googledrive-video-iframe')) {
             return;
+        }
+        if (existing) {
+            existing.remove();
         }
         
         const modalHTML = `
@@ -3907,15 +4118,10 @@ const veloAcademyApp = {
                         </button>
                     </div>
                     <div class="googledrive-video-modal-body">
-                        <iframe 
-                            id="googledrive-video-iframe" 
-                            src="" 
-                            frameborder="0" 
-                            allowfullscreen>
-                        </iframe>
+                        <iframe id="googledrive-video-iframe" class="googledrive-video-iframe" title="Vídeo Google Drive" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen" allowfullscreen></iframe>
                     </div>
                     <div class="googledrive-video-modal-footer">
-                        <button class="btn btn-success" id="googledrive-video-btn-finish" onclick="veloAcademyApp.finishGoogleDriveVideoViewing()">
+                        <button class="btn btn-success" id="googledrive-video-btn-finish" onclick="veloAcademyApp.finishGoogleDriveVideoViewing()" disabled>
                             Finalizar <i class="fas fa-check"></i>
                         </button>
                     </div>
@@ -3934,15 +4140,19 @@ const veloAcademyApp = {
             }
         });
         
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape' && overlay.classList.contains('active')) {
-                this.closeGoogleDriveVideoModal();
-            }
-        });
+        if (!this._gdriveModalKeydownBound) {
+            this._gdriveModalKeydownBound = true;
+            document.addEventListener('keydown', (e) => {
+                const ov = document.getElementById('googledrive-video-modal-overlay');
+                if (e.key === 'Escape' && ov && ov.classList.contains('active')) {
+                    this.closeGoogleDriveVideoModal();
+                }
+            });
+        }
     },
     
     // Abrir modal de vídeo Google Drive
-    openGoogleDriveVideoModal(videoUrl, subtitle, lessonTitle, courseId = null, moduleId = null) {
+    openGoogleDriveVideoModal(videoUrl, subtitle, lessonTitle, courseId = null, moduleId = null, durationHint = '') {
         // Criar modal se não existir
         this.createGoogleDriveVideoModal();
         
@@ -3951,7 +4161,7 @@ const veloAcademyApp = {
         const iframe = document.getElementById('googledrive-video-iframe');
         
         if (!overlay || !titleElement || !iframe) {
-            setTimeout(() => this.openGoogleDriveVideoModal(videoUrl, subtitle, lessonTitle, courseId, moduleId), 100);
+            setTimeout(() => this.openGoogleDriveVideoModal(videoUrl, subtitle, lessonTitle, courseId, moduleId, durationHint), 100);
             return;
         }
         
@@ -3977,9 +4187,11 @@ const veloAcademyApp = {
             }
         }
         
-        // Configurar título e iframe
         titleElement.textContent = lessonTitle;
         iframe.src = previewUrl;
+        
+        const unlockSec = this.parseLessonDurationToUnlockSeconds(durationHint);
+        this.scheduleGdriveFinishUnlock(unlockSec);
         
         // Mostrar modal
         overlay.classList.add('active');
@@ -3990,6 +4202,10 @@ const veloAcademyApp = {
     
     // Finalizar visualização do vídeo Google Drive
     async finishGoogleDriveVideoViewing() {
+        const finishBtn = document.getElementById('googledrive-video-btn-finish');
+        if (finishBtn && finishBtn.disabled) {
+            return;
+        }
         if (this.googleDriveVideoMetadata) {
             // Obter lista completa de aulas do subtítulo para validação
             let allLessonTitles = null;
@@ -4000,30 +4216,21 @@ const veloAcademyApp = {
             if (courseId && subtitle) {
                 const course = this.courseDatabase[courseId];
                 if (course) {
-                    // Encontrar módulo
-                    let module = null;
-                    if (typeof moduleId === 'number') {
-                        module = course.modules?.[moduleId];
-                    } else {
-                        module = course.modules?.find(m => m.id === moduleId || m.title === moduleId);
-                    }
-                    
-                    if (module) {
-                        const section = module.sections?.find(s => s.subtitle === subtitle);
+                    for (const mod of course.modules || []) {
+                        const section = mod.sections?.find(s => s.subtitle === subtitle);
                         if (section) {
                             allLessonTitles = [];
-                            // Adicionar aulas de vídeo YouTube
                             const sectionVideos = section.lessons?.filter(l => l.type === 'video' && this.isYouTubeLink(l.filePath)) || [];
                             sectionVideos.forEach(video => {
                                 allLessonTitles.push(video.title);
                             });
-                            // Adicionar outras aulas (PDFs, documentos, vídeos Google Drive, slides, etc)
                             section.lessons?.forEach(lesson => {
                                 if (lesson.type === 'pdf' || lesson.type === 'document' || lesson.type === 'audio' || 
                                     lesson.type === 'slide' || (lesson.type === 'video' && !this.isYouTubeLink(lesson.filePath))) {
                                     allLessonTitles.push(lesson.title);
                                 }
                             });
+                            break;
                         }
                     }
                 }
@@ -4107,12 +4314,20 @@ const veloAcademyApp = {
     // Fechar modal de vídeo Google Drive
     closeGoogleDriveVideoModal() {
         const overlay = document.getElementById('googledrive-video-modal-overlay');
-        const iframe = document.getElementById('googledrive-video-iframe');
+        
+        this.clearGdriveFinishUnlockTimer();
         
         if (overlay) {
             overlay.classList.remove('active');
         }
         
+        const finishBtn = document.getElementById('googledrive-video-btn-finish');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.removeAttribute('title');
+        }
+        
+        const iframe = document.getElementById('googledrive-video-iframe');
         if (iframe) {
             iframe.src = '';
         }
@@ -4128,13 +4343,27 @@ const veloAcademyApp = {
     closeAulaModal() {
         const overlay = document.getElementById('aula-modal-overlay');
         const iframe = document.getElementById('aula-slides-iframe');
+        const extPanel = document.getElementById('aula-drive-external-panel');
+        
+        this.clearAulaFinishUnlockTimer();
         
         if (overlay) {
             overlay.classList.remove('active');
         }
         
+        if (extPanel) {
+            extPanel.style.display = 'none';
+            extPanel.setAttribute('aria-hidden', 'true');
+        }
         if (iframe) {
             iframe.src = '';
+            iframe.style.display = '';
+        }
+        
+        const finishBtn = document.getElementById('aula-btn-finish');
+        if (finishBtn) {
+            finishBtn.disabled = true;
+            finishBtn.removeAttribute('title');
         }
         
         document.body.style.overflow = '';

@@ -1,4 +1,4 @@
-// VERSION: v1.0.0 | DATE: 2026-04-23 | GET /api/conquistas/excelencia/:userEmail
+// VERSION: v1.0.1 | DATE: 2026-04-23 | GET /api/conquistas/excelencia/:userEmail — fonte: atendimento_trophies (não course_progress)
 
 const { getDatabase } = require('../../../lib/mongodb');
 const { fetchConquistasExcelencia, ensureExcelenciaIndex } = require('../../../lib/conquistas-excelencia');
